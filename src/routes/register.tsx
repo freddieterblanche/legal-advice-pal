@@ -149,16 +149,44 @@ function RegisterPage() {
           {step === 2 && (
             <div className="space-y-3">
               <h2 className="font-heading text-xl text-ink">Admin Contact</h2>
-              <p className="text-sm text-muted-foreground">This person manages the firm account.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input placeholder="First name" value={admin.first_name} onChange={(v) => setAdmin({ ...admin, first_name: v })} required />
-                <Input placeholder="Last name" value={admin.last_name} onChange={(v) => setAdmin({ ...admin, last_name: v })} required />
-              </div>
-              <Input type="email" placeholder="Email" value={admin.email} onChange={(v) => setAdmin({ ...admin, email: v })} required />
-              <Input type="password" placeholder="Password (min 8 chars)" value={admin.password} onChange={(v) => setAdmin({ ...admin, password: v })} required />
+              {existingUserId ? (
+                <div className="rounded border border-forest/30 bg-forest/5 p-4 text-sm text-ink">
+                  You're signed in as <strong>{admin.email}</strong>. This account will be set as the firm administrator.
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">This person manages the firm account.</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Input placeholder="First name" value={admin.first_name} onChange={(v) => setAdmin({ ...admin, first_name: v })} required />
+                    <Input placeholder="Last name" value={admin.last_name} onChange={(v) => setAdmin({ ...admin, last_name: v })} required />
+                  </div>
+                  <Input type="email" placeholder="Email" value={admin.email} onChange={(v) => setAdmin({ ...admin, email: v })} required />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={admin.password}
+                      onChange={(e) => setAdmin({ ...admin, password: e.target.value })}
+                      placeholder="Password (min 8 chars)"
+                      required
+                      minLength={8}
+                      maxLength={72}
+                      className="w-full rounded border border-border bg-background px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                    />
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-ink">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between pt-2">
                 <button onClick={() => setStep(1)} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
-                <button onClick={() => setStep(3)} disabled={!admin.email || admin.password.length < 8 || !admin.first_name || !admin.last_name} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue →</button>
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!existingUserId && (!admin.email || admin.password.length < 8 || !admin.first_name || !admin.last_name)}
+                  className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50"
+                >
+                  Continue →
+                </button>
               </div>
             </div>
           )}
