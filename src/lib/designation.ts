@@ -1,14 +1,35 @@
 export type LawyerKind = "advocate" | "attorney";
 
 /**
+ * Attorney designation codes used in South African firms (in seniority order).
+ */
+export const ATTORNEY_DESIGNATIONS = [
+  "Managing Director",
+  "Chairperson",
+  "Chief Executive Officer",
+  "Chief Operating Officer",
+  "Company Secretary",
+  "Managing Partner",
+  "Director",
+  "Partner",
+  "Consultant",
+  "Executive",
+  "Senior Associate",
+  "Associate",
+  "Candidate Legal Practitioner",
+] as const;
+
+export type AttorneyDesignation = (typeof ATTORNEY_DESIGNATIONS)[number];
+
+/**
  * In South Africa, the legal profession is split:
  *  - Advocates (incl. Senior Counsel / SC) — courtroom specialists briefed by attorneys
- *  - Attorneys (incl. Attorney-Partners) — direct client contact, transactional + litigation
+ *  - Attorneys (incl. Director, Partner, Associate, etc.) — direct client contact, transactional + litigation
  */
 export function designationKind(designation?: string | null): LawyerKind {
   if (!designation) return "attorney";
   const d = designation.toLowerCase();
-  if (d.includes("advocate") || d === "sc" || d.includes("senior counsel")) return "advocate";
+  if (d.includes("advocate") || d === "sc" || d.includes("senior counsel") || d.includes("junior counsel")) return "advocate";
   return "attorney";
 }
 
@@ -20,4 +41,49 @@ export const ATTORNEY_BADGE =
 
 export function designationBadgeClass(designation?: string | null): string {
   return designationKind(designation) === "advocate" ? ADVOCATE_BADGE : ATTORNEY_BADGE;
+}
+
+export function yearsInPractice(yearOfAdmission?: number | null): number | null {
+  if (!yearOfAdmission || yearOfAdmission < 1900) return null;
+  const years = new Date().getFullYear() - yearOfAdmission;
+  return years >= 0 ? years : null;
+}
+
+export type StructuredLawyer = {
+  lawyer_type?: string | null;
+  year_of_admission?: number | null;
+  is_senior_counsel?: boolean | null;
+  designation_code?: string | null;
+  designation_custom?: string | null;
+  is_practice_head?: boolean | null;
+  practice_head_area?: string | null;
+  is_sector_head?: boolean | null;
+  sector_head_area?: string | null;
+  designation?: string | null;
+};
+
+/**
+ * Build a primary designation label from the structured fields,
+ * falling back to the legacy free-text `designation` column when unset.
+ */
+export function formatDesignation(l: StructuredLawyer): string {
+  if (l.lawyer_type === "advocate") {
+    const seniority = l.is_senior_counsel ? "Senior Counsel" : "Junior Counsel";
+    const years = yearsInPractice(l.year_of_admission ?? null);
+    return years !== null ? `${seniority} · ${years} year${years === 1 ? "" : "s"} in practice` : seniority;
+  }
+  if (l.lawyer_type === "attorney") {
+    return (l.designation_code || l.designation_custom || "Attorney") as string;
+  }
+  return l.designation ?? "";
+}
+
+/**
+ * Extra badges for Practice Head / Sector Head (Attorneys only, typically Directors).
+ */
+export function headBadges(l: StructuredLawyer): string[] {
+  const out: string[] = [];
+  if (l.is_practice_head && l.practice_head_area) out.push(`Practice Head: ${l.practice_head_area}`);
+  if (l.is_sector_head && l.sector_head_area) out.push(`Sector Head: ${l.sector_head_area}`);
+  return out;
 }
