@@ -338,6 +338,17 @@ function LawyerFormModal({
     })();
   }, [firmId]);
 
+  // Load all practice areas (for selection)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("practice_areas")
+        .select("id, slug, name")
+        .order("name", { ascending: true });
+      setAllPracticeAreas((data ?? []) as { id: string; slug: string; name: string }[]);
+    })();
+  }, []);
+
   // Load lawyer's existing branch links
   useEffect(() => {
     if (!lawyer) return;
