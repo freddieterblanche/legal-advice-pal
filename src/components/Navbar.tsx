@@ -29,7 +29,7 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/80">
+    <header className="sticky top-0 z-50 bg-ink">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="font-heading text-2xl font-bold tracking-tight text-white">
           Lawexpert.co.za
