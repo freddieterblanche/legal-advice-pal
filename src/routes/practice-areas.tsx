@@ -6,7 +6,7 @@ import { getPracticeAreaIcon } from "../lib/practice-area-icons";
 export const Route = createFileRoute("/practice-areas")({
   head: () => ({
     meta: [
-      { title: "Practice Areas — Lawexperts.co.za" },
+      { title: "Practice Areas — Lawexpert.co.za" },
       { name: "description", content: "Browse South African attorneys and advocates by practice area, from Constitutional Law to Mining & Resources." },
     ],
   }),

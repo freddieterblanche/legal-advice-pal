@@ -8,7 +8,7 @@ import { z } from "zod";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Firm Dashboard — Lawexperts.co.za" }] }),
+  head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
   component: Dashboard,
 });
 
@@ -50,7 +50,7 @@ function Dashboard() {
               <h1 className="font-heading text-2xl text-ink md:text-3xl">{firm.name}</h1>
               <p className="text-sm text-muted-foreground">
                 Status: <span className="capitalize">{firm.status}</span>
-                {firm.status === "pending" && " — awaiting Lawexperts.co.za review"}
+                {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
               </p>
             </div>
             {firm.status === "active" && (

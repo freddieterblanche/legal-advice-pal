@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign In — Lawexperts.co.za" }] }),
+  head: () => ({ meta: [{ title: "Sign In — Lawexpert.co.za" }] }),
   component: AuthPage,
 });
 
@@ -56,7 +56,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center bg-cream px-4 py-12">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
-        <h1 className="font-heading text-3xl text-ink">{mode === "signin" ? "Sign in to Lawexperts.co.za" : "Create an account"}</h1>
+        <h1 className="font-heading text-3xl text-ink">{mode === "signin" ? "Sign in to Lawexpert.co.za" : "Create an account"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "signin" ? "Access your firm dashboard." : "Sign up to manage your firm and lawyers."}
         </p>

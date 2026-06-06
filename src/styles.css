@@ -42,7 +42,7 @@
 :root {
   --radius: 0.625rem;
 
-  /* Lawexperts.co.za — Slate & Steel palette
+  /* Lawexpert.co.za — Slate & Steel palette
      Cool light surfaces, slate text, trustworthy blue for Attorneys,
      deeper slate-navy for Advocates. */
   --ink: oklch(0.30 0.04 255);             /* slate-900 — primary text / dark surfaces */
