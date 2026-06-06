@@ -65,15 +65,26 @@ function FirmProfile() {
   return (
     <div className="bg-cream">
       <section className="bg-ink py-16 text-cream">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h1 className="font-heading text-4xl md:text-5xl">{firm.name}</h1>
-          <div className="mt-4 flex flex-wrap gap-5 text-sm text-cream/70">
-            {firm.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {firm.city}, {firm.province}</span>}
-            {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
-            {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
+          <div>
+            <h1 className="font-heading text-4xl md:text-5xl">{firm.name}</h1>
+            <div className="mt-4 flex flex-wrap gap-5 text-sm text-cream/70">
+              {firm.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {firm.city}, {firm.province}</span>}
+              {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
+              {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
+            </div>
           </div>
+          {firm.logo_url && (
+            <img
+              src={firm.logo_url}
+              alt={`${firm.name} logo`}
+              className="h-20 w-auto object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+          )}
         </div>
       </section>
+
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         {firm.description && (
