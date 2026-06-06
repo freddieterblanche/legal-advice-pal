@@ -6,6 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { formatDesignation, headBadges, designationKind } from "../lib/designation";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
@@ -86,16 +87,23 @@ function LawyerProfile() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}</h1>
-                {lawyer.designation && (() => {
-                  const isAdv = lawyer.designation.toLowerCase().includes("advocate") || lawyer.designation.toLowerCase() === "sc";
+                {(() => {
+                  const label = formatDesignation(lawyer);
+                  if (!label) return null;
+                  const isAdv = designationKind(lawyer.lawyer_type === "advocate" ? "advocate" : lawyer.designation) === "advocate";
                   return (
                     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${
                       isAdv ? "bg-white/10 text-white ring-white/30" : "bg-gold/20 text-white ring-gold/40"
                     }`}>
-                      {isAdv ? "Advocate" : "Attorney"} · {lawyer.designation}
+                      {isAdv ? "Advocate" : "Attorney"} · {label}
                     </span>
                   );
                 })()}
+                {headBadges(lawyer).map((b) => (
+                  <span key={b} className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-gold/40">
+                    {b}
+                  </span>
+                ))}
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-cream/70">
                 {lawyer.firms && (

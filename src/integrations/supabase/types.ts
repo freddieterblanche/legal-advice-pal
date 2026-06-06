@@ -501,17 +501,24 @@ export type Database = {
           city: string | null
           created_at: string | null
           designation: string | null
+          designation_code: string | null
+          designation_custom: string | null
           education: string | null
           email: string | null
           firm_id: string
           first_name: string
           id: string
           is_claimed: boolean | null
+          is_practice_head: boolean
+          is_sector_head: boolean
+          is_senior_counsel: boolean
           last_name: string
+          lawyer_type: string | null
           linkedin_url: string | null
           noteworthy_matters: string | null
           overview: string | null
           phone: string | null
+          practice_head_area: string | null
           profile_id: string | null
           profile_views: number | null
           province: string | null
@@ -519,10 +526,12 @@ export type Database = {
           reported_cases_notes: string | null
           saflii_author_url: string | null
           search_vector: unknown
+          sector_head_area: string | null
           slug: string
           status: string | null
           trial_end_date: string | null
           trial_start_date: string | null
+          year_of_admission: number | null
         }
         Insert: {
           accolades?: string | null
@@ -531,17 +540,24 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           designation?: string | null
+          designation_code?: string | null
+          designation_custom?: string | null
           education?: string | null
           email?: string | null
           firm_id: string
           first_name: string
           id?: string
           is_claimed?: boolean | null
+          is_practice_head?: boolean
+          is_sector_head?: boolean
+          is_senior_counsel?: boolean
           last_name: string
+          lawyer_type?: string | null
           linkedin_url?: string | null
           noteworthy_matters?: string | null
           overview?: string | null
           phone?: string | null
+          practice_head_area?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null
@@ -549,10 +565,12 @@ export type Database = {
           reported_cases_notes?: string | null
           saflii_author_url?: string | null
           search_vector?: unknown
+          sector_head_area?: string | null
           slug: string
           status?: string | null
           trial_end_date?: string | null
           trial_start_date?: string | null
+          year_of_admission?: number | null
         }
         Update: {
           accolades?: string | null
@@ -561,17 +579,24 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           designation?: string | null
+          designation_code?: string | null
+          designation_custom?: string | null
           education?: string | null
           email?: string | null
           firm_id?: string
           first_name?: string
           id?: string
           is_claimed?: boolean | null
+          is_practice_head?: boolean
+          is_sector_head?: boolean
+          is_senior_counsel?: boolean
           last_name?: string
+          lawyer_type?: string | null
           linkedin_url?: string | null
           noteworthy_matters?: string | null
           overview?: string | null
           phone?: string | null
+          practice_head_area?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null
@@ -579,10 +604,12 @@ export type Database = {
           reported_cases_notes?: string | null
           saflii_author_url?: string | null
           search_vector?: unknown
+          sector_head_area?: string | null
           slug?: string
           status?: string | null
           trial_end_date?: string | null
           trial_start_date?: string | null
+          year_of_admission?: number | null
         }
         Relationships: [
           {

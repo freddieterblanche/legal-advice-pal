@@ -6,7 +6,8 @@ import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
-import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
+import { PROVINCES, slugify } from "../../lib/constants";
+import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../../lib/designation";
 import { importLawyerProfile } from "../../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
@@ -182,10 +183,21 @@ function Overview({ firmId }: { firmId: string }) {
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const lawyerSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
-  designation: z.enum(DESIGNATIONS as unknown as [string, ...string[]]),
+  designation: z.string().trim().max(120).optional(),
+  lawyer_type: z.enum(["advocate", "attorney"]).nullable().optional(),
+  year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().optional(),
+  is_senior_counsel: z.boolean().optional(),
+  designation_code: z.string().trim().max(80).nullable().optional(),
+  designation_custom: z.string().trim().max(120).nullable().optional(),
+  is_practice_head: z.boolean().optional(),
+  practice_head_area: z.string().trim().max(120).nullable().optional(),
+  is_sector_head: z.boolean().optional(),
+  sector_head_area: z.string().trim().max(120).nullable().optional(),
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(20000).optional(),
@@ -212,6 +224,15 @@ type LawyerRow = {
   first_name: string | null;
   last_name: string | null;
   designation: string | null;
+  lawyer_type: string | null;
+  year_of_admission: number | null;
+  is_senior_counsel: boolean | null;
+  designation_code: string | null;
+  designation_custom: string | null;
+  is_practice_head: boolean | null;
+  practice_head_area: string | null;
+  is_sector_head: boolean | null;
+  sector_head_area: string | null;
   city: string | null;
   province: string | null;
   bio: string | null;
@@ -345,10 +366,23 @@ function LawyerFormModal({
   onSaved: () => void;
 }) {
   const isEdit = !!lawyer;
+  const initialOtherCode =
+    !!lawyer?.designation_code &&
+    !(ATTORNEY_DESIGNATIONS as readonly string[]).includes(lawyer.designation_code);
+  const [otherDesignation, setOtherDesignation] = useState<boolean>(initialOtherCode);
   const [form, setForm] = useState({
     first_name: lawyer?.first_name ?? "",
     last_name: lawyer?.last_name ?? "",
-    designation: lawyer?.designation ?? "Attorney",
+    designation: lawyer?.designation ?? "",
+    lawyer_type: (lawyer?.lawyer_type as "advocate" | "attorney" | null) ?? "attorney",
+    year_of_admission: lawyer?.year_of_admission ?? null,
+    is_senior_counsel: !!lawyer?.is_senior_counsel,
+    designation_code: initialOtherCode ? "" : (lawyer?.designation_code ?? ""),
+    designation_custom: lawyer?.designation_custom ?? (initialOtherCode ? (lawyer?.designation_code ?? "") : ""),
+    is_practice_head: !!lawyer?.is_practice_head,
+    practice_head_area: lawyer?.practice_head_area ?? "",
+    is_sector_head: !!lawyer?.is_sector_head,
+    sector_head_area: lawyer?.sector_head_area ?? "",
     city: lawyer?.city ?? "",
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
@@ -551,8 +585,26 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse({
+      // Normalise structured designation fields by type
+      const isAdvocate = form.lawyer_type === "advocate";
+      const normalised = {
         ...form,
+        designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
+        designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
+        is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
+        is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
+        practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
+        is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
+        sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
+      };
+      // Keep the legacy `designation` text in sync for views/lists that haven't migrated
+      const legacyDesignation = isAdvocate
+        ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
+        : (normalised.designation_code || normalised.designation_custom || "Attorney");
+
+      const parsed = lawyerSchema.parse({
+        ...normalised,
+        designation: legacyDesignation,
         bio: sanitizeBioHtml(form.bio),
         overview: sanitizeBioHtml(form.overview),
         qualifications: sanitizeBioHtml(form.qualifications),
@@ -636,9 +688,147 @@ function LawyerFormModal({
             <input required placeholder="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             <input required placeholder="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
-          <select value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-            {DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
+          <div className="rounded-md border border-border bg-background p-3 space-y-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lawyer type</label>
+              <div className="flex gap-2">
+                {(["attorney", "advocate"] as const).map((t) => (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => setForm({ ...form, lawyer_type: t })}
+                    className={`flex-1 rounded border px-3 py-2 text-sm capitalize transition-colors ${
+                      form.lawyer_type === t ? "border-gold bg-gold/15 text-ink" : "border-border bg-card text-muted-foreground hover:text-ink"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {form.lawyer_type === "advocate" ? (
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.is_senior_counsel}
+                    onChange={(e) => setForm({ ...form, is_senior_counsel: e.target.checked })}
+                    className="accent-gold"
+                  />
+                  Senior Counsel (SC)
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Year of admission</label>
+                    <input
+                      type="number"
+                      min={1900}
+                      max={CURRENT_YEAR}
+                      placeholder="e.g. 2008"
+                      value={form.year_of_admission ?? ""}
+                      onChange={(e) => setForm({ ...form, year_of_admission: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Years in practice</label>
+                    <div className="rounded border border-dashed border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+                      {yearsInPractice(form.year_of_admission) ?? "—"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Designation</label>
+                  <select
+                    value={otherDesignation ? "__other__" : form.designation_code}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "__other__") {
+                        setOtherDesignation(true);
+                        setForm({ ...form, designation_code: "" });
+                      } else {
+                        setOtherDesignation(false);
+                        setForm({ ...form, designation_code: v, designation_custom: "" });
+                      }
+                    }}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  >
+                    <option value="">Select…</option>
+                    {ATTORNEY_DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    <option value="__other__">Other (specify)</option>
+                  </select>
+                </div>
+                {otherDesignation && (
+                  <input
+                    placeholder="Custom designation"
+                    value={form.designation_custom}
+                    onChange={(e) => setForm({ ...form, designation_custom: e.target.value })}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  />
+                )}
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Year of admission (optional)</label>
+                  <input
+                    type="number"
+                    min={1900}
+                    max={CURRENT_YEAR}
+                    placeholder="e.g. 2015"
+                    value={form.year_of_admission ?? ""}
+                    onChange={(e) => setForm({ ...form, year_of_admission: e.target.value ? Number(e.target.value) : null })}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  />
+                </div>
+                {form.designation_code === "Director" && (
+                  <div className="space-y-2 rounded border border-dashed border-border p-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.is_practice_head}
+                        onChange={(e) => setForm({ ...form, is_practice_head: e.target.checked })}
+                        className="accent-gold"
+                      />
+                      Also Practice Head
+                    </label>
+                    {form.is_practice_head && (
+                      <input
+                        placeholder="Practice area (e.g. Banking & Finance)"
+                        value={form.practice_head_area}
+                        onChange={(e) => setForm({ ...form, practice_head_area: e.target.value })}
+                        className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                      />
+                    )}
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.is_sector_head}
+                        onChange={(e) => setForm({ ...form, is_sector_head: e.target.checked })}
+                        className="accent-gold"
+                      />
+                      Also Sector Head
+                    </label>
+                    {form.is_sector_head && (
+                      <input
+                        placeholder="Sector (e.g. Mining)"
+                        value={form.sector_head_area}
+                        onChange={(e) => setForm({ ...form, sector_head_area: e.target.value })}
+                        className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {lawyer?.designation && (
+              <p className="text-xs text-muted-foreground">
+                Current legacy value: <span className="font-medium text-ink">{lawyer.designation}</span> — will be replaced when you save.
+              </p>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
