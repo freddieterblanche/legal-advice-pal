@@ -233,14 +233,47 @@ function LawyersTab({ firmId }: { firmId: string }) {
   );
 }
 
-function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose: () => void; onAdded: () => void }) {
-  const [form, setForm] = useState({ first_name: "", last_name: "", designation: "Attorney", city: "", province: "Gauteng", bio: "" });
+function LawyerFormModal({
+  firmId,
+  lawyer,
+  onClose,
+  onSaved,
+}: {
+  firmId: string;
+  lawyer?: LawyerRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const isEdit = !!lawyer;
+  const [form, setForm] = useState({
+    first_name: lawyer?.first_name ?? "",
+    last_name: lawyer?.last_name ?? "",
+    designation: lawyer?.designation ?? "Attorney",
+    city: lawyer?.city ?? "",
+    province: lawyer?.province ?? "Gauteng",
+    bio: lawyer?.bio ?? "",
+  });
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
   const importFn = useServerFn(importLawyerProfile);
+
+  // Load existing practice areas when editing
+  useEffect(() => {
+    if (!lawyer) return;
+    (async () => {
+      const { data } = await supabase
+        .from("lawyer_practice_areas")
+        .select("practice_areas(id, slug, name)")
+        .eq("lawyer_id", lawyer.id);
+      const rows = (data ?? [])
+        .map((r: { practice_areas: { id: string; slug: string; name: string } | null }) => r.practice_areas)
+        .filter((p): p is { id: string; slug: string; name: string } => !!p);
+      setPracticeAreas(rows);
+    })();
+  }, [lawyer]);
 
   const handleImport = async () => {
     if (!importUrl.trim()) return;
@@ -266,25 +299,37 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
     }
   };
 
+  const syncPracticeAreas = async (lawyerId: string) => {
+    const { error: delErr } = await supabase.from("lawyer_practice_areas").delete().eq("lawyer_id", lawyerId);
+    if (delErr) throw delErr;
+    if (practiceAreas.length === 0) return;
+    const links = practiceAreas.map((p) => ({ lawyer_id: lawyerId, practice_area_id: p.id }));
+    const { error } = await supabase.from("lawyer_practice_areas").insert(links);
+    if (error) throw error;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const parsed = lawyerSchema.parse(form);
-      const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
-      const { data: inserted, error } = await supabase
-        .from("lawyers")
-        .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
-        .select("id")
-        .single();
-      if (error) throw error;
-      if (inserted && practiceAreas.length > 0) {
-        const links = practiceAreas.map((p) => ({ lawyer_id: inserted.id, practice_area_id: p.id }));
-        const { error: paErr } = await supabase.from("lawyer_practice_areas").insert(links);
-        if (paErr) console.warn("Practice area link failed:", paErr.message);
+      if (isEdit && lawyer) {
+        const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
+        if (error) throw error;
+        await syncPracticeAreas(lawyer.id);
+        toast.success("Profile updated");
+      } else {
+        const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
+        const { data: inserted, error } = await supabase
+          .from("lawyers")
+          .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (inserted) await syncPracticeAreas(inserted.id);
+        toast.success("Lawyer added");
       }
-      toast.success("Lawyer added");
-      onAdded();
+      onSaved();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally {
