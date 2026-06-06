@@ -1001,7 +1001,7 @@ function LawyerFormModal({
                     }
                     className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
                       selected
-                        ? "bg-forest/15 text-forest ring-1 ring-forest/30 hover:bg-forest/20"
+                        ? "bg-green-600/15 text-green-700 ring-1 ring-green-600/40 hover:bg-green-600/20"
                         : "bg-muted text-muted-foreground hover:bg-muted/70"
                     }`}
                   >
