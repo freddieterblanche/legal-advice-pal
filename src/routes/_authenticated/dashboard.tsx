@@ -327,6 +327,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 
       {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
       {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
+      {inviting && <InviteLawyerModal lawyer={inviting} onClose={() => setInviting(null)} onSent={() => { refresh(); setInviting(null); }} />}
     </div>
   );
 }
