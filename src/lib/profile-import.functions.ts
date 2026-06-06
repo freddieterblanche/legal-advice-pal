@@ -70,7 +70,11 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
-          "Bio should be a clean prose summary (max ~1500 chars), no markdown. " +
+          "Bio: return HTML (NOT markdown) with these tags only: <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <br>. " +
+          "Use <h2>/<h3> for natural section headings such as 'Experience', 'Education', 'Recognition', 'Practice Areas'. " +
+          "Use <p> for paragraphs (separate ideas into multiple paragraphs for readability). Use lists where appropriate. " +
+          "Do NOT include the lawyer's name as a heading, and do not include inline styles, classes, links, or images. " +
+          "Aim for ~800–4000 characters of well-structured HTML. " +
           "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
           "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
           "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
