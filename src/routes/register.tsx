@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { PROVINCES, slugify } from "../lib/constants";
+import { PROVINCES } from "../lib/constants";
+import { registerFirmForCurrentUser } from "../lib/firm-registration.functions";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -41,6 +43,7 @@ const adminSchema = z.object({
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const registerFirm = useServerFn(registerFirmForCurrentUser);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -62,9 +65,11 @@ function RegisterPage() {
     try {
       const firmParsed = firmSchema.parse(firm);
       let userId = existingUserId;
+      let adminNames: { first_name?: string; last_name?: string } | undefined;
 
       if (!userId) {
         const adminParsed = adminSchema.parse(admin);
+        adminNames = { first_name: adminParsed.first_name, last_name: adminParsed.last_name };
         const { data: authData, error: authErr } = await supabase.auth.signUp({
           email: adminParsed.email,
           password: adminParsed.password,
@@ -83,30 +88,13 @@ function RegisterPage() {
           throw authErr;
         }
         if (!authData.user) throw new Error("Failed to create user");
-        await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
+        if (signInErr) throw signInErr;
         userId = authData.user.id;
       }
 
-
-      // Create firm
-      const slug = `${slugify(firmParsed.name)}-${Math.random().toString(36).slice(2, 6)}`;
-      const { data: firmRow, error: firmErr } = await supabase
-        .from("firms")
-        .insert({ ...firmParsed, slug, status: "pending" })
-        .select()
-        .single();
-      if (firmErr) throw firmErr;
-
-      // Update profile
-      const profileUpdate: { firm_id: string; role: string; first_name?: string; last_name?: string } = {
-        firm_id: firmRow.id,
-        role: "firm_admin",
-      };
-      if (!existingUserId) {
-        profileUpdate.first_name = admin.first_name;
-        profileUpdate.last_name = admin.last_name;
-      }
-      await supabase.from("profiles").update(profileUpdate).eq("id", userId!);
+      if (!userId) throw new Error("Please sign in before registering a firm.");
+      await registerFirm({ data: { firm: firmParsed, admin: adminNames } });
 
       toast.success("Firm registered. Welcome to Lawexpert.co.za.");
       navigate({ to: "/dashboard" });
