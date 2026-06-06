@@ -109,7 +109,7 @@ function Dashboard() {
                 <img
                   src={firm.logo_url}
                   alt={`${firm.name} logo`}
-                  className="h-12 w-12 rounded object-contain"
+                  className="h-14 w-auto max-w-[200px] object-contain"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               )}
