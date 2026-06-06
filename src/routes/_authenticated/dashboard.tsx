@@ -471,7 +471,7 @@ function LawyerFormModal({
                 <img
                   src={form.avatar_url}
                   alt="Preview"
-                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-border"
+                  className="h-20 w-20 shrink-0 rounded-md object-cover ring-1 ring-border"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                 />
               )}
