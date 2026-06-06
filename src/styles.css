@@ -32,22 +32,23 @@
   --color-cream: var(--cream);
   --color-gold: var(--gold);
   --color-forest: var(--forest);
-  --color-advocate: var(--forest);
   --color-attorney: var(--gold);
+  --color-advocate: var(--forest);
 
-  --font-heading: "Fraunces", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  /* Lawexperts.co.za — light & trustworthy palette
-     Navy primary, cool white surfaces, professional blue accent, slate teal */
-  --ink: oklch(0.28 0.06 250);            /* deep navy — primary text + dark surfaces */
-  --cream: oklch(0.985 0.004 250);         /* cool near-white background */
-  --gold: oklch(0.55 0.16 250);            /* trustworthy blue accent (Attorney) */
-  --forest: oklch(0.50 0.06 215);          /* slate teal (Advocate) */
+  /* Lawexperts.co.za — Slate & Steel palette
+     Cool light surfaces, slate text, trustworthy blue for Attorneys,
+     deeper slate-navy for Advocates. */
+  --ink: oklch(0.30 0.04 255);             /* slate-900 — primary text / dark surfaces */
+  --cream: oklch(0.985 0.005 250);          /* slate-50 — airy background */
+  --gold: oklch(0.50 0.18 264);             /* blue-700 — Attorney accent */
+  --forest: oklch(0.38 0.07 255);           /* slate-700 — Advocate accent */
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -55,38 +56,38 @@
   --card-foreground: var(--ink);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--ink);
-  --primary: var(--ink);
+  --primary: var(--gold);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.965 0.008 250);
   --secondary-foreground: var(--ink);
   --muted: oklch(0.96 0.006 250);
-  --muted-foreground: oklch(0.52 0.02 250);
-  --accent: var(--gold);
-  --accent-foreground: oklch(1 0 0);
+  --muted-foreground: oklch(0.50 0.02 255);
+  --accent: oklch(0.95 0.02 255);
+  --accent-foreground: var(--ink);
   --destructive: oklch(0.58 0.20 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.91 0.008 250);
-  --input: oklch(0.92 0.008 250);
+  --border: oklch(0.91 0.01 255);
+  --input: oklch(0.92 0.01 255);
   --ring: var(--gold);
 }
 
 .dark {
   --background: var(--ink);
   --foreground: var(--cream);
-  --card: oklch(0.32 0.05 250);
+  --card: oklch(0.34 0.04 255);
   --card-foreground: var(--cream);
-  --popover: oklch(0.32 0.05 250);
+  --popover: oklch(0.34 0.04 255);
   --popover-foreground: var(--cream);
-  --primary: var(--cream);
-  --primary-foreground: var(--ink);
-  --secondary: oklch(0.34 0.05 250);
+  --primary: var(--gold);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.36 0.04 255);
   --secondary-foreground: var(--cream);
-  --muted: oklch(0.34 0.05 250);
-  --muted-foreground: oklch(0.78 0.01 250);
-  --accent: var(--gold);
-  --accent-foreground: oklch(1 0 0);
-  --border: oklch(0.38 0.04 250);
-  --input: oklch(0.38 0.04 250);
+  --muted: oklch(0.36 0.04 255);
+  --muted-foreground: oklch(0.78 0.01 255);
+  --accent: oklch(0.40 0.05 255);
+  --accent-foreground: var(--cream);
+  --border: oklch(0.40 0.04 255);
+  --input: oklch(0.40 0.04 255);
   --ring: var(--gold);
 }
 
