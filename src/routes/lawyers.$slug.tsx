@@ -135,16 +135,17 @@ function LawyerProfile() {
                   </Link>
                 )}
                 <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {lawyer.city}, {lawyer.province}</span>
-                {lawyer.email && (
-                  <a href={`mailto:${lawyer.email}`} className="flex items-center gap-1.5 hover:text-gold">
-                    <Mail className="h-4 w-4" /> {lawyer.email}
+                {contact?.email && (
+                  <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <Mail className="h-4 w-4" /> {contact.email}
                   </a>
                 )}
-                {lawyer.phone && (
-                  <a href={`tel:${lawyer.phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
-                    <Phone className="h-4 w-4" /> {lawyer.phone}
+                {contact?.phone && (
+                  <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <Phone className="h-4 w-4" /> {contact.phone}
                   </a>
                 )}
+
                 {lawyer.linkedin_url && (
                   <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
                     <Linkedin className="h-4 w-4" /> LinkedIn
