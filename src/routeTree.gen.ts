@@ -16,6 +16,7 @@ import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FirmsIndexRouteImport } from './routes/firms.index'
 import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -54,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FirmsIndexRoute = FirmsIndexRouteImport.update({
+  id: '/firms/',
+  path: '/firms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LawyersSlugRoute = LawyersSlugRouteImport.update({
   id: '/lawyers/$slug',
   path: '/lawyers/$slug',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/firms/': typeof FirmsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/firms': typeof FirmsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/firms/': typeof FirmsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/firms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/firms'
   id:
     | '__root__'
     | '/'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/firms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   FirmsSlugRoute: typeof FirmsSlugRoute
   LawyersSlugRoute: typeof LawyersSlugRoute
+  FirmsIndexRoute: typeof FirmsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/firms/': {
+      id: '/firms/'
+      path: '/firms'
+      fullPath: '/firms/'
+      preLoaderRoute: typeof FirmsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lawyers/$slug': {
       id: '/lawyers/$slug'
       path: '/lawyers/$slug'
@@ -250,17 +270,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   FirmsSlugRoute: FirmsSlugRoute,
   LawyersSlugRoute: LawyersSlugRoute,
+  FirmsIndexRoute: FirmsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
