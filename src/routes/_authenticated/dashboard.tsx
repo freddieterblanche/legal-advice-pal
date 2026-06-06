@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye } from "lucide-react";
+import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye, Building2, Trash2, Star } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -12,6 +12,17 @@ import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
+
+type Branch = {
+  id: string;
+  firm_id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  phone: string | null;
+  is_head_office: boolean;
+};
 
 type Tab = "overview" | "lawyers" | "billing" | "settings";
 
@@ -301,6 +312,8 @@ function LawyerFormModal({
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
+  const [firmBranches, setFirmBranches] = useState<Branch[]>([]);
+  const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -310,6 +323,49 @@ function LawyerFormModal({
   const importFn = useServerFn(importLawyerProfile);
   const fetchImageFn = useServerFn(fetchImageAsDataUrl);
   const [loadingUrlCrop, setLoadingUrlCrop] = useState(false);
+
+  // Load firm branches
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("firm_branches")
+        .select("*")
+        .eq("firm_id", firmId)
+        .order("is_head_office", { ascending: false })
+        .order("created_at", { ascending: true });
+      setFirmBranches((data ?? []) as Branch[]);
+    })();
+  }, [firmId]);
+
+  // Load lawyer's existing branch links
+  useEffect(() => {
+    if (!lawyer) return;
+    (async () => {
+      const { data } = await supabase
+        .from("lawyer_branches")
+        .select("branch_id")
+        .eq("lawyer_id", lawyer.id);
+      setSelectedBranchIds(new Set((data ?? []).map((r) => r.branch_id)));
+    })();
+  }, [lawyer]);
+
+  const toggleBranch = (branchId: string) => {
+    const next = new Set(selectedBranchIds);
+    if (next.has(branchId)) next.delete(branchId);
+    else next.add(branchId);
+    setSelectedBranchIds(next);
+    // Auto-fill city/province from first selected branch
+    const firstId = next.values().next().value as string | undefined;
+    const first = firstId ? firmBranches.find((b) => b.id === firstId) : undefined;
+    if (first) {
+      setForm((f) => ({
+        ...f,
+        city: first.city || f.city,
+        province: (first.province as string) || f.province,
+      }));
+    }
+  };
+
 
   const handleRepositionUrl = async () => {
     const url = form.avatar_url?.trim();
@@ -418,6 +474,15 @@ function LawyerFormModal({
     if (error) throw error;
   };
 
+  const syncBranches = async (lawyerId: string) => {
+    const { error: delErr } = await supabase.from("lawyer_branches").delete().eq("lawyer_id", lawyerId);
+    if (delErr) throw delErr;
+    if (selectedBranchIds.size === 0) return;
+    const links = Array.from(selectedBranchIds).map((branch_id) => ({ lawyer_id: lawyerId, branch_id }));
+    const { error } = await supabase.from("lawyer_branches").insert(links);
+    if (error) throw error;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -427,6 +492,7 @@ function LawyerFormModal({
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
         await syncPracticeAreas(lawyer.id);
+        await syncBranches(lawyer.id);
         toast.success("Profile updated");
       } else {
         const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -436,7 +502,10 @@ function LawyerFormModal({
           .select("id")
           .single();
         if (error) throw error;
-        if (inserted) await syncPracticeAreas(inserted.id);
+        if (inserted) {
+          await syncPracticeAreas(inserted.id);
+          await syncBranches(inserted.id);
+        }
         toast.success("Lawyer added");
       }
       onSaved();
@@ -504,6 +573,33 @@ function LawyerFormModal({
               {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
+          {firmBranches.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Branches <span className="text-muted-foreground/70">(select one or more)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {firmBranches.map((b) => {
+                  const checked = selectedBranchIds.has(b.id);
+                  return (
+                    <button
+                      type="button"
+                      key={b.id}
+                      onClick={() => toggleBranch(b.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+                        checked ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {b.is_head_office && <Star className="h-3 w-3 text-gold" />}
+                      {b.name}
+                      {b.city ? ` · ${b.city}` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
+            </div>
+          )}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
             <RichTextEditor
@@ -676,11 +772,14 @@ function SettingsTab({ firm }: { firm: any }) {
     website: firm.website ?? "",
     phone: firm.phone ?? "",
     address: firm.address ?? "",
+    city: firm.city ?? "",
+    province: firm.province ?? "Gauteng",
   });
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("firms").update(form).eq("id", firm.id);
+      const clean = { ...form, description: sanitizeBioHtml(form.description) };
+      const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["my-profile"] }); },
@@ -688,16 +787,203 @@ function SettingsTab({ firm }: { firm: any }) {
   });
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="max-w-2xl space-y-3 rounded-md border border-border bg-card p-6">
-      <h2 className="font-heading text-xl text-ink">Firm Settings</h2>
-      <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Firm name" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-      <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" rows={4} maxLength={2000} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-      <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-      <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-      <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Address" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-      <button type="submit" disabled={save.isPending} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">
-        {save.isPending ? "Saving…" : "Save Changes"}
-      </button>
-    </form>
+    <div className="max-w-3xl space-y-6">
+      <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-3 rounded-md border border-border bg-card p-6">
+        <h2 className="font-heading text-xl text-ink">Firm Settings</h2>
+        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Firm name" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">About the firm</label>
+          <RichTextEditor
+            value={form.description}
+            onChange={(html) => setForm({ ...form, description: html })}
+            placeholder="Describe your firm — use headings, paragraphs, lists…"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Bold, italic and lists are supported.</p>
+        </div>
+
+        <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Main phone" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Main address" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <p className="text-xs text-muted-foreground">City and province auto-apply to lawyers linked only to the head office.</p>
+
+        <button type="submit" disabled={save.isPending} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+          {save.isPending ? "Saving…" : "Save Changes"}
+        </button>
+      </form>
+
+      <BranchesManager firmId={firm.id} />
+    </div>
+  );
+}
+
+function BranchesManager({ firmId }: { firmId: string }) {
+  const qc = useQueryClient();
+  const { data: branches } = useQuery({
+    queryKey: ["firm-branches", firmId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("firm_branches")
+        .select("*")
+        .eq("firm_id", firmId)
+        .order("is_head_office", { ascending: false })
+        .order("created_at", { ascending: true });
+      return (data ?? []) as Branch[];
+    },
+  });
+
+  const [editing, setEditing] = useState<Branch | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("firm_branches").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Branch removed"); qc.invalidateQueries({ queryKey: ["firm-branches", firmId] }); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  return (
+    <div className="rounded-md border border-border bg-card p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="font-heading text-xl text-ink">Branches</h2>
+          <p className="text-xs text-muted-foreground">Head office plus any additional offices. Lawyers can belong to one or more branches.</p>
+        </div>
+        <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream hover:bg-ink/90">
+          <Plus className="h-3.5 w-3.5" /> Add branch
+        </button>
+      </div>
+
+      <div className="divide-y divide-border rounded border border-border">
+        {(branches ?? []).map((b) => (
+          <div key={b.id} className="flex items-start justify-between gap-3 p-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                {b.is_head_office && <Star className="h-3.5 w-3.5 text-gold" />}
+                <p className="text-sm font-semibold text-ink">{b.name}</p>
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {[b.address, b.city, b.province].filter(Boolean).join(", ") || "No address set"}
+                {b.phone ? ` · ${b.phone}` : ""}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button onClick={() => setEditing(b)} className="text-xs font-medium text-ink hover:text-gold">Edit</button>
+              {!b.is_head_office && (
+                <button onClick={() => { if (confirm("Delete this branch?")) remove.mutate(b.id); }} className="text-destructive hover:text-destructive/80">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+        {(!branches || branches.length === 0) && (
+          <div className="p-6 text-center text-sm text-muted-foreground">No branches yet.</div>
+        )}
+      </div>
+
+      {(adding || editing) && (
+        <BranchFormModal
+          firmId={firmId}
+          branch={editing ?? undefined}
+          onClose={() => { setAdding(false); setEditing(null); }}
+          onSaved={() => { setAdding(false); setEditing(null); qc.invalidateQueries({ queryKey: ["firm-branches", firmId] }); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function BranchFormModal({
+  firmId,
+  branch,
+  onClose,
+  onSaved,
+}: {
+  firmId: string;
+  branch?: Branch;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const isEdit = !!branch;
+  const [form, setForm] = useState({
+    name: branch?.name ?? "",
+    address: branch?.address ?? "",
+    city: branch?.city ?? "",
+    province: branch?.province ?? "Gauteng",
+    phone: branch?.phone ?? "",
+    is_head_office: branch?.is_head_office ?? false,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) { toast.error("Name required"); return; }
+    setSaving(true);
+    try {
+      // If marking as head office, clear the flag on any existing head office
+      if (form.is_head_office) {
+        const { error: clearErr } = await supabase
+          .from("firm_branches")
+          .update({ is_head_office: false })
+          .eq("firm_id", firmId)
+          .neq("id", branch?.id ?? "00000000-0000-0000-0000-000000000000");
+        if (clearErr) throw clearErr;
+      }
+      if (isEdit && branch) {
+        const { error } = await supabase.from("firm_branches").update(form).eq("id", branch.id);
+        if (error) throw error;
+        toast.success("Branch updated");
+      } else {
+        const { error } = await supabase.from("firm_branches").insert({ ...form, firm_id: firmId });
+        if (error) throw error;
+        toast.success("Branch added");
+      }
+      onSaved();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Branch" : "Add Branch"}</h3>
+          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          <input required placeholder="Branch name (e.g. Cape Town Office)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input placeholder="Street address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div className="grid grid-cols-2 gap-3">
+            <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+            <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
+              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <input placeholder="Phone (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input type="checkbox" checked={form.is_head_office} onChange={(e) => setForm({ ...form, is_head_office: e.target.checked })} />
+            Head office
+          </label>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save" : "Add"}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
