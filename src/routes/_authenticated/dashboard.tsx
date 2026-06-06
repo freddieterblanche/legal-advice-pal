@@ -312,6 +312,7 @@ function LawyerFormModal({
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
+  const [allPracticeAreas, setAllPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [firmBranches, setFirmBranches] = useState<Branch[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
