@@ -70,8 +70,13 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
-          "Bio should be a clean prose summary (max ~1500 chars), no markdown.",
+          "Bio should be a clean prose summary (max ~1500 chars), no markdown. " +
+          "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
+          "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
+          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
+          "Resolve relative URLs against the source URL. Empty string if none found.",
         prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
+
       });
       extracted = experimental_output;
     } catch (err) {
