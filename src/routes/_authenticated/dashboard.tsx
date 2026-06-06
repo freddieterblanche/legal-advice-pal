@@ -312,6 +312,7 @@ function LawyerFormModal({
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
+  const [allPracticeAreas, setAllPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [firmBranches, setFirmBranches] = useState<Branch[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -336,6 +337,17 @@ function LawyerFormModal({
       setFirmBranches((data ?? []) as Branch[]);
     })();
   }, [firmId]);
+
+  // Load all practice areas (for selection)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("practice_areas")
+        .select("id, slug, name")
+        .order("name", { ascending: true });
+      setAllPracticeAreas((data ?? []) as { id: string; slug: string; name: string }[]);
+    })();
+  }, []);
 
   // Load lawyer's existing branch links
   useEffect(() => {
@@ -682,21 +694,37 @@ function LawyerFormModal({
 
 
 
-          {practiceAreas.length > 0 && (
-            <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
-              <div className="flex flex-wrap gap-1.5">
-                {practiceAreas.map((p) => (
-                  <span key={p.id} className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest">
+          <div>
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
+            <div className="flex flex-wrap gap-1.5">
+              {allPracticeAreas.map((p) => {
+                const selected = practiceAreas.some((x) => x.id === p.id);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() =>
+                      setPracticeAreas(
+                        selected
+                          ? practiceAreas.filter((x) => x.id !== p.id)
+                          : [...practiceAreas, p]
+                      )
+                    }
+                    className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
+                      selected
+                        ? "bg-forest/15 text-forest ring-1 ring-forest/30 hover:bg-forest/20"
+                        : "bg-muted text-muted-foreground hover:bg-muted/70"
+                    }`}
+                  >
                     {p.name}
-                    <button type="button" onClick={() => setPracticeAreas(practiceAreas.filter((x) => x.id !== p.id))} className="hover:text-destructive">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
+                  </button>
+                );
+              })}
+              {allPracticeAreas.length === 0 && (
+                <p className="text-xs text-muted-foreground">Loading…</p>
+              )}
             </div>
-          )}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
