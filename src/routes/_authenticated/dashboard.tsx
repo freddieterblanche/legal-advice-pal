@@ -135,7 +135,7 @@ const lawyerSchema = z.object({
   designation: z.enum(DESIGNATIONS as unknown as [string, ...string[]]),
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
-  bio: z.string().max(2000).optional(),
+  bio: z.string().max(20000).optional(),
   avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
 });
 
