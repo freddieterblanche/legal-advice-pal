@@ -21,6 +21,9 @@ const extractionSchema = z.object({
   bio: z.string().max(10000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
   photo_url: z.string().max(2000).default(""),
+  email: z.string().max(200).default(""),
+  phone: z.string().max(60).default(""),
+  linkedin_url: z.string().max(500).default(""),
 });
 
 
