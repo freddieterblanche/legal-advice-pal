@@ -6,8 +6,8 @@ import { supabase } from "../integrations/supabase/client";
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug.replace(/-/g, " ")} — LexSA` },
-      { name: "description", content: "South African law firm profile on LexSA." },
+      { title: `${params.slug.replace(/-/g, " ")} — Lawexperts.co.za` },
+      { name: "description", content: "South African law firm profile on Lawexperts.co.za." },
     ],
   }),
   component: FirmProfile,

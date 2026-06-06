@@ -5,7 +5,7 @@ import { supabase } from "../integrations/supabase/client";
 export const Route = createFileRoute("/practice-areas")({
   head: () => ({
     meta: [
-      { title: "Practice Areas — LexSA" },
+      { title: "Practice Areas — Lawexperts.co.za" },
       { name: "description", content: "Browse South African lawyers by practice area, from Constitutional Law to Mining & Resources." },
     ],
   }),

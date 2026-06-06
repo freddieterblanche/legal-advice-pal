@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-1">
-            <Link to="/" className="font-heading text-2xl font-bold text-gold">LexSA</Link>
+            <Link to="/" className="font-heading text-2xl font-bold text-gold">Lawexperts.co.za</Link>
             <p className="mt-3 text-sm text-cream/60">
               South Africa's legal directory.<br />Verified profiles. Linked cases.
             </p>
@@ -34,7 +34,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t border-cream/10 pt-6 text-xs text-cream/50">
-          © {new Date().getFullYear()} LexSA. Independent directory. Not affiliated with the Legal Practice Council.
+          © {new Date().getFullYear()} Lawexperts.co.za. Independent directory. Not affiliated with the Legal Practice Council.
         </div>
       </div>
     </footer>

@@ -8,9 +8,9 @@ import { PROVINCES } from "../lib/constants";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LexSA | South Africa's Legal Directory" },
+      { title: "Lawexperts.co.za | South Africa's Legal Directory" },
       { name: "description", content: "Search verified South African lawyers by practice area, province, and reported cases. Find the right counsel — backed by their case record." },
-      { property: "og:title", content: "LexSA | South Africa's Legal Directory" },
+      { property: "og:title", content: "Lawexperts.co.za | South Africa's Legal Directory" },
       { property: "og:description", content: "Verified profiles. Linked cases. South Africa's legal directory." },
     ],
   }),
@@ -166,7 +166,7 @@ function HomePage() {
       {/* CTA */}
       <section className="bg-ink py-20 text-cream md:py-28">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <h2 className="font-heading text-3xl md:text-4xl">List your firm on LexSA</h2>
+          <h2 className="font-heading text-3xl md:text-4xl">List your firm on Lawexperts.co.za</h2>
           <p className="mx-auto mt-4 max-w-2xl text-cream/70">
             R99 per lawyer per month. First 3 months free — no credit card required.
             Build trust with verified profiles and linked reported cases.

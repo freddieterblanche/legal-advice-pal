@@ -57,9 +57,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LexSA | South Africa's Legal Directory" },
+      { title: "Lawexperts.co.za | South Africa's Legal Directory" },
       { name: "description", content: "South Africa's legal directory. Verified profiles. Linked cases. Find advocates and attorneys by practice area, province, and reported cases." },
-      { property: "og:title", content: "LexSA | South Africa's Legal Directory" },
+      { property: "og:title", content: "Lawexperts.co.za | South Africa's Legal Directory" },
       { property: "og:description", content: "Verified profiles. Linked cases. Find South African lawyers across every practice area." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

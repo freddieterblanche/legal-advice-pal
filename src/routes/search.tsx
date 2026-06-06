@@ -16,7 +16,7 @@ export const Route = createFileRoute("/search")({
   }),
   head: () => ({
     meta: [
-      { title: "Find a Lawyer — LexSA" },
+      { title: "Find a Lawyer — Lawexperts.co.za" },
       { name: "description", content: "Search South African lawyers by name, practice area, and province." },
     ],
   }),
