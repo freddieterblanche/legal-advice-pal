@@ -293,8 +293,10 @@ function LawyerFormModal({
         city: res.city || "",
         province: res.province || "Gauteng",
         bio: res.bio || "",
+        avatar_url: res.avatar_url || "",
       });
       setPracticeAreas(res.practice_areas);
+
       setImported(true);
       toast.success("Profile imported — please review");
     } catch (err) {
