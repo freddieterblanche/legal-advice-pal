@@ -71,6 +71,9 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
         system:
           "You extract a lawyer's profile from a law-firm webpage. Map free-text values to the allowed enums. " +
           "If a field is not present, use an empty string (or empty array for practice areas). Do not invent information. " +
+          "first_name / last_name: REQUIRED. The page describes one lawyer — extract their full personal name. " +
+          "Look at the page title, the main heading, the URL slug, repeated mentions in the bio, the alt text of the headshot, and any 'About <Name>' phrasing. " +
+          "Strip titles (Mr, Mrs, Ms, Dr, Adv, Adv., Attorney, Prof). Split into first and last name. Never leave both blank if any human name appears anywhere on the page. " +
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
@@ -81,8 +84,10 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           "Aim for ~800–4000 characters of well-structured HTML. " +
           "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
           "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
-          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
-          "Resolve relative URLs against the source URL. Empty string if none found.",
+          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). Resolve relative URLs against the source URL. Empty string if none found. " +
+          "email: the lawyer's direct email address if shown on the page (look for mailto: links or plain-text addresses near their name). Empty string otherwise. " +
+          "phone: the lawyer's direct phone number (any format). Look for tel: links or labelled phone/mobile/cell/direct numbers next to their name. Empty string otherwise. " +
+          "linkedin_url: the lawyer's LinkedIn profile URL if linked on the page (typically https://www.linkedin.com/in/...). Empty string otherwise.",
         prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
 
       });
