@@ -1525,17 +1525,41 @@ function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
   });
 
   const [draft, setDraft] = useState({ case_name: "", citation: "", court: "", year: "", url: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ case_name: "", citation: "", court: "", year: "", url: "" });
   const [saving, setSaving] = useState(false);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["lawyer-reported-cases", lawyerId] });
 
-  const add = async () => {
-    if (!draft.case_name.trim()) { toast.error("Case name is required"); return; }
-    if (draft.url && !/^https?:\/\//i.test(draft.url.trim())) { toast.error("URL must start with http:// or https://"); return; }
-    const yearNum = draft.year ? Number(draft.year) : null;
+  const startEdit = (c: ReportedCase) => {
+    setEditingId(c.id);
+    setEditForm({
+      case_name: c.case_name,
+      citation: c.citation ?? "",
+      court: c.court ?? "",
+      year: c.year?.toString() ?? "",
+      url: c.url ?? "",
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ case_name: "", citation: "", court: "", year: "", url: "" });
+  };
+
+  const validateCase = (values: { case_name: string; url: string; year: string }) => {
+    if (!values.case_name.trim()) { toast.error("Case name is required"); return false; }
+    if (values.url && !/^https?:\/\//i.test(values.url.trim())) { toast.error("URL must start with http:// or https://"); return false; }
+    const yearNum = values.year ? Number(values.year) : null;
     if (yearNum !== null && (Number.isNaN(yearNum) || yearNum < 1900 || yearNum > 2100)) {
-      toast.error("Enter a valid year"); return;
+      toast.error("Enter a valid year"); return false;
     }
+    return true;
+  };
+
+  const add = async () => {
+    if (!validateCase(draft)) return;
+    const yearNum = draft.year ? Number(draft.year) : null;
     setSaving(true);
     try {
       const { error } = await supabase.from("lawyer_reported_cases").insert({
@@ -1557,6 +1581,28 @@ function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
     }
   };
 
+  const update = async (id: string) => {
+    if (!validateCase(editForm)) return;
+    const yearNum = editForm.year ? Number(editForm.year) : null;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("lawyer_reported_cases").update({
+        case_name: editForm.case_name.trim().slice(0, 300),
+        citation: editForm.citation.trim().slice(0, 200) || null,
+        court: editForm.court.trim().slice(0, 200) || null,
+        year: yearNum,
+        url: editForm.url.trim().slice(0, 500) || null,
+      }).eq("id", id);
+      if (error) throw error;
+      setEditingId(null);
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Remove this case?")) return;
     const { error } = await supabase.from("lawyer_reported_cases").delete().eq("id", id);
@@ -1569,17 +1615,86 @@ function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
       {(cases ?? []).length > 0 && (
         <ul className="divide-y divide-border rounded border border-border">
           {(cases ?? []).map((c) => (
-            <li key={c.id} className="flex items-start justify-between gap-3 p-3">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-ink">{c.case_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {[c.citation, c.court, c.year].filter(Boolean).join(" · ")}
-                </p>
-                {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-forest hover:text-gold">Open ↗</a>}
-              </div>
-              <button type="button" onClick={() => remove(c.id)} className="shrink-0 text-destructive hover:text-destructive/80">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+            <li key={c.id} className="p-3">
+              {editingId === c.id ? (
+                <div className="space-y-2">
+                  <input
+                    placeholder="Case name *"
+                    value={editForm.case_name}
+                    onChange={(e) => setEditForm({ ...editForm, case_name: e.target.value })}
+                    maxLength={300}
+                    className="w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+                  />
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <input
+                      placeholder="Citation"
+                      value={editForm.citation}
+                      onChange={(e) => setEditForm({ ...editForm, citation: e.target.value })}
+                      maxLength={200}
+                      className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+                    />
+                    <input
+                      placeholder="Court"
+                      value={editForm.court}
+                      onChange={(e) => setEditForm({ ...editForm, court: e.target.value })}
+                      maxLength={200}
+                      className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+                    />
+                    <input
+                      type="number"
+                      min={1900}
+                      max={2100}
+                      placeholder="Year"
+                      value={editForm.year}
+                      onChange={(e) => setEditForm({ ...editForm, year: e.target.value })}
+                      className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                  <input
+                    type="url"
+                    placeholder="https://… (link to judgment)"
+                    value={editForm.url}
+                    onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+                    maxLength={500}
+                    className="w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+                  />
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => update(c.id)}
+                      disabled={saving}
+                      className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-50"
+                    >
+                      {saving ? "Saving…" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="rounded px-3 py-1.5 text-xs text-muted-foreground hover:text-ink"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink">{c.case_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[c.citation, c.court, c.year].filter(Boolean).join(" · ")}
+                    </p>
+                    {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-forest hover:text-gold">Open ↗</a>}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button type="button" onClick={() => startEdit(c)} className="text-muted-foreground hover:text-ink" title="Edit">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button type="button" onClick={() => remove(c.id)} className="text-destructive hover:text-destructive/80" title="Delete">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
