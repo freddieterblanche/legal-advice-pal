@@ -214,6 +214,11 @@ type LawyerRow = {
   city: string | null;
   province: string | null;
   bio: string | null;
+  overview: string | null;
+  qualifications: string | null;
+  accolades: string | null;
+  noteworthy_matters: string | null;
+  reported_cases_notes: string | null;
   avatar_url: string | null;
   email: string | null;
   phone: string | null;
@@ -221,6 +226,8 @@ type LawyerRow = {
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
+  profile_id?: string | null;
+  slug?: string | null;
 };
 
 
