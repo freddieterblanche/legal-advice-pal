@@ -46,7 +46,7 @@ export function Navbar() {
         <div className="hidden items-center gap-3 md:flex">
           {session ? (
             <>
-              <Link to="/dashboard" className="rounded-md border border-gold/40 px-4 py-2 text-sm font-medium text-gold hover:bg-gold hover:text-ink">
+              <Link to="/dashboard" className="rounded-md bg-gold px-4 py-2 text-sm font-semibold text-ink shadow-sm hover:bg-gold/90">
                 Dashboard
               </Link>
               <button onClick={signOut} className="text-sm font-medium text-cream/70 hover:text-cream">
