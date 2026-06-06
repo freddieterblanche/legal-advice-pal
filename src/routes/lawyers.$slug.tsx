@@ -152,7 +152,7 @@ function LawyerProfile() {
                   <Pencil className="mr-2 inline h-4 w-4" /> Edit Profile
                 </Link>
               )}
-              <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
+              <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
                 <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
               </button>
             </div>

@@ -1486,7 +1486,7 @@ function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onC
             <p className="text-sm text-ink">Share this single-use link with the lawyer (valid for 7 days):</p>
             <div className="flex gap-2">
               <input readOnly value={inviteUrl} className="flex-1 rounded border border-border bg-background px-3 py-2 text-xs" onFocus={(e) => e.currentTarget.select()} />
-              <button type="button" onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Copied"); }} className="rounded bg-gold px-3 py-2 text-xs font-semibold text-ink">Copy</button>
+              <button type="button" onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Copied"); }} className="rounded bg-gold px-3 py-2 text-xs font-semibold text-white">Copy</button>
             </div>
             <p className="text-xs text-muted-foreground">Email delivery isn't active yet on this project — paste the link into an email or message to the lawyer.</p>
             <div className="flex justify-end pt-2">
