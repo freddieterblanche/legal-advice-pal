@@ -210,6 +210,35 @@ function LawyerProfile() {
               </a>
             )}
           </div>
+
+          {branches.length > 0 && (
+            <div className="rounded-md border border-border bg-card p-5">
+              <h3 className="flex items-center gap-2 font-heading text-sm font-semibold uppercase tracking-wider text-ink">
+                <Building2 className="h-4 w-4 text-gold" /> {branches.length === 1 ? "Office" : "Offices"}
+              </h3>
+              <ul className="mt-3 space-y-3">
+                {branches.map((b: any) => (
+                  <li key={b.id} className="text-sm">
+                    <p className="font-semibold text-ink">
+                      {b.name}
+                      {b.is_head_office && <span className="ml-2 rounded bg-gold/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-gold">Head Office</span>}
+                    </p>
+                    {(b.address || b.city || b.province) && (
+                      <p className="mt-0.5 flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                        <span>{[b.address, b.city, b.province].filter(Boolean).join(", ")}</span>
+                      </p>
+                    )}
+                    {b.phone && (
+                      <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-0.5 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                        <Phone className="h-3 w-3" /> {b.phone}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </aside>
       </div>
 
