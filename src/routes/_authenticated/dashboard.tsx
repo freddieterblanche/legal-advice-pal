@@ -490,7 +490,7 @@ function LawyerFormModal({
                     type="file"
                     accept="image/*"
                     disabled={uploading}
-                    onChange={handleFileUpload}
+                    onChange={handleFileSelect}
                     className="hidden"
                   />
                 </label>
