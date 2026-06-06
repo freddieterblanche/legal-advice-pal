@@ -520,6 +520,14 @@ function LawyerFormModal({
           </div>
         </form>
       </div>
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          busy={uploading}
+          onCancel={() => { URL.revokeObjectURL(cropSrc); setCropSrc(null); }}
+          onConfirm={handleCroppedUpload}
+        />
+      )}
     </div>
   );
 }
