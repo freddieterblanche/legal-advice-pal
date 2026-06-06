@@ -281,12 +281,9 @@ function LawyerFormModal({
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [importUrl, setImportUrl] = useState("");
-  const [importing, setImporting] = useState(false);
-  const [imported, setImported] = useState(false);
-  const importFn = useServerFn(importLawyerProfile);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
@@ -294,21 +291,27 @@ function LawyerFormModal({
       toast.error("Image must be under 5 MB");
       return;
     }
+    const url = URL.createObjectURL(file);
+    setCropSrc(url);
+  };
+
+  const handleCroppedUpload = async (blob: Blob) => {
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${firmId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, file, {
-        contentType: file.type,
+      const path = `${firmId}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, blob, {
+        contentType: "image/jpeg",
         upsert: false,
       });
       if (upErr) throw upErr;
       const { data: signed, error: sErr } = await supabase.storage
         .from("lawyer-photos")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10); // 10 years
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
       setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
       toast.success("Photo uploaded");
+      if (cropSrc) URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
