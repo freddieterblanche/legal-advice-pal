@@ -170,7 +170,10 @@ function AdminFirmsPage() {
         <FirmFormModal
           firm={editing ?? undefined}
           onClose={() => { setAdding(false); setEditing(null); }}
-          onSaved={() => { setAdding(false); setEditing(null); qc.invalidateQueries({ queryKey: ["admin-firms"] }); }}
+          onSaved={(stayOpen) => {
+            qc.invalidateQueries({ queryKey: ["admin-firms"] });
+            if (!stayOpen) { setAdding(false); setEditing(null); }
+          }}
         />
       )}
     </div>
