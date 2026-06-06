@@ -12,6 +12,7 @@ import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
 
 type Branch = {
   id: string;
@@ -188,6 +189,11 @@ const lawyerSchema = z.object({
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(20000).optional(),
+  overview: z.string().max(20000).optional(),
+  qualifications: z.string().max(20000).optional(),
+  accolades: z.string().max(20000).optional(),
+  noteworthy_matters: z.string().max(20000).optional(),
+  reported_cases_notes: z.string().max(20000).optional(),
   avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
   email: z.string().trim().email().max(200).or(z.literal("")).optional(),
   phone: z.string().trim().max(60).or(z.literal("")).optional(),
@@ -209,6 +215,11 @@ type LawyerRow = {
   city: string | null;
   province: string | null;
   bio: string | null;
+  overview: string | null;
+  qualifications: string | null;
+  accolades: string | null;
+  noteworthy_matters: string | null;
+  reported_cases_notes: string | null;
   avatar_url: string | null;
   email: string | null;
   phone: string | null;
@@ -216,6 +227,8 @@ type LawyerRow = {
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
+  profile_id?: string | null;
+  slug?: string | null;
 };
 
 
@@ -223,6 +236,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
+  const [inviting, setInviting] = useState<LawyerRow | null>(null);
 
   const { data: lawyers } = useQuery({
     queryKey: ["firm-lawyers-list", firmId],
@@ -294,6 +308,9 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                       </a>
                     )}
                     <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
+                    <button onClick={() => setInviting(l as LawyerRow)} className="mr-2 text-xs font-medium text-forest hover:text-gold" disabled={!!l.profile_id} title={l.profile_id ? "Already claimed" : "Invite the lawyer to manage their own profile"}>
+                      {l.profile_id ? "Claimed" : "Invite"}
+                    </button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
                     </button>
@@ -311,6 +328,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 
       {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
       {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
+      {inviting && <InviteLawyerModal lawyer={inviting} onClose={() => setInviting(null)} onSent={() => { refresh(); setInviting(null); }} />}
     </div>
   );
 }
@@ -334,6 +352,11 @@ function LawyerFormModal({
     city: lawyer?.city ?? "",
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
+    overview: lawyer?.overview ?? lawyer?.bio ?? "",
+    qualifications: lawyer?.qualifications ?? "",
+    accolades: lawyer?.accolades ?? "",
+    noteworthy_matters: lawyer?.noteworthy_matters ?? "",
+    reported_cases_notes: lawyer?.reported_cases_notes ?? "",
     avatar_url: lawyer?.avatar_url ?? "",
     email: lawyer?.email ?? "",
     phone: lawyer?.phone ?? "",
@@ -528,7 +551,15 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse({ ...form, bio: sanitizeBioHtml(form.bio) });
+      const parsed = lawyerSchema.parse({
+        ...form,
+        bio: sanitizeBioHtml(form.bio),
+        overview: sanitizeBioHtml(form.overview),
+        qualifications: sanitizeBioHtml(form.qualifications),
+        accolades: sanitizeBioHtml(form.accolades),
+        noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
+        reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+      });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
@@ -641,15 +672,34 @@ function LawyerFormModal({
               <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
             </div>
           )}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
-            <RichTextEditor
-              value={form.bio}
-              onChange={(html) => setForm({ ...form, bio: html })}
-              placeholder="Short bio with headings, paragraphs, and lists…"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
-          </div>
+          <Section title="Overview" hint="Lead paragraph(s) for the profile.">
+            <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
+          </Section>
+
+          <Section title="Qualifications" hint="Degrees, admissions, memberships.">
+            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />
+          </Section>
+
+          <Section title="Accolades & Awards">
+            <RichTextEditor value={form.accolades} onChange={(html) => setForm({ ...form, accolades: html })} placeholder="Chambers Global ranking, awards, recognitions…" />
+          </Section>
+
+          <Section title="Articles Published" hint="Add each article with a title, publication, date and link.">
+            {lawyer ? (
+              <ArticlesEditor lawyerId={lawyer.id} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Save the lawyer first to add articles.</p>
+            )}
+          </Section>
+
+          <Section title="Reported Cases — additional notes" hint="Free-text fallback for cases not yet linked from SAFLII.">
+            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Listed cases, citations, brief commentary…" />
+          </Section>
+
+          <Section title="Noteworthy Matters" hint="Significant deals, transactions, mandates.">
+            <RichTextEditor value={form.noteworthy_matters} onChange={(html) => setForm({ ...form, noteworthy_matters: html })} placeholder="Major transactions, mandates and matters…" />
+          </Section>
+
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
             <div className="flex items-start gap-3">
@@ -1040,6 +1090,212 @@ function BranchFormModal({
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save" : "Add"}</button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</label>
+      {children}
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+type Article = {
+  id: string;
+  title: string;
+  publication: string | null;
+  published_date: string | null;
+  url: string | null;
+  sort_order: number;
+};
+
+function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
+  const qc = useQueryClient();
+  const { data: articles } = useQuery({
+    queryKey: ["lawyer-articles", lawyerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lawyer_articles")
+        .select("*")
+        .eq("lawyer_id", lawyerId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      return (data ?? []) as Article[];
+    },
+  });
+
+  const [draft, setDraft] = useState({ title: "", publication: "", published_date: "", url: "" });
+  const [saving, setSaving] = useState(false);
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["lawyer-articles", lawyerId] });
+
+  const add = async () => {
+    if (!draft.title.trim()) { toast.error("Title is required"); return; }
+    if (draft.url && !/^https?:\/\//i.test(draft.url.trim())) { toast.error("URL must start with http:// or https://"); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("lawyer_articles").insert({
+        lawyer_id: lawyerId,
+        title: draft.title.trim().slice(0, 255),
+        publication: draft.publication.trim().slice(0, 255) || null,
+        published_date: draft.published_date || null,
+        url: draft.url.trim().slice(0, 500) || null,
+        sort_order: (articles?.length ?? 0),
+      });
+      if (error) throw error;
+      setDraft({ title: "", publication: "", published_date: "", url: "" });
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Remove this article?")) return;
+    const { error } = await supabase.from("lawyer_articles").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+  };
+
+  return (
+    <div className="space-y-3">
+      {(articles ?? []).length > 0 && (
+        <ul className="divide-y divide-border rounded border border-border">
+          {(articles ?? []).map((a) => (
+            <li key={a.id} className="flex items-start justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-ink">{a.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[a.publication, a.published_date ? new Date(a.published_date).toLocaleDateString() : null].filter(Boolean).join(" · ")}
+                </p>
+                {a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-xs text-forest hover:text-gold">Open ↗</a>}
+              </div>
+              <button type="button" onClick={() => remove(a.id)} className="shrink-0 text-destructive hover:text-destructive/80">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="rounded border border-dashed border-border p-3">
+        <p className="mb-2 text-xs font-semibold text-ink">Add an article</p>
+        <input
+          placeholder="Title *"
+          value={draft.title}
+          onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+          maxLength={255}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <div className="mb-2 grid gap-2 sm:grid-cols-2">
+          <input
+            placeholder="Publication"
+            value={draft.publication}
+            onChange={(e) => setDraft({ ...draft, publication: e.target.value })}
+            maxLength={255}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+          <input
+            type="date"
+            value={draft.published_date}
+            onChange={(e) => setDraft({ ...draft, published_date: e.target.value })}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+        </div>
+        <input
+          type="url"
+          placeholder="https://… (link to article)"
+          value={draft.url}
+          onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+          maxLength={500}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={saving || !draft.title.trim()}
+          className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-50"
+        >
+          {saving ? "Adding…" : "Add article"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onClose: () => void; onSent: () => void }) {
+  const [email, setEmail] = useState(lawyer.email ?? "");
+  const [sending, setSending] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const inviteFn = useServerFn(createLawyerInvite);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast.error("Enter a valid email"); return; }
+    setSending(true);
+    try {
+      const res = await inviteFn({ data: { lawyer_id: lawyer.id, email } });
+      const url = `${window.location.origin}/claim?token=${res.token}`;
+      setInviteUrl(url);
+      toast.success("Invite created — share the link below.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create invite");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-heading text-xl text-ink">Invite {lawyer.first_name} {lawyer.last_name}</h3>
+          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {!inviteUrl ? (
+          <form onSubmit={submit} className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              They'll be able to sign in with this email and manage their own profile sections (Overview, Qualifications, Articles, etc.).
+            </p>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="lawyer@firm.co.za"
+              maxLength={255}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
+              <button type="submit" disabled={sending} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+                {sending ? "Creating…" : "Create invite link"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-ink">Share this single-use link with the lawyer (valid for 7 days):</p>
+            <div className="flex gap-2">
+              <input readOnly value={inviteUrl} className="flex-1 rounded border border-border bg-background px-3 py-2 text-xs" onFocus={(e) => e.currentTarget.select()} />
+              <button type="button" onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Copied"); }} className="rounded bg-gold px-3 py-2 text-xs font-semibold text-ink">Copy</button>
+            </div>
+            <p className="text-xs text-muted-foreground">Email delivery isn't active yet on this project — paste the link into an email or message to the lawyer.</p>
+            <div className="flex justify-end pt-2">
+              <button type="button" onClick={onSent} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream">Done</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
