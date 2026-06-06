@@ -11,12 +11,16 @@ import { importLawyerProfile } from "../../lib/profile-import.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
+type Tab = "overview" | "lawyers" | "billing" | "settings";
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    tab: (s.tab as Tab | undefined) ?? undefined,
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   component: Dashboard,
 });
-
-type Tab = "overview" | "lawyers" | "billing" | "settings";
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("overview");
