@@ -289,6 +289,9 @@ function LawyerFormModal({
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
     avatar_url: lawyer?.avatar_url ?? "",
+    email: lawyer?.email ?? "",
+    phone: lawyer?.phone ?? "",
+    linkedin_url: lawyer?.linkedin_url ?? "",
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
