@@ -25,7 +25,12 @@ export const registerFirmForCurrentUser = createServerFn({ method: "POST" })
   .inputValidator((input) => registerFirmSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
-    const slug = `${slugify(data.firm.name)}-${Math.random().toString(36).slice(2, 8)}`;
+    const baseSlug = slugify(data.firm.name);
+    let slug = baseSlug;
+    {
+      const { data: clash } = await supabaseAdmin.from("firms").select("id").eq("slug", slug).maybeSingle();
+      if (clash) slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
+    }
 
     const { data: existingProfile, error: profileReadError } = await supabaseAdmin
       .from("profiles")
