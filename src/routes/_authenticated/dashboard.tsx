@@ -8,6 +8,8 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
 import { importLawyerProfile } from "../../lib/profile-import.functions";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
