@@ -170,9 +170,9 @@ function LawyerProfile() {
           {(() => {
             const proseClass = "mt-3 leading-relaxed text-foreground/80 [&_h2]:font-heading [&_h2]:text-lg [&_h2]:text-ink [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:font-heading [&_h3]:text-base [&_h3]:text-ink [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-3 [&_li]:my-1 [&_strong]:font-semibold [&_strong]:text-ink";
             const sections: { title: string; html: string | null }[] = [
+              { title: "Accolades", html: lawyer.accolades },
               { title: "About", html: lawyer.overview || lawyer.bio },
               { title: "Qualifications", html: lawyer.qualifications },
-              { title: "Accolades", html: lawyer.accolades },
               { title: "Noteworthy Matters", html: lawyer.noteworthy_matters },
             ];
             return sections.filter((s) => s.html && String(s.html).trim()).map((s) => (
