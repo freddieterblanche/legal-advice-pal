@@ -20,6 +20,7 @@ import { Route as FirmsIndexRouteImport } from './routes/firms.index'
 import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -75,6 +76,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
+  id: '/admin/firms',
+  path: '/admin/firms',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
+  '/admin/firms': typeof AuthenticatedAdminFirmsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms': typeof FirmsIndexRoute
+  '/admin/firms': typeof AuthenticatedAdminFirmsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
+  '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms/'
+    | '/admin/firms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms'
+    | '/admin/firms'
   id:
     | '__root__'
     | '/'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms/'
+    | '/_authenticated/admin/firms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -246,15 +258,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/firms': {
+      id: '/_authenticated/admin/firms'
+      path: '/admin/firms'
+      fullPath: '/admin/firms'
+      preLoaderRoute: typeof AuthenticatedAdminFirmsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
