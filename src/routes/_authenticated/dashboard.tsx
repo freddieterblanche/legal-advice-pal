@@ -193,7 +193,7 @@ function LawyersTab({ firmId }: { firmId: string }) {
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
                   <td className="px-4 py-3 text-right">
-                    <button onClick={() => toggle.mutate({ id: l.id, status: l.status })} className="mr-2 text-xs text-forest hover:text-ink">
+                    <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
                     </button>
                     <button onClick={() => { if (confirm("Delete this lawyer?")) remove.mutate(l.id); }} className="text-xs text-destructive">Delete</button>
