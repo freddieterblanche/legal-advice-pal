@@ -23,7 +23,8 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const [tab, setTab] = useState<Tab>("overview");
+  const search = Route.useSearch();
+  const [tab, setTab] = useState<Tab>(search.tab ?? (search.edit ? "lawyers" : "overview"));
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile"],
