@@ -5,7 +5,10 @@ import { Plus, Users, Wallet, FileText, Settings as SettingsIcon } from "lucide-
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
+import { importLawyerProfile } from "../../lib/profile-import.functions";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
