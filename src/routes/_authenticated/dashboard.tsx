@@ -406,7 +406,7 @@ function LawyerFormModal({
             <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
             <div className="flex items-start gap-3">
               {form.avatar_url && (
                 <img
@@ -416,13 +416,27 @@ function LawyerFormModal({
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                 />
               )}
-              <input
-                type="url"
-                placeholder="https://yourfirm.co.za/team/jane.jpg"
-                value={form.avatar_url}
-                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
-              />
+              <div className="flex-1 space-y-2">
+                <input
+                  type="url"
+                  placeholder="https://yourfirm.co.za/team/jane.jpg"
+                  value={form.avatar_url}
+                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
+                  <Upload className="h-3.5 w-3.5" />
+                  {uploading ? "Uploading…" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploading}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
+              </div>
             </div>
           </div>
 
