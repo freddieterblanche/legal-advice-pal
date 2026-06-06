@@ -1153,6 +1153,29 @@ function SettingsTab({ firm }: { firm: any }) {
           <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Bold, italic and lists are supported.</p>
         </div>
 
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Logo image URL</label>
+          <div className="flex items-start gap-3">
+            {form.logo_url && (
+              <img
+                src={form.logo_url}
+                alt="Logo preview"
+                className="h-16 w-16 shrink-0 rounded border border-border bg-white object-contain p-1"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              />
+            )}
+            <input
+              type="url"
+              value={form.logo_url}
+              onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
+              placeholder="https://yourfirm.co.za/logo.png"
+              maxLength={2000}
+              className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Paste a public URL to your firm logo. PNG or SVG with a transparent background works best.</p>
+        </div>
+
         <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Main phone" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Main address" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
