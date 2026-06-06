@@ -340,7 +340,7 @@ function LawyerFormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
-        <h3 className="font-heading text-xl text-ink">Add Lawyer</h3>
+        <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
 
         <div className="mt-4 rounded-md border border-dashed border-gold/60 bg-gold/5 p-3">
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink">
@@ -385,7 +385,7 @@ function LawyerFormModal({
           <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           {practiceAreas.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Suggested practice areas</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
               <div className="flex flex-wrap gap-1.5">
                 {practiceAreas.map((p) => (
                   <span key={p.id} className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest">
@@ -400,7 +400,7 @@ function LawyerFormModal({
           )}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : "Add Lawyer"}</button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
           </div>
         </form>
       </div>
