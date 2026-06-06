@@ -28,22 +28,25 @@ function LawyerProfile() {
   const { slug } = Route.useParams();
   const [showEnquiry, setShowEnquiry] = useState(false);
 
+  const PUBLIC_COLUMNS =
+    "id, profile_id, firm_id, slug, first_name, last_name, designation, bio, education, linkedin_url, saflii_author_url, avatar_url, city, province, status, trial_start_date, trial_end_date, is_claimed, profile_views, created_at, qualifications, overview, accolades, noteworthy_matters, reported_cases_notes, lawyer_type, year_of_admission, is_senior_counsel, designation_code, designation_custom, is_practice_head, practice_head_area, is_sector_head, sector_head_area";
+
   const { data: lawyer, isLoading } = useQuery({
     queryKey: ["lawyer", slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_reported_cases(id, case_name, citation, court, year, url, sort_order), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
+        .select(`${PUBLIC_COLUMNS}, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_reported_cases(id, case_name, citation, court, year, url, sort_order), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
         .eq("slug", slug)
         .in("status", ["trial", "active"])
         .maybeSingle();
       if (error) throw error;
       if (!data) throw notFound();
-      return data;
+      return data as any;
     },
   });
 
-  const { data: myFirmId } = useQuery({
+  const { data: myFirmId, data: _viewer } = useQuery({
     queryKey: ["my-firm-id"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -53,6 +56,24 @@ function LawyerProfile() {
     },
     staleTime: 60_000,
   });
+
+  // Email/phone are only readable by signed-in users; fetched separately so anon never requests them.
+  const { data: contact } = useQuery({
+    queryKey: ["lawyer-contact", lawyer?.id],
+    enabled: !!lawyer?.id,
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("lawyers")
+        .select("email, phone")
+        .eq("id", lawyer!.id)
+        .maybeSingle();
+      return data;
+    },
+    staleTime: 60_000,
+  });
+
 
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!lawyer) return null;
