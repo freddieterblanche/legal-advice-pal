@@ -396,7 +396,15 @@ function LawyerFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
+      <div onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] w-[90vw] overflow-y-auto rounded-lg bg-card p-6 shadow-xl md:w-[70vw]">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink"
+        >
+          <X className="h-4 w-4" />
+        </button>
         <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
 
         <div className="mt-4 rounded-md border border-dashed border-gold/60 bg-gold/5 p-3">
