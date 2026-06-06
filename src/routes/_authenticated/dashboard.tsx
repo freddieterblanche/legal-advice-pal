@@ -10,6 +10,7 @@ import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
 import { importLawyerProfile } from "../../lib/profile-import.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
+import { ImageCropModal } from "../../components/ImageCropModal";
 
 type Tab = "overview" | "lawyers" | "billing" | "settings";
 
