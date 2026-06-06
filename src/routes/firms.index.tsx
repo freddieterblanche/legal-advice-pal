@@ -144,7 +144,7 @@ function FirmsIndex() {
                     </div>
                   </div>
                   {f.description && (
-                    <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">{f.description}</p>
+                    <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">{f.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()}</p>
                   )}
                   <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
