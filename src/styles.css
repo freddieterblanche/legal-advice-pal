@@ -32,58 +32,61 @@
   --color-cream: var(--cream);
   --color-gold: var(--gold);
   --color-forest: var(--forest);
+  --color-advocate: var(--forest);
+  --color-attorney: var(--gold);
 
-  --font-heading: "Playfair Display", Georgia, serif;
-  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.375rem;
+  --radius: 0.5rem;
 
-  /* Lawexperts.co.za brand palette */
-  --ink: oklch(0.18 0.012 60);          /* #0f0e0c */
-  --cream: oklch(0.96 0.012 80);         /* #f5f1ea */
-  --gold: oklch(0.66 0.12 75);           /* #b8882a */
-  --forest: oklch(0.45 0.05 165);        /* #3d5a4c */
+  /* Lawexperts.co.za — light & trustworthy palette
+     Navy primary, cool white surfaces, professional blue accent, slate teal */
+  --ink: oklch(0.28 0.06 250);            /* deep navy — primary text + dark surfaces */
+  --cream: oklch(0.985 0.004 250);         /* cool near-white background */
+  --gold: oklch(0.55 0.16 250);            /* trustworthy blue accent (Attorney) */
+  --forest: oklch(0.50 0.06 215);          /* slate teal (Advocate) */
 
   --background: var(--cream);
   --foreground: var(--ink);
-  --card: oklch(0.99 0.005 80);
+  --card: oklch(1 0 0);
   --card-foreground: var(--ink);
-  --popover: oklch(0.99 0.005 80);
+  --popover: oklch(1 0 0);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
-  --primary-foreground: var(--cream);
-  --secondary: oklch(0.92 0.015 80);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.008 250);
   --secondary-foreground: var(--ink);
-  --muted: oklch(0.92 0.015 80);
-  --muted-foreground: oklch(0.45 0.015 70);
+  --muted: oklch(0.96 0.006 250);
+  --muted-foreground: oklch(0.52 0.02 250);
   --accent: var(--gold);
-  --accent-foreground: var(--ink);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: var(--cream);
-  --border: oklch(0.86 0.015 75);
-  --input: oklch(0.88 0.012 75);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.58 0.20 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.91 0.008 250);
+  --input: oklch(0.92 0.008 250);
   --ring: var(--gold);
 }
 
 .dark {
   --background: var(--ink);
   --foreground: var(--cream);
-  --card: oklch(0.22 0.012 60);
+  --card: oklch(0.32 0.05 250);
   --card-foreground: var(--cream);
-  --popover: oklch(0.22 0.012 60);
+  --popover: oklch(0.32 0.05 250);
   --popover-foreground: var(--cream);
   --primary: var(--cream);
   --primary-foreground: var(--ink);
-  --secondary: oklch(0.25 0.012 60);
+  --secondary: oklch(0.34 0.05 250);
   --secondary-foreground: var(--cream);
-  --muted: oklch(0.25 0.012 60);
-  --muted-foreground: oklch(0.70 0.015 75);
+  --muted: oklch(0.34 0.05 250);
+  --muted-foreground: oklch(0.78 0.01 250);
   --accent: var(--gold);
-  --accent-foreground: var(--ink);
-  --border: oklch(0.28 0.012 60);
-  --input: oklch(0.28 0.012 60);
+  --accent-foreground: oklch(1 0 0);
+  --border: oklch(0.38 0.04 250);
+  --input: oklch(0.38 0.04 250);
   --ring: var(--gold);
 }
 
@@ -93,10 +96,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 700;
-    letter-spacing: -0.015em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
