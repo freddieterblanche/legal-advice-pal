@@ -3,8 +3,11 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "../integrations/supabase/auth-middleware";
-import { DESIGNATIONS, PROVINCES } from "./constants";
+import { PROVINCES } from "./constants";
+import { ATTORNEY_DESIGNATIONS } from "./designation";
 import { sanitizeBioHtml } from "./sanitize";
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 const inputSchema = z.object({
   url: z.string().trim().url().max(500).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
@@ -15,10 +18,19 @@ const inputSchema = z.object({
 const extractionSchema = z.object({
   first_name: z.string().max(80).default(""),
   last_name: z.string().max(80).default(""),
-  designation: z.string().max(40).default("Attorney"),
+  // Structured designation
+  lawyer_type: z.enum(["attorney", "advocate", ""]).default(""),
+  is_senior_counsel: z.boolean().default(false),
+  designation_code: z.string().max(60).default(""),
+  designation_custom: z.string().max(60).default(""),
+  year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().default(null),
   city: z.string().max(80).default(""),
   province: z.string().max(40).default(""),
-  bio: z.string().max(10000).default(""),
+  // Structured bio sections (HTML)
+  overview: z.string().max(10000).default(""),
+  qualifications: z.string().max(10000).default(""),
+  accolades: z.string().max(10000).default(""),
+  noteworthy_matters: z.string().max(10000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
   photo_url: z.string().max(2000).default(""),
   email: z.string().max(200).default(""),
@@ -69,19 +81,31 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
         model: gateway("google/gemini-3-flash-preview"),
         experimental_output: Output.object({ schema: extractionSchema }),
         system:
-          "You extract a lawyer's profile from a law-firm webpage. Map free-text values to the allowed enums. " +
-          "If a field is not present, use an empty string (or empty array for practice areas). Do not invent information. " +
+          "You extract a South African lawyer's profile from a law-firm webpage. Map free-text values to the allowed enums. " +
+          "If a field is not present, use an empty string (or empty array / null / false as appropriate). Do not invent information. " +
+          // Name
           "first_name / last_name: REQUIRED. The page describes one lawyer — extract their full personal name. " +
           "Look at the page title, the main heading, the URL slug, repeated mentions in the bio, the alt text of the headshot, and any 'About <Name>' phrasing. " +
           "Strip titles (Mr, Mrs, Ms, Dr, Adv, Adv., Attorney, Prof). Split into first and last name. Never leave both blank if any human name appears anywhere on the page. " +
-          `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
+          // Lawyer type & designation
+          "lawyer_type: 'advocate' if the page describes an advocate / member of the Bar / counsel / SC / Senior Counsel / Junior Counsel; otherwise 'attorney' (Director, Partner, Associate, Consultant, etc.). Default 'attorney' if a law-firm page mentions a title like Director/Partner/Associate. " +
+          "is_senior_counsel: true ONLY if the page indicates 'SC', 'Senior Counsel', or 'Silk'. " +
+          `designation_code (attorneys only — pick the closest match from this list, else leave empty): ${ATTORNEY_DESIGNATIONS.join(", ")}. ` +
+          "designation_custom: only if lawyer is an attorney AND the title clearly does NOT match any item in designation_code (e.g. 'Of Counsel', 'Head of Tax'). Otherwise empty. " +
+          "year_of_admission: the 4-digit year the lawyer was admitted as an attorney/advocate, if stated (e.g. 'Admitted 2005', 'Admitted as an Attorney in 2010'). Use null if absent. " +
+          // Location
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
+          // Practice areas
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
-          "Bio: return HTML (NOT markdown) with these tags only: <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <br>. " +
-          "Use <h2>/<h3> for natural section headings such as 'Experience', 'Education', 'Recognition', 'Practice Areas'. " +
-          "Use <p> for paragraphs (separate ideas into multiple paragraphs for readability). Use lists where appropriate. " +
-          "Do NOT include the lawyer's name as a heading, and do not include inline styles, classes, links, or images. " +
-          "Aim for ~800–4000 characters of well-structured HTML. " +
+          // Bio sections — IMPORTANT: split into structured sections instead of one big bio
+          "Return the biography SPLIT into four separate HTML sections. Each section is HTML using only these tags: <p>, <strong>, <em>, <ul>, <ol>, <li>, <br>. " +
+          "Do NOT include <h2>/<h3> headings inside these sections — the UI renders the section heading itself. Do not include the lawyer's name as a heading. No inline styles, no classes, no links, no images. " +
+          "overview: a 2–5 paragraph narrative introduction describing who the lawyer is, what they do, their seniority and focus. This is the main bio prose. " +
+          "qualifications: their academic and professional qualifications (degrees, university, year, admissions, bar memberships). Use <ul><li>…</li></ul> when listing multiple. " +
+          "accolades: rankings, awards, recognitions (Chambers, Legal 500, Best Lawyers, IFLR1000, Who's Who Legal, etc.). Use <ul><li>…</li></ul> when listing multiple. " +
+          "noteworthy_matters: significant transactions, mandates, cases or matters the lawyer has worked on. Use <ul><li>…</li></ul> when listing multiple. " +
+          "If a section's content is not present on the page, return an empty string for that section — do not duplicate the overview into the other sections. " +
+          // Contact
           "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
           "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
           "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). Resolve relative URLs against the source URL. Empty string if none found. " +
@@ -100,9 +124,13 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
     }
 
     // 3. Coerce to allowed enums
-    const designation = (DESIGNATIONS as readonly string[]).includes(extracted.designation)
-      ? extracted.designation
-      : "Attorney";
+    const lawyer_type: "attorney" | "advocate" = extracted.lawyer_type === "advocate" ? "advocate" : "attorney";
+    const designation_code = (ATTORNEY_DESIGNATIONS as readonly string[]).includes(extracted.designation_code)
+      ? extracted.designation_code
+      : "";
+    const designation_custom = (!designation_code && extracted.designation_custom.trim())
+      ? extracted.designation_custom.trim().slice(0, 60)
+      : "";
     const province = (PROVINCES as readonly string[]).includes(extracted.province)
       ? extracted.province
       : "";
@@ -144,13 +172,28 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       : "";
     const phone = extracted.phone.trim().replace(/[^\d+()\-\s]/g, "").slice(0, 60);
 
+    // Derive legacy designation label for backwards-compatibility consumers
+    const legacyDesignation = lawyer_type === "advocate"
+      ? (extracted.is_senior_counsel ? "Senior Counsel" : "Advocate")
+      : (designation_code || designation_custom || "Attorney");
+
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
-      designation,
+      lawyer_type,
+      is_senior_counsel: lawyer_type === "advocate" ? !!extracted.is_senior_counsel : false,
+      designation_code,
+      designation_custom,
+      year_of_admission: extracted.year_of_admission,
+      designation: legacyDesignation,
       city: extracted.city,
       province,
-      bio: sanitizeBioHtml(extracted.bio),
+      overview: sanitizeBioHtml(extracted.overview),
+      qualifications: sanitizeBioHtml(extracted.qualifications),
+      accolades: sanitizeBioHtml(extracted.accolades),
+      noteworthy_matters: sanitizeBioHtml(extracted.noteworthy_matters),
+      // Legacy combined bio (kept as overview for any consumer still reading `bio`)
+      bio: sanitizeBioHtml(extracted.overview),
       avatar_url,
       email,
       phone,
@@ -158,4 +201,3 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       practice_areas: practiceAreaIds,
     };
   });
-
