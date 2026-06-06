@@ -124,7 +124,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       designation,
       city: extracted.city,
       province,
-      bio: (await import("./sanitize")).sanitizeBioHtml(extracted.bio),
+      bio: sanitizeBioHtml(extracted.bio),
       avatar_url,
       practice_areas: practiceAreaIds,
     };
