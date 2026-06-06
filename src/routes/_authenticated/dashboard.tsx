@@ -360,15 +360,19 @@ function LawyerFormModal({
     setImported(false);
     try {
       const res = await importFn({ data: { url: importUrl.trim() } });
-      setForm({
-        first_name: res.first_name || "",
-        last_name: res.last_name || "",
-        designation: res.designation || "Attorney",
-        city: res.city || "",
-        province: res.province || "Gauteng",
-        bio: res.bio || "",
-        avatar_url: res.avatar_url || "",
-      });
+      setForm((f) => ({
+        ...f,
+        first_name: res.first_name || f.first_name,
+        last_name: res.last_name || f.last_name,
+        designation: res.designation || f.designation,
+        city: res.city || f.city,
+        province: res.province || f.province,
+        bio: res.bio || f.bio,
+        avatar_url: res.avatar_url || f.avatar_url,
+        email: res.email || f.email,
+        phone: res.phone || f.phone,
+        linkedin_url: res.linkedin_url || f.linkedin_url,
+      }));
       setPracticeAreas(res.practice_areas);
 
       setImported(true);
