@@ -519,6 +519,32 @@ function LawyerFormModal({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <input
+              type="email"
+              placeholder="Email (optional)"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              type="tel"
+              placeholder="Phone (optional)"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <input
+            type="url"
+            placeholder="LinkedIn URL (optional) — https://www.linkedin.com/in/…"
+            value={form.linkedin_url}
+            onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+          />
+
+
+
           {practiceAreas.length > 0 && (
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
