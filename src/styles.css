@@ -42,13 +42,13 @@
 :root {
   --radius: 0.625rem;
 
-  /* Lawexpert.co.za — Slate & Steel palette
-     Cool light surfaces, slate text, trustworthy blue for Attorneys,
-     deeper slate-navy for Advocates. */
-  --ink: oklch(0.30 0.04 255);             /* slate-900 — primary text / dark surfaces */
-  --cream: oklch(0.985 0.005 250);          /* slate-50 — airy background */
+  /* Lawexpert.co.za — Navy palette
+     Cool light surfaces, deep navy text, trustworthy blue for Attorneys,
+     deeper navy for Advocates. */
+  --ink: oklch(0.23 0.07 265);             /* dark navy — primary text / dark surfaces */
+  --cream: oklch(0.985 0.005 250);          /* airy background */
   --gold: oklch(0.50 0.18 264);             /* blue-700 — Attorney accent */
-  --forest: oklch(0.38 0.07 255);           /* slate-700 — Advocate accent */
+  --forest: oklch(0.32 0.09 265);           /* navy-700 — Advocate accent */
 
   --background: var(--cream);
   --foreground: var(--ink);
