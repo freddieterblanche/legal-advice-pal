@@ -646,7 +646,14 @@ function LawyerFormModal({
       }
       onSaved();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed");
+      console.error("Lawyer save failed:", err);
+      if (err instanceof z.ZodError) {
+        const first = err.issues[0];
+        const path = first?.path?.join(".") || "field";
+        toast.error(`${path}: ${first?.message || "invalid value"}`);
+      } else {
+        toast.error(err instanceof Error ? err.message : "Failed");
+      }
     } finally {
       setSaving(false);
     }
