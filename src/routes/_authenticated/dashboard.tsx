@@ -474,6 +474,15 @@ function LawyerFormModal({
     if (error) throw error;
   };
 
+  const syncBranches = async (lawyerId: string) => {
+    const { error: delErr } = await supabase.from("lawyer_branches").delete().eq("lawyer_id", lawyerId);
+    if (delErr) throw delErr;
+    if (selectedBranchIds.size === 0) return;
+    const links = Array.from(selectedBranchIds).map((branch_id) => ({ lawyer_id: lawyerId, branch_id }));
+    const { error } = await supabase.from("lawyer_branches").insert(links);
+    if (error) throw error;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -483,6 +492,7 @@ function LawyerFormModal({
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
         await syncPracticeAreas(lawyer.id);
+        await syncBranches(lawyer.id);
         toast.success("Profile updated");
       } else {
         const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -492,7 +502,10 @@ function LawyerFormModal({
           .select("id")
           .single();
         if (error) throw error;
-        if (inserted) await syncPracticeAreas(inserted.id);
+        if (inserted) {
+          await syncPracticeAreas(inserted.id);
+          await syncBranches(inserted.id);
+        }
         toast.success("Lawyer added");
       }
       onSaved();
