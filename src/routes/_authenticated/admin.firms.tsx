@@ -20,6 +20,7 @@ type FirmRow = {
   city: string | null;
   province: string | null;
   status: string | null;
+  logo_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/firms")({
