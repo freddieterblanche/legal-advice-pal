@@ -312,6 +312,8 @@ function LawyerFormModal({
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
+  const [firmBranches, setFirmBranches] = useState<Branch[]>([]);
+  const [selectedBranchIds, setSelectedBranchIds] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -321,6 +323,49 @@ function LawyerFormModal({
   const importFn = useServerFn(importLawyerProfile);
   const fetchImageFn = useServerFn(fetchImageAsDataUrl);
   const [loadingUrlCrop, setLoadingUrlCrop] = useState(false);
+
+  // Load firm branches
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("firm_branches")
+        .select("*")
+        .eq("firm_id", firmId)
+        .order("is_head_office", { ascending: false })
+        .order("created_at", { ascending: true });
+      setFirmBranches((data ?? []) as Branch[]);
+    })();
+  }, [firmId]);
+
+  // Load lawyer's existing branch links
+  useEffect(() => {
+    if (!lawyer) return;
+    (async () => {
+      const { data } = await supabase
+        .from("lawyer_branches")
+        .select("branch_id")
+        .eq("lawyer_id", lawyer.id);
+      setSelectedBranchIds(new Set((data ?? []).map((r) => r.branch_id)));
+    })();
+  }, [lawyer]);
+
+  const toggleBranch = (branchId: string) => {
+    const next = new Set(selectedBranchIds);
+    if (next.has(branchId)) next.delete(branchId);
+    else next.add(branchId);
+    setSelectedBranchIds(next);
+    // Auto-fill city/province from first selected branch
+    const firstId = next.values().next().value as string | undefined;
+    const first = firstId ? firmBranches.find((b) => b.id === firstId) : undefined;
+    if (first) {
+      setForm((f) => ({
+        ...f,
+        city: first.city || f.city,
+        province: (first.province as string) || f.province,
+      }));
+    }
+  };
+
 
   const handleRepositionUrl = async () => {
     const url = form.avatar_url?.trim();
