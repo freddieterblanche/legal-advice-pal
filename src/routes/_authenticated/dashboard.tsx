@@ -306,6 +306,9 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                       </a>
                     )}
                     <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
+                    <button onClick={() => setInviting(l as LawyerRow)} className="mr-2 text-xs font-medium text-forest hover:text-gold" disabled={!!l.profile_id} title={l.profile_id ? "Already claimed" : "Invite the lawyer to manage their own profile"}>
+                      {l.profile_id ? "Claimed" : "Invite"}
+                    </button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
                     </button>
