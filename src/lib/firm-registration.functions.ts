@@ -49,10 +49,12 @@ export const registerFirmForCurrentUser = createServerFn({ method: "POST" })
     if (data.admin?.first_name) profileUpdate.first_name = data.admin.first_name;
     if (data.admin?.last_name) profileUpdate.last_name = data.admin.last_name;
 
+    const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    if (userError) throw userError;
+
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update(profileUpdate)
-      .eq("id", context.userId);
+      .upsert({ id: context.userId, email: userData.user.email, ...profileUpdate }, { onConflict: "id" });
     if (updateError) throw updateError;
 
     return { firmId: firmRow.id, slug: firmRow.slug };
