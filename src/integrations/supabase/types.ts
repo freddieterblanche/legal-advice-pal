@@ -268,6 +268,57 @@ export type Database = {
         }
         Relationships: []
       }
+      lawyer_articles: {
+        Row: {
+          created_at: string
+          id: string
+          lawyer_id: string
+          publication: string | null
+          published_date: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lawyer_id: string
+          publication?: string | null
+          published_date?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lawyer_id?: string
+          publication?: string | null
+          published_date?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lawyer_branches: {
         Row: {
           branch_id: string
@@ -357,6 +408,54 @@ export type Database = {
           },
         ]
       }
+      lawyer_invites: {
+        Row: {
+          accepted_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          lawyer_id: string
+          sent_at: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          lawyer_id: string
+          sent_at?: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          lawyer_id?: string
+          sent_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: true
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: true
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lawyer_practice_areas: {
         Row: {
           lawyer_id: string
@@ -396,6 +495,7 @@ export type Database = {
       }
       lawyers: {
         Row: {
+          accolades: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -409,10 +509,14 @@ export type Database = {
           is_claimed: boolean | null
           last_name: string
           linkedin_url: string | null
+          noteworthy_matters: string | null
+          overview: string | null
           phone: string | null
           profile_id: string | null
           profile_views: number | null
           province: string | null
+          qualifications: string | null
+          reported_cases_notes: string | null
           saflii_author_url: string | null
           search_vector: unknown
           slug: string
@@ -421,6 +525,7 @@ export type Database = {
           trial_start_date: string | null
         }
         Insert: {
+          accolades?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -434,10 +539,14 @@ export type Database = {
           is_claimed?: boolean | null
           last_name: string
           linkedin_url?: string | null
+          noteworthy_matters?: string | null
+          overview?: string | null
           phone?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null
+          qualifications?: string | null
+          reported_cases_notes?: string | null
           saflii_author_url?: string | null
           search_vector?: unknown
           slug: string
@@ -446,6 +555,7 @@ export type Database = {
           trial_start_date?: string | null
         }
         Update: {
+          accolades?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -459,10 +569,14 @@ export type Database = {
           is_claimed?: boolean | null
           last_name?: string
           linkedin_url?: string | null
+          noteworthy_matters?: string | null
+          overview?: string | null
           phone?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null
+          qualifications?: string | null
+          reported_cases_notes?: string | null
           saflii_author_url?: string | null
           search_vector?: unknown
           slug?: string
