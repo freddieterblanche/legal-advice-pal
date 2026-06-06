@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
 import { importLawyerProfile } from "../../lib/profile-import.functions";
+import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
@@ -302,6 +303,25 @@ function LawyerFormModal({
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
   const importFn = useServerFn(importLawyerProfile);
+  const fetchImageFn = useServerFn(fetchImageAsDataUrl);
+  const [loadingUrlCrop, setLoadingUrlCrop] = useState(false);
+
+  const handleRepositionUrl = async () => {
+    const url = form.avatar_url?.trim();
+    if (!url) {
+      toast.error("Enter or paste an image URL first");
+      return;
+    }
+    setLoadingUrlCrop(true);
+    try {
+      const { dataUrl } = await fetchImageFn({ data: { url } });
+      setCropSrc(dataUrl);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load image");
+    } finally {
+      setLoadingUrlCrop(false);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -503,18 +523,30 @@ function LawyerFormModal({
                   onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
                   className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                 />
-                <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
-                  <Upload className="h-3.5 w-3.5" />
-                  {uploading ? "Uploading…" : "Upload image"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={uploading}
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </label>
-                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
+                    <Upload className="h-3.5 w-3.5" />
+                    {uploading ? "Uploading…" : "Upload image"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploading}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  {form.avatar_url && (
+                    <button
+                      type="button"
+                      onClick={handleRepositionUrl}
+                      disabled={loadingUrlCrop}
+                      className="inline-flex items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted disabled:opacity-50"
+                    >
+                      {loadingUrlCrop ? "Loading…" : "Reposition / Crop"}
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB). Use Reposition to crop URL images.</p>
               </div>
             </div>
           </div>
