@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
@@ -136,9 +136,23 @@ const lawyerSchema = z.object({
   bio: z.string().max(2000).optional(),
 });
 
+type LawyerRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  designation: string | null;
+  city: string | null;
+  province: string | null;
+  bio: string | null;
+  status: string | null;
+  trial_end_date: string | null;
+  profile_views: number | null;
+};
+
 function LawyersTab({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<LawyerRow | null>(null);
 
   const { data: lawyers } = useQuery({
     queryKey: ["firm-lawyers-list", firmId],
@@ -162,6 +176,8 @@ function LawyersTab({ firmId }: { firmId: string }) {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
   });
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] });
 
   return (
     <div>
@@ -195,6 +211,7 @@ function LawyersTab({ firmId }: { firmId: string }) {
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
                   <td className="px-4 py-3 text-right">
+                    <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
                     </button>
@@ -210,19 +227,53 @@ function LawyersTab({ firmId }: { firmId: string }) {
         </table>
       </div>
 
-      {showAdd && <AddLawyerModal firmId={firmId} onClose={() => setShowAdd(false)} onAdded={() => { qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }); setShowAdd(false); }} />}
+      {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
+      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
     </div>
   );
 }
 
-function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose: () => void; onAdded: () => void }) {
-  const [form, setForm] = useState({ first_name: "", last_name: "", designation: "Attorney", city: "", province: "Gauteng", bio: "" });
+function LawyerFormModal({
+  firmId,
+  lawyer,
+  onClose,
+  onSaved,
+}: {
+  firmId: string;
+  lawyer?: LawyerRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const isEdit = !!lawyer;
+  const [form, setForm] = useState({
+    first_name: lawyer?.first_name ?? "",
+    last_name: lawyer?.last_name ?? "",
+    designation: lawyer?.designation ?? "Attorney",
+    city: lawyer?.city ?? "",
+    province: lawyer?.province ?? "Gauteng",
+    bio: lawyer?.bio ?? "",
+  });
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
   const importFn = useServerFn(importLawyerProfile);
+
+  // Load existing practice areas when editing
+  useEffect(() => {
+    if (!lawyer) return;
+    (async () => {
+      const { data } = await supabase
+        .from("lawyer_practice_areas")
+        .select("practice_areas(id, slug, name)")
+        .eq("lawyer_id", lawyer.id);
+      const rows = (data ?? [])
+        .map((r: { practice_areas: { id: string; slug: string; name: string } | null }) => r.practice_areas)
+        .filter((p): p is { id: string; slug: string; name: string } => !!p);
+      setPracticeAreas(rows);
+    })();
+  }, [lawyer]);
 
   const handleImport = async () => {
     if (!importUrl.trim()) return;
@@ -248,25 +299,37 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
     }
   };
 
+  const syncPracticeAreas = async (lawyerId: string) => {
+    const { error: delErr } = await supabase.from("lawyer_practice_areas").delete().eq("lawyer_id", lawyerId);
+    if (delErr) throw delErr;
+    if (practiceAreas.length === 0) return;
+    const links = practiceAreas.map((p) => ({ lawyer_id: lawyerId, practice_area_id: p.id }));
+    const { error } = await supabase.from("lawyer_practice_areas").insert(links);
+    if (error) throw error;
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const parsed = lawyerSchema.parse(form);
-      const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
-      const { data: inserted, error } = await supabase
-        .from("lawyers")
-        .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
-        .select("id")
-        .single();
-      if (error) throw error;
-      if (inserted && practiceAreas.length > 0) {
-        const links = practiceAreas.map((p) => ({ lawyer_id: inserted.id, practice_area_id: p.id }));
-        const { error: paErr } = await supabase.from("lawyer_practice_areas").insert(links);
-        if (paErr) console.warn("Practice area link failed:", paErr.message);
+      if (isEdit && lawyer) {
+        const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
+        if (error) throw error;
+        await syncPracticeAreas(lawyer.id);
+        toast.success("Profile updated");
+      } else {
+        const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
+        const { data: inserted, error } = await supabase
+          .from("lawyers")
+          .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (inserted) await syncPracticeAreas(inserted.id);
+        toast.success("Lawyer added");
       }
-      toast.success("Lawyer added");
-      onAdded();
+      onSaved();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally {
@@ -277,7 +340,7 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
-        <h3 className="font-heading text-xl text-ink">Add Lawyer</h3>
+        <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
 
         <div className="mt-4 rounded-md border border-dashed border-gold/60 bg-gold/5 p-3">
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink">
@@ -322,7 +385,7 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
           <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           {practiceAreas.length > 0 && (
             <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Suggested practice areas</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
               <div className="flex flex-wrap gap-1.5">
                 {practiceAreas.map((p) => (
                   <span key={p.id} className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest">
@@ -337,7 +400,7 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
           )}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : "Add Lawyer"}</button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
           </div>
         </form>
       </div>
