@@ -206,17 +206,10 @@ const lawyerSchema = z.object({
   accolades: z.string().max(20000).optional(),
   noteworthy_matters: z.string().max(20000).optional(),
   reported_cases_notes: z.string().max(20000).optional(),
-  avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
-  email: z.string().trim().email().max(200).or(z.literal("")).optional(),
-  phone: z.string().trim().max(60).or(z.literal("")).optional(),
-  linkedin_url: z
-    .string()
-    .trim()
-    .url()
-    .max(500)
-    .refine((u) => /linkedin\.com/i.test(u), { message: "Must be a LinkedIn URL" })
-    .or(z.literal(""))
-    .optional(),
+  avatar_url: z.string().trim().max(2000).optional(),
+  email: z.string().trim().max(200).optional(),
+  phone: z.string().trim().max(60).optional(),
+  linkedin_url: z.string().trim().max(500).optional(),
 });
 
 type LawyerRow = {
@@ -646,7 +639,14 @@ function LawyerFormModal({
       }
       onSaved();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed");
+      console.error("Lawyer save failed:", err);
+      if (err instanceof z.ZodError) {
+        const first = err.issues[0];
+        const path = first?.path?.join(".") || "field";
+        toast.error(`${path}: ${first?.message || "invalid value"}`);
+      } else {
+        toast.error(err instanceof Error ? err.message : "Failed");
+      }
     } finally {
       setSaving(false);
     }
