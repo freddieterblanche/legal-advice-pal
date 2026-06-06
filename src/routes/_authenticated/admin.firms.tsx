@@ -180,7 +180,7 @@ function AdminFirmsPage() {
   );
 }
 
-function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: () => void; onSaved: () => void }) {
+function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: () => void; onSaved: (stayOpen?: boolean) => void }) {
   const isEdit = !!firm;
   const [form, setForm] = useState({
     name: firm?.name ?? "",
