@@ -193,6 +193,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     city: firm?.city ?? "",
     province: firm?.province ?? "Gauteng",
     status: firm?.status ?? "active",
+    logo_url: firm?.logo_url ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
