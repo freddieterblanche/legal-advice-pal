@@ -573,6 +573,33 @@ function LawyerFormModal({
               {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
+          {firmBranches.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Branches <span className="text-muted-foreground/70">(select one or more)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {firmBranches.map((b) => {
+                  const checked = selectedBranchIds.has(b.id);
+                  return (
+                    <button
+                      type="button"
+                      key={b.id}
+                      onClick={() => toggleBranch(b.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+                        checked ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {b.is_head_office && <Star className="h-3 w-3 text-gold" />}
+                      {b.name}
+                      {b.city ? ` · ${b.city}` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
+            </div>
+          )}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
             <RichTextEditor
