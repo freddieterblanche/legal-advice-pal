@@ -283,3 +283,134 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     </div>
   );
 }
+
+type BranchRow = {
+  id: string;
+  firm_id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  phone: string | null;
+  is_head_office: boolean;
+};
+
+function BranchesEditor({ firmId }: { firmId: string }) {
+  const qc = useQueryClient();
+  const { data: branches, isLoading } = useQuery({
+    queryKey: ["firm-branches", firmId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("firm_branches")
+        .select("*")
+        .eq("firm_id", firmId)
+        .order("is_head_office", { ascending: false })
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as BranchRow[];
+    },
+  });
+
+  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+  const [busy, setBusy] = useState(false);
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["firm-branches", firmId] });
+
+  const addBranch = async () => {
+    if (!draft.name.trim()) { toast.error("Branch name required"); return; }
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("firm_branches").insert({
+        firm_id: firmId,
+        name: draft.name.trim(),
+        address: draft.address || null,
+        city: draft.city || null,
+        province: draft.province || null,
+        phone: draft.phone || null,
+        is_head_office: draft.is_head_office,
+      });
+      if (error) throw error;
+      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+      refresh();
+      toast.success("Branch added");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const updateBranch = async (id: string, patch: Partial<BranchRow>) => {
+    const { error } = await supabase.from("firm_branches").update(patch).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+  };
+
+  const deleteBranch = async (id: string) => {
+    if (!confirm("Delete this branch?")) return;
+    const { error } = await supabase.from("firm_branches").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+    toast.success("Branch deleted");
+  };
+
+  return (
+    <div className="rounded-md border border-border bg-cream/50 p-3">
+      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Branches</label>
+      {isLoading ? (
+        <p className="text-xs text-muted-foreground">Loading branches…</p>
+      ) : (
+        <div className="space-y-2">
+          {(branches ?? []).map((b) => (
+            <div key={b.id} className="rounded border border-border bg-card p-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <input value={b.name} onChange={(e) => updateBranch(b.id, { name: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
+                <input value={b.phone ?? ""} onChange={(e) => updateBranch(b.id, { phone: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
+                <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
+                <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
+                <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                  <option value="">Province…</option>
+                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
+                <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  <input type="checkbox" checked={b.is_head_office} onChange={(e) => updateBranch(b.id, { is_head_office: e.target.checked })} />
+                  Head office
+                </label>
+                <button type="button" onClick={() => deleteBranch(b.id)} className="text-xs text-destructive hover:underline">
+                  <Trash2 className="mr-1 inline h-3 w-3" /> Remove
+                </button>
+              </div>
+            </div>
+          ))}
+          {branches && branches.length === 0 && (
+            <p className="text-xs text-muted-foreground">No branches yet.</p>
+          )}
+
+          <div className="rounded border border-dashed border-border p-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="New branch name" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <input value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} placeholder="Phone" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <input type="checkbox" checked={draft.is_head_office} onChange={(e) => setDraft({ ...draft, is_head_office: e.target.checked })} />
+                Head office
+              </label>
+              <button type="button" disabled={busy} onClick={addBranch} className="inline-flex items-center gap-1 rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-50">
+                <Plus className="h-3 w-3" /> Add branch
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
