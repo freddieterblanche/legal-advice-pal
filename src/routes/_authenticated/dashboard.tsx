@@ -1498,3 +1498,144 @@ function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onC
     </div>
   );
 }
+
+type ReportedCase = {
+  id: string;
+  case_name: string;
+  citation: string | null;
+  court: string | null;
+  year: number | null;
+  url: string | null;
+  sort_order: number;
+};
+
+function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
+  const qc = useQueryClient();
+  const { data: cases } = useQuery({
+    queryKey: ["lawyer-reported-cases", lawyerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lawyer_reported_cases")
+        .select("*")
+        .eq("lawyer_id", lawyerId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      return (data ?? []) as ReportedCase[];
+    },
+  });
+
+  const [draft, setDraft] = useState({ case_name: "", citation: "", court: "", year: "", url: "" });
+  const [saving, setSaving] = useState(false);
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["lawyer-reported-cases", lawyerId] });
+
+  const add = async () => {
+    if (!draft.case_name.trim()) { toast.error("Case name is required"); return; }
+    if (draft.url && !/^https?:\/\//i.test(draft.url.trim())) { toast.error("URL must start with http:// or https://"); return; }
+    const yearNum = draft.year ? Number(draft.year) : null;
+    if (yearNum !== null && (Number.isNaN(yearNum) || yearNum < 1900 || yearNum > 2100)) {
+      toast.error("Enter a valid year"); return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("lawyer_reported_cases").insert({
+        lawyer_id: lawyerId,
+        case_name: draft.case_name.trim().slice(0, 300),
+        citation: draft.citation.trim().slice(0, 200) || null,
+        court: draft.court.trim().slice(0, 200) || null,
+        year: yearNum,
+        url: draft.url.trim().slice(0, 500) || null,
+        sort_order: (cases?.length ?? 0),
+      });
+      if (error) throw error;
+      setDraft({ case_name: "", citation: "", court: "", year: "", url: "" });
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Remove this case?")) return;
+    const { error } = await supabase.from("lawyer_reported_cases").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+  };
+
+  return (
+    <div className="space-y-3">
+      {(cases ?? []).length > 0 && (
+        <ul className="divide-y divide-border rounded border border-border">
+          {(cases ?? []).map((c) => (
+            <li key={c.id} className="flex items-start justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-ink">{c.case_name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[c.citation, c.court, c.year].filter(Boolean).join(" · ")}
+                </p>
+                {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-xs text-forest hover:text-gold">Open ↗</a>}
+              </div>
+              <button type="button" onClick={() => remove(c.id)} className="shrink-0 text-destructive hover:text-destructive/80">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="rounded border border-dashed border-border p-3">
+        <p className="mb-2 text-xs font-semibold text-ink">Add a reported case</p>
+        <input
+          placeholder="Case name *  (e.g. ABC Ltd v XYZ (Pty) Ltd)"
+          value={draft.case_name}
+          onChange={(e) => setDraft({ ...draft, case_name: e.target.value })}
+          maxLength={300}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <div className="mb-2 grid gap-2 sm:grid-cols-3">
+          <input
+            placeholder="Citation (e.g. 2024 (3) SA 1)"
+            value={draft.citation}
+            onChange={(e) => setDraft({ ...draft, citation: e.target.value })}
+            maxLength={200}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+          <input
+            placeholder="Court (e.g. SCA, ConCourt)"
+            value={draft.court}
+            onChange={(e) => setDraft({ ...draft, court: e.target.value })}
+            maxLength={200}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+          <input
+            type="number"
+            min={1900}
+            max={2100}
+            placeholder="Year"
+            value={draft.year}
+            onChange={(e) => setDraft({ ...draft, year: e.target.value })}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+        </div>
+        <input
+          type="url"
+          placeholder="https://… (link to judgment, e.g. SAFLII URL)"
+          value={draft.url}
+          onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+          maxLength={500}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={saving || !draft.case_name.trim()}
+          className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-50"
+        >
+          {saving ? "Adding…" : "Add case"}
+        </button>
+      </div>
+    </div>
+  );
+}
