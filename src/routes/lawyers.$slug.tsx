@@ -240,17 +240,19 @@ function LawyerProfile() {
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-md border border-border bg-card p-5">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Status</h3>
-            <p className="mt-2 text-sm capitalize text-foreground/80">
-              {lawyer.status === "trial" ? "Listed (Trial)" : "Verified Listing"}
-            </p>
-            {lawyer.linkedin_url && (
-              <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-forest hover:text-gold">
-                LinkedIn →
-              </a>
-            )}
-          </div>
+          {canEdit && (
+            <div className="rounded-md border border-border bg-card p-5">
+              <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Status</h3>
+              <p className="mt-2 text-sm capitalize text-foreground/80">
+                {lawyer.status === "trial" ? "Listed (Trial)" : "Verified Listing"}
+              </p>
+              {lawyer.linkedin_url && (
+                <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-forest hover:text-gold">
+                  LinkedIn →
+                </a>
+              )}
+            </div>
+          )}
 
           {branches.length > 0 && (
             <div className="rounded-md border border-border bg-card p-5">
