@@ -9,8 +9,8 @@ import { z } from "zod";
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug.replace(/-/g, " ")} — LexSA` },
-      { name: "description", content: "South African lawyer profile on LexSA with linked reported cases." },
+      { title: `${params.slug.replace(/-/g, " ")} — Lawexperts.co.za` },
+      { name: "description", content: "South African lawyer profile on Lawexperts.co.za with linked reported cases." },
     ],
   }),
   component: LawyerProfile,
