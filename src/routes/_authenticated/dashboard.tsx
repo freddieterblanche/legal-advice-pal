@@ -89,6 +89,16 @@ function Dashboard() {
 
   return (
     <div className="bg-cream">
+      {isPlatformAdmin && (
+        <div className="border-b border-gold/30 bg-gold/10">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs sm:px-6">
+            <span className="text-ink">
+              {search.firmId ? <>Platform admin · managing <strong>{firm.name}</strong></> : <>Platform admin</>}
+            </span>
+            <Link to="/admin/firms" className="font-medium text-forest hover:text-gold">← All firms</Link>
+          </div>
+        </div>
+      )}
       <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
