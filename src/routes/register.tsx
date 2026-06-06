@@ -43,31 +43,43 @@ function RegisterPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [existingUserId, setExistingUserId] = useState<string | null>(null);
   const [firm, setFirm] = useState({ name: "", registration_number: "", province: "", city: "", website: "", phone: "", address: "" });
   const [admin, setAdmin] = useState({ first_name: "", last_name: "", email: "", password: "" });
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setExistingUserId(data.user.id);
+        setAdmin((a) => ({ ...a, email: data.user!.email ?? "", password: "already-signed-in" }));
+      }
+    });
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const firmParsed = firmSchema.parse(firm);
-      const adminParsed = adminSchema.parse(admin);
+      let userId = existingUserId;
 
-      // 1. Sign up admin
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email: adminParsed.email,
-        password: adminParsed.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { first_name: adminParsed.first_name, last_name: adminParsed.last_name },
-        },
-      });
-      if (authErr) throw authErr;
-      if (!authData.user) throw new Error("Failed to create user");
+      if (!userId) {
+        const adminParsed = adminSchema.parse(admin);
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
+          email: adminParsed.email,
+          password: adminParsed.password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { first_name: adminParsed.first_name, last_name: adminParsed.last_name },
+          },
+        });
+        if (authErr) throw authErr;
+        if (!authData.user) throw new Error("Failed to create user");
+        await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
+        userId = authData.user.id;
+      }
 
-      // 2. Sign in to get auth context
-      await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
-
-      // 3. Create firm
+      // Create firm
       const slug = `${slugify(firmParsed.name)}-${Math.random().toString(36).slice(2, 6)}`;
       const { data: firmRow, error: firmErr } = await supabase
         .from("firms")
@@ -76,13 +88,13 @@ function RegisterPage() {
         .single();
       if (firmErr) throw firmErr;
 
-      // 4. Update admin profile
-      await supabase.from("profiles").update({
-        firm_id: firmRow.id,
-        role: "firm_admin",
-        first_name: adminParsed.first_name,
-        last_name: adminParsed.last_name,
-      }).eq("id", authData.user.id);
+      // Update profile
+      const profileUpdate: Record<string, unknown> = { firm_id: firmRow.id, role: "firm_admin" };
+      if (!existingUserId) {
+        profileUpdate.first_name = admin.first_name;
+        profileUpdate.last_name = admin.last_name;
+      }
+      await supabase.from("profiles").update(profileUpdate).eq("id", userId!);
 
       toast.success("Firm registered. Welcome to Lawexpert.co.za.");
       navigate({ to: "/dashboard" });
