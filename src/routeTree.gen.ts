@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
+import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -40,6 +41,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PracticeAreasRoute = PracticeAreasRouteImport.update({
   id: '/practice-areas',
   path: '/practice-areas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClaimRoute = ClaimRouteImport.update({
+  id: '/claim',
+  path: '/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -85,6 +91,7 @@ const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/claim': typeof ClaimRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/claim': typeof ClaimRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/claim': typeof ClaimRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/claim'
     | '/practice-areas'
     | '/register'
     | '/search'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/claim'
     | '/practice-areas'
     | '/register'
     | '/search'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/claim'
     | '/practice-areas'
     | '/register'
     | '/search'
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ClaimRoute: typeof ClaimRoute
   PracticeAreasRoute: typeof PracticeAreasRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/practice-areas'
       fullPath: '/practice-areas'
       preLoaderRoute: typeof PracticeAreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/claim': {
+      id: '/claim'
+      path: '/claim'
+      fullPath: '/claim'
+      preLoaderRoute: typeof ClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ClaimRoute: ClaimRoute,
   PracticeAreasRoute: PracticeAreasRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
