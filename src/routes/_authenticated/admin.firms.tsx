@@ -121,7 +121,14 @@ function AdminFirmsPage() {
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="font-medium text-ink">{f.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(f)}
+                          className="text-left font-medium text-ink hover:text-gold hover:underline"
+                          title="Open editor with live preview"
+                        >
+                          {f.name}
+                        </button>
                         <p className="text-xs text-muted-foreground">/{f.slug}</p>
                       </div>
                     </div>
@@ -143,7 +150,7 @@ function AdminFirmsPage() {
                     </button>
                     <button onClick={() => setEditing(f)} className="mr-3 text-xs font-medium text-ink hover:text-gold">Edit</button>
                     {f.status === "active" && (
-                      <Link to="/firms/$slug" params={{ slug: f.slug }} className="mr-3 text-xs font-medium text-forest hover:text-gold">View</Link>
+                      <Link to="/firms/$slug" params={{ slug: f.slug }} target="_blank" className="mr-3 text-xs font-medium text-forest hover:text-gold">Open ↗</Link>
                     )}
                     <button onClick={() => { if (confirm(`Delete ${f.name}? This also removes its lawyers and branches.`)) remove.mutate(f.id); }} className="text-xs text-destructive">
                       <Trash2 className="inline h-3 w-3" />
