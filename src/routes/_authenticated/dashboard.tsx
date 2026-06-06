@@ -12,6 +12,7 @@ import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
 
 type Branch = {
   id: string;
