@@ -143,6 +143,16 @@ const lawyerSchema = z.object({
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(20000).optional(),
   avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
+  email: z.string().trim().email().max(200).or(z.literal("")).optional(),
+  phone: z.string().trim().max(60).or(z.literal("")).optional(),
+  linkedin_url: z
+    .string()
+    .trim()
+    .url()
+    .max(500)
+    .refine((u) => /linkedin\.com/i.test(u), { message: "Must be a LinkedIn URL" })
+    .or(z.literal(""))
+    .optional(),
 });
 
 type LawyerRow = {
@@ -154,6 +164,9 @@ type LawyerRow = {
   province: string | null;
   bio: string | null;
   avatar_url: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
