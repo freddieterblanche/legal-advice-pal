@@ -1230,3 +1230,73 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
   );
 }
 
+
+function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onClose: () => void; onSent: () => void }) {
+  const [email, setEmail] = useState(lawyer.email ?? "");
+  const [sending, setSending] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const inviteFn = useServerFn(createLawyerInvite);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast.error("Enter a valid email"); return; }
+    setSending(true);
+    try {
+      const res = await inviteFn({ data: { lawyer_id: lawyer.id, email } });
+      const url = `${window.location.origin}/claim?token=${res.token}`;
+      setInviteUrl(url);
+      toast.success("Invite created — share the link below.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create invite");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-heading text-xl text-ink">Invite {lawyer.first_name} {lawyer.last_name}</h3>
+          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {!inviteUrl ? (
+          <form onSubmit={submit} className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              They'll be able to sign in with this email and manage their own profile sections (Overview, Qualifications, Articles, etc.).
+            </p>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="lawyer@firm.co.za"
+              maxLength={255}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
+              <button type="submit" disabled={sending} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+                {sending ? "Creating…" : "Create invite link"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-ink">Share this single-use link with the lawyer (valid for 7 days):</p>
+            <div className="flex gap-2">
+              <input readOnly value={inviteUrl} className="flex-1 rounded border border-border bg-background px-3 py-2 text-xs" onFocus={(e) => e.currentTarget.select()} />
+              <button type="button" onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Copied"); }} className="rounded bg-gold px-3 py-2 text-xs font-semibold text-ink">Copy</button>
+            </div>
+            <p className="text-xs text-muted-foreground">Email delivery isn't active yet on this project — paste the link into an email or message to the lawyer.</p>
+            <div className="flex justify-end pt-2">
+              <button type="button" onClick={onSent} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream">Done</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
