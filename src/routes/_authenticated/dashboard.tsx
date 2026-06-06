@@ -666,15 +666,34 @@ function LawyerFormModal({
               <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
             </div>
           )}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
-            <RichTextEditor
-              value={form.bio}
-              onChange={(html) => setForm({ ...form, bio: html })}
-              placeholder="Short bio with headings, paragraphs, and lists…"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
-          </div>
+          <Section title="Overview" hint="Lead paragraph(s) for the profile.">
+            <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
+          </Section>
+
+          <Section title="Qualifications" hint="Degrees, admissions, memberships.">
+            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />
+          </Section>
+
+          <Section title="Accolades & Awards">
+            <RichTextEditor value={form.accolades} onChange={(html) => setForm({ ...form, accolades: html })} placeholder="Chambers Global ranking, awards, recognitions…" />
+          </Section>
+
+          <Section title="Articles Published" hint="Add each article with a title, publication, date and link.">
+            {lawyer ? (
+              <ArticlesEditor lawyerId={lawyer.id} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Save the lawyer first to add articles.</p>
+            )}
+          </Section>
+
+          <Section title="Reported Cases — additional notes" hint="Free-text fallback for cases not yet linked from SAFLII.">
+            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Listed cases, citations, brief commentary…" />
+          </Section>
+
+          <Section title="Noteworthy Matters" hint="Significant deals, transactions, mandates.">
+            <RichTextEditor value={form.noteworthy_matters} onChange={(html) => setForm({ ...form, noteworthy_matters: html })} placeholder="Major transactions, mandates and matters…" />
+          </Section>
+
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
             <div className="flex items-start gap-3">
