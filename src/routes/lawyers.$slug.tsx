@@ -63,8 +63,8 @@ function LawyerProfile() {
   const canEdit = myFirmId && lawyer.firm_id === myFirmId;
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
-  const cases = lawyer.lawyer_cases ?? [];
-  const reportedCases = (lawyer.lawyer_reported_cases ?? []).slice().sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const cases = (lawyer.lawyer_cases ?? []).slice().sort((a: any, b: any) => (b.cases?.year ?? 0) - (a.cases?.year ?? 0));
+  const reportedCases = (lawyer.lawyer_reported_cases ?? []).slice().sort((a: any, b: any) => (b.year ?? 0) - (a.year ?? 0));
   const totalCases = cases.length + reportedCases.length;
   const branches = (lawyer.lawyer_branches ?? [])
     .map((x: any) => x.firm_branches)
