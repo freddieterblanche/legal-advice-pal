@@ -1,0 +1,1 @@
+ALTER TABLE public.lawyers DROP CONSTRAINT IF EXISTS lawyers_designation_check;
