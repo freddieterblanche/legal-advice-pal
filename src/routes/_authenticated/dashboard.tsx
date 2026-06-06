@@ -143,6 +143,16 @@ const lawyerSchema = z.object({
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(20000).optional(),
   avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
+  email: z.string().trim().email().max(200).or(z.literal("")).optional(),
+  phone: z.string().trim().max(60).or(z.literal("")).optional(),
+  linkedin_url: z
+    .string()
+    .trim()
+    .url()
+    .max(500)
+    .refine((u) => /linkedin\.com/i.test(u), { message: "Must be a LinkedIn URL" })
+    .or(z.literal(""))
+    .optional(),
 });
 
 type LawyerRow = {
@@ -154,6 +164,9 @@ type LawyerRow = {
   province: string | null;
   bio: string | null;
   avatar_url: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
@@ -276,6 +289,9 @@ function LawyerFormModal({
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
     avatar_url: lawyer?.avatar_url ?? "",
+    email: lawyer?.email ?? "",
+    phone: lawyer?.phone ?? "",
+    linkedin_url: lawyer?.linkedin_url ?? "",
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
@@ -344,15 +360,19 @@ function LawyerFormModal({
     setImported(false);
     try {
       const res = await importFn({ data: { url: importUrl.trim() } });
-      setForm({
-        first_name: res.first_name || "",
-        last_name: res.last_name || "",
-        designation: res.designation || "Attorney",
-        city: res.city || "",
-        province: res.province || "Gauteng",
-        bio: res.bio || "",
-        avatar_url: res.avatar_url || "",
-      });
+      setForm((f) => ({
+        ...f,
+        first_name: res.first_name || f.first_name,
+        last_name: res.last_name || f.last_name,
+        designation: res.designation || f.designation,
+        city: res.city || f.city,
+        province: res.province || f.province,
+        bio: res.bio || f.bio,
+        avatar_url: res.avatar_url || f.avatar_url,
+        email: res.email || f.email,
+        phone: res.phone || f.phone,
+        linkedin_url: res.linkedin_url || f.linkedin_url,
+      }));
       setPracticeAreas(res.practice_areas);
 
       setImported(true);
@@ -498,6 +518,32 @@ function LawyerFormModal({
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <input
+              type="email"
+              placeholder="Email (optional)"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              type="tel"
+              placeholder="Phone (optional)"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className="rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <input
+            type="url"
+            placeholder="LinkedIn URL (optional) — https://www.linkedin.com/in/…"
+            value={form.linkedin_url}
+            onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+          />
+
+
 
           {practiceAreas.length > 0 && (
             <div>

@@ -311,12 +311,14 @@ export type Database = {
           created_at: string | null
           designation: string | null
           education: string | null
+          email: string | null
           firm_id: string
           first_name: string
           id: string
           is_claimed: boolean | null
           last_name: string
           linkedin_url: string | null
+          phone: string | null
           profile_id: string | null
           profile_views: number | null
           province: string | null
@@ -334,12 +336,14 @@ export type Database = {
           created_at?: string | null
           designation?: string | null
           education?: string | null
+          email?: string | null
           firm_id: string
           first_name: string
           id?: string
           is_claimed?: boolean | null
           last_name: string
           linkedin_url?: string | null
+          phone?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null
@@ -357,12 +361,14 @@ export type Database = {
           created_at?: string | null
           designation?: string | null
           education?: string | null
+          email?: string | null
           firm_id?: string
           first_name?: string
           id?: string
           is_claimed?: boolean | null
           last_name?: string
           linkedin_url?: string | null
+          phone?: string | null
           profile_id?: string | null
           profile_views?: number | null
           province?: string | null

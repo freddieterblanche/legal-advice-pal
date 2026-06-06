@@ -21,6 +21,9 @@ const extractionSchema = z.object({
   bio: z.string().max(10000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
   photo_url: z.string().max(2000).default(""),
+  email: z.string().max(200).default(""),
+  phone: z.string().max(60).default(""),
+  linkedin_url: z.string().max(500).default(""),
 });
 
 
@@ -68,6 +71,9 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
         system:
           "You extract a lawyer's profile from a law-firm webpage. Map free-text values to the allowed enums. " +
           "If a field is not present, use an empty string (or empty array for practice areas). Do not invent information. " +
+          "first_name / last_name: REQUIRED. The page describes one lawyer — extract their full personal name. " +
+          "Look at the page title, the main heading, the URL slug, repeated mentions in the bio, the alt text of the headshot, and any 'About <Name>' phrasing. " +
+          "Strip titles (Mr, Mrs, Ms, Dr, Adv, Adv., Attorney, Prof). Split into first and last name. Never leave both blank if any human name appears anywhere on the page. " +
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
@@ -78,8 +84,10 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           "Aim for ~800–4000 characters of well-structured HTML. " +
           "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
           "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
-          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
-          "Resolve relative URLs against the source URL. Empty string if none found.",
+          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). Resolve relative URLs against the source URL. Empty string if none found. " +
+          "email: the lawyer's direct email address if shown on the page (look for mailto: links or plain-text addresses near their name). Empty string otherwise. " +
+          "phone: the lawyer's direct phone number (any format). Look for tel: links or labelled phone/mobile/cell/direct numbers next to their name. Empty string otherwise. " +
+          "linkedin_url: the lawyer's LinkedIn profile URL if linked on the page (typically https://www.linkedin.com/in/...). Empty string otherwise.",
         prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
 
       });
@@ -118,6 +126,24 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       }
     }
 
+    // Validate LinkedIn URL
+    let linkedin_url = "";
+    const rawLi = extracted.linkedin_url.trim();
+    if (rawLi) {
+      try {
+        const u = new URL(rawLi, data.url);
+        if ((u.protocol === "http:" || u.protocol === "https:") && /linkedin\.com/i.test(u.hostname)) {
+          linkedin_url = u.toString().slice(0, 500);
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Lightweight email/phone cleanup
+    const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(extracted.email.trim())
+      ? extracted.email.trim().toLowerCase().slice(0, 200)
+      : "";
+    const phone = extracted.phone.trim().replace(/[^\d+()\-\s]/g, "").slice(0, 60);
+
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
@@ -126,6 +152,9 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       province,
       bio: sanitizeBioHtml(extracted.bio),
       avatar_url,
+      email,
+      phone,
+      linkedin_url,
       practice_areas: practiceAreaIds,
     };
   });
