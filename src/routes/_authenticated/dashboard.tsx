@@ -543,15 +543,27 @@ function LawyerFormModal({
         ...f,
         first_name: res.first_name || f.first_name,
         last_name: res.last_name || f.last_name,
+        lawyer_type: (res.lawyer_type as "advocate" | "attorney") || f.lawyer_type,
+        is_senior_counsel: res.lawyer_type === "advocate" ? !!res.is_senior_counsel : f.is_senior_counsel,
+        year_of_admission: res.year_of_admission ?? f.year_of_admission,
+        designation_code: res.designation_code || f.designation_code,
+        designation_custom: res.designation_custom || f.designation_custom,
         designation: res.designation || f.designation,
         city: res.city || f.city,
         province: res.province || f.province,
-        bio: res.bio || f.bio,
+        overview: res.overview || f.overview,
+        qualifications: res.qualifications || f.qualifications,
+        accolades: res.accolades || f.accolades,
+        noteworthy_matters: res.noteworthy_matters || f.noteworthy_matters,
+        bio: res.overview || f.bio,
         avatar_url: res.avatar_url || f.avatar_url,
         email: res.email || f.email,
         phone: res.phone || f.phone,
         linkedin_url: res.linkedin_url || f.linkedin_url,
       }));
+      // If imported designation_custom is set, switch the "Other" toggle on
+      if (res.designation_custom && !res.designation_code) setOtherDesignation(true);
+      else if (res.designation_code) setOtherDesignation(false);
       setPracticeAreas(res.practice_areas);
 
       setImported(true);
