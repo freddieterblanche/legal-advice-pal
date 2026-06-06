@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye } from "lucide-react";
@@ -26,7 +26,12 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function Dashboard() {
   const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/dashboard" });
   const [tab, setTab] = useState<Tab>(search.tab ?? (search.edit ? "lawyers" : "overview"));
+  const clearEditSearch = () => {
+    if (!search.edit) return;
+    navigate({ search: (prev: { tab?: Tab; edit?: string }) => ({ ...prev, edit: undefined }) });
+  };
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile"],
@@ -91,7 +96,7 @@ function Dashboard() {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
-        {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} />}
+        {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} onClearEditSearch={clearEditSearch} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
@@ -174,7 +179,7 @@ type LawyerRow = {
 };
 
 
-function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: string }) {
+function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: string; editLawyerId?: string; onClearEditSearch?: () => void }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
@@ -265,7 +270,7 @@ function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: s
       </div>
 
       {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
-      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
+      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
     </div>
   );
 }
