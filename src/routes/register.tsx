@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -43,31 +43,43 @@ function RegisterPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [existingUserId, setExistingUserId] = useState<string | null>(null);
   const [firm, setFirm] = useState({ name: "", registration_number: "", province: "", city: "", website: "", phone: "", address: "" });
   const [admin, setAdmin] = useState({ first_name: "", last_name: "", email: "", password: "" });
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setExistingUserId(data.user.id);
+        setAdmin((a) => ({ ...a, email: data.user!.email ?? "", password: "already-signed-in" }));
+      }
+    });
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const firmParsed = firmSchema.parse(firm);
-      const adminParsed = adminSchema.parse(admin);
+      let userId = existingUserId;
 
-      // 1. Sign up admin
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email: adminParsed.email,
-        password: adminParsed.password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { first_name: adminParsed.first_name, last_name: adminParsed.last_name },
-        },
-      });
-      if (authErr) throw authErr;
-      if (!authData.user) throw new Error("Failed to create user");
+      if (!userId) {
+        const adminParsed = adminSchema.parse(admin);
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
+          email: adminParsed.email,
+          password: adminParsed.password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { first_name: adminParsed.first_name, last_name: adminParsed.last_name },
+          },
+        });
+        if (authErr) throw authErr;
+        if (!authData.user) throw new Error("Failed to create user");
+        await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
+        userId = authData.user.id;
+      }
 
-      // 2. Sign in to get auth context
-      await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
-
-      // 3. Create firm
+      // Create firm
       const slug = `${slugify(firmParsed.name)}-${Math.random().toString(36).slice(2, 6)}`;
       const { data: firmRow, error: firmErr } = await supabase
         .from("firms")
@@ -76,13 +88,16 @@ function RegisterPage() {
         .single();
       if (firmErr) throw firmErr;
 
-      // 4. Update admin profile
-      await supabase.from("profiles").update({
+      // Update profile
+      const profileUpdate: { firm_id: string; role: string; first_name?: string; last_name?: string } = {
         firm_id: firmRow.id,
         role: "firm_admin",
-        first_name: adminParsed.first_name,
-        last_name: adminParsed.last_name,
-      }).eq("id", authData.user.id);
+      };
+      if (!existingUserId) {
+        profileUpdate.first_name = admin.first_name;
+        profileUpdate.last_name = admin.last_name;
+      }
+      await supabase.from("profiles").update(profileUpdate).eq("id", userId!);
 
       toast.success("Firm registered. Welcome to Lawexpert.co.za.");
       navigate({ to: "/dashboard" });
@@ -134,16 +149,44 @@ function RegisterPage() {
           {step === 2 && (
             <div className="space-y-3">
               <h2 className="font-heading text-xl text-ink">Admin Contact</h2>
-              <p className="text-sm text-muted-foreground">This person manages the firm account.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input placeholder="First name" value={admin.first_name} onChange={(v) => setAdmin({ ...admin, first_name: v })} required />
-                <Input placeholder="Last name" value={admin.last_name} onChange={(v) => setAdmin({ ...admin, last_name: v })} required />
-              </div>
-              <Input type="email" placeholder="Email" value={admin.email} onChange={(v) => setAdmin({ ...admin, email: v })} required />
-              <Input type="password" placeholder="Password (min 8 chars)" value={admin.password} onChange={(v) => setAdmin({ ...admin, password: v })} required />
+              {existingUserId ? (
+                <div className="rounded border border-forest/30 bg-forest/5 p-4 text-sm text-ink">
+                  You're signed in as <strong>{admin.email}</strong>. This account will be set as the firm administrator.
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">This person manages the firm account.</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Input placeholder="First name" value={admin.first_name} onChange={(v) => setAdmin({ ...admin, first_name: v })} required />
+                    <Input placeholder="Last name" value={admin.last_name} onChange={(v) => setAdmin({ ...admin, last_name: v })} required />
+                  </div>
+                  <Input type="email" placeholder="Email" value={admin.email} onChange={(v) => setAdmin({ ...admin, email: v })} required />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={admin.password}
+                      onChange={(e) => setAdmin({ ...admin, password: e.target.value })}
+                      placeholder="Password (min 8 chars)"
+                      required
+                      minLength={8}
+                      maxLength={72}
+                      className="w-full rounded border border-border bg-background px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                    />
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-ink">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between pt-2">
                 <button onClick={() => setStep(1)} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
-                <button onClick={() => setStep(3)} disabled={!admin.email || admin.password.length < 8 || !admin.first_name || !admin.last_name} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue →</button>
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!existingUserId && (!admin.email || admin.password.length < 8 || !admin.first_name || !admin.last_name)}
+                  className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50"
+                >
+                  Continue →
+                </button>
               </div>
             </div>
           )}
