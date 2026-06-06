@@ -670,9 +670,147 @@ function LawyerFormModal({
             <input required placeholder="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             <input required placeholder="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
-          <select value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-            {DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
+          <div className="rounded-md border border-border bg-background p-3 space-y-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lawyer type</label>
+              <div className="flex gap-2">
+                {(["attorney", "advocate"] as const).map((t) => (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => setForm({ ...form, lawyer_type: t })}
+                    className={`flex-1 rounded border px-3 py-2 text-sm capitalize transition-colors ${
+                      form.lawyer_type === t ? "border-gold bg-gold/15 text-ink" : "border-border bg-card text-muted-foreground hover:text-ink"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {form.lawyer_type === "advocate" ? (
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.is_senior_counsel}
+                    onChange={(e) => setForm({ ...form, is_senior_counsel: e.target.checked })}
+                    className="accent-gold"
+                  />
+                  Senior Counsel (SC)
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Year of admission</label>
+                    <input
+                      type="number"
+                      min={1900}
+                      max={CURRENT_YEAR}
+                      placeholder="e.g. 2008"
+                      value={form.year_of_admission ?? ""}
+                      onChange={(e) => setForm({ ...form, year_of_admission: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-muted-foreground">Years in practice</label>
+                    <div className="rounded border border-dashed border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+                      {yearsInPractice(form.year_of_admission) ?? "—"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Designation</label>
+                  <select
+                    value={otherDesignation ? "__other__" : form.designation_code}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "__other__") {
+                        setOtherDesignation(true);
+                        setForm({ ...form, designation_code: "" });
+                      } else {
+                        setOtherDesignation(false);
+                        setForm({ ...form, designation_code: v, designation_custom: "" });
+                      }
+                    }}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  >
+                    <option value="">Select…</option>
+                    {ATTORNEY_DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    <option value="__other__">Other (specify)</option>
+                  </select>
+                </div>
+                {otherDesignation && (
+                  <input
+                    placeholder="Custom designation"
+                    value={form.designation_custom}
+                    onChange={(e) => setForm({ ...form, designation_custom: e.target.value })}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  />
+                )}
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">Year of admission (optional)</label>
+                  <input
+                    type="number"
+                    min={1900}
+                    max={CURRENT_YEAR}
+                    placeholder="e.g. 2015"
+                    value={form.year_of_admission ?? ""}
+                    onChange={(e) => setForm({ ...form, year_of_admission: e.target.value ? Number(e.target.value) : null })}
+                    className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                  />
+                </div>
+                {form.designation_code === "Director" && (
+                  <div className="space-y-2 rounded border border-dashed border-border p-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.is_practice_head}
+                        onChange={(e) => setForm({ ...form, is_practice_head: e.target.checked })}
+                        className="accent-gold"
+                      />
+                      Also Practice Head
+                    </label>
+                    {form.is_practice_head && (
+                      <input
+                        placeholder="Practice area (e.g. Banking & Finance)"
+                        value={form.practice_head_area}
+                        onChange={(e) => setForm({ ...form, practice_head_area: e.target.value })}
+                        className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                      />
+                    )}
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={form.is_sector_head}
+                        onChange={(e) => setForm({ ...form, is_sector_head: e.target.checked })}
+                        className="accent-gold"
+                      />
+                      Also Sector Head
+                    </label>
+                    {form.is_sector_head && (
+                      <input
+                        placeholder="Sector (e.g. Mining)"
+                        value={form.sector_head_area}
+                        onChange={(e) => setForm({ ...form, sector_head_area: e.target.value })}
+                        className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {lawyer?.designation && (
+              <p className="text-xs text-muted-foreground">
+                Current legacy value: <span className="font-medium text-ink">{lawyer.designation}</span> — will be replaced when you save.
+              </p>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
