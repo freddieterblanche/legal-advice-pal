@@ -100,6 +100,19 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       .filter((p) => matchedSlugs.includes(p.slug))
       .map((p) => ({ id: p.id, slug: p.slug, name: p.name }));
 
+    // Resolve and validate photo URL
+    let avatar_url = "";
+    if (extracted.photo_url.trim()) {
+      try {
+        const resolved = new URL(extracted.photo_url.trim(), data.url).toString();
+        if (resolved.startsWith("http://") || resolved.startsWith("https://")) {
+          avatar_url = resolved.slice(0, 2000);
+        }
+      } catch {
+        // ignore invalid URL
+      }
+    }
+
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
@@ -107,6 +120,8 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       city: extracted.city,
       province,
       bio: extracted.bio,
+      avatar_url,
       practice_areas: practiceAreaIds,
     };
   });
+
