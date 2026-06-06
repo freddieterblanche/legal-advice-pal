@@ -43,13 +43,13 @@ function LawyerProfile() {
     },
   });
 
-  const { data: myFirmId, data: _viewer } = useQuery({
-    queryKey: ["my-firm-id"],
+  const { data: viewer } = useQuery({
+    queryKey: ["viewer-profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data } = await supabase.from("profiles").select("firm_id").eq("id", user.id).maybeSingle();
-      return data?.firm_id ?? null;
+      const { data } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
+      return data ?? null;
     },
     staleTime: 60_000,
   });
@@ -60,7 +60,8 @@ function LawyerProfile() {
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!lawyer) return null;
 
-  const canEdit = myFirmId && lawyer.firm_id === myFirmId;
+  const isPlatformAdmin = viewer?.role === "platform_admin";
+  const canEdit = isPlatformAdmin || (!!viewer?.firm_id && lawyer.firm_id === viewer.firm_id);
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
   const cases = (lawyer.lawyer_cases ?? []).slice().sort((a: any, b: any) => (b.cases?.year ?? 0) - (a.cases?.year ?? 0));
