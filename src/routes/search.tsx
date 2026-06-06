@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES, DESIGNATIONS } from "../lib/constants";
+import { designationKind, designationBadgeClass } from "../lib/designation";
 
-type Search = { q?: string; area?: string; province?: string; designation?: string; page?: number };
+type Search = { q?: string; area?: string; province?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -12,6 +14,7 @@ export const Route = createFileRoute("/search")({
     area: typeof s.area === "string" ? s.area : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
+    type: s.type === "attorney" || s.type === "advocate" ? s.type : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
   head: () => ({
@@ -51,7 +54,8 @@ function SearchPage() {
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
-      return { rows: filtered, total: count ?? 0 };
+      if (search.type) filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
+      return { rows: filtered, total: search.type ? filtered.length : (count ?? 0) };
     },
   });
 
@@ -78,10 +82,37 @@ function SearchPage() {
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search by name or firm…"
               maxLength={120}
-              className="flex-1 min-w-[200px] rounded-md border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
-            <button type="submit" className="rounded-md bg-ink px-6 py-2 text-sm font-semibold text-cream hover:bg-ink/90">Search</button>
+            <button type="submit" className="rounded-lg bg-ink px-6 py-2 text-sm font-semibold text-white hover:bg-ink/90">Search</button>
           </form>
+          {/* Type tabs */}
+          <div className="mt-4 inline-flex rounded-full border border-border bg-background p-1">
+            {([
+              { key: undefined, label: "Both" },
+              { key: "attorney" as const, label: "Attorneys" },
+              { key: "advocate" as const, label: "Advocates" },
+            ]).map((t) => {
+              const active = search.type === t.key;
+              return (
+                <button
+                  key={t.label}
+                  onClick={() => update({ type: t.key })}
+                  className={`rounded-full px-4 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? t.key === "advocate"
+                        ? "bg-forest text-white"
+                        : t.key === "attorney"
+                        ? "bg-gold text-white"
+                        : "bg-ink text-white"
+                      : "text-muted-foreground hover:text-ink"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
