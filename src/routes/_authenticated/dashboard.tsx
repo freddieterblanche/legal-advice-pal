@@ -601,7 +601,9 @@ function LawyerFormModal({
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
           </div>
         </form>
+        </div>
       </div>
+
       {cropSrc && (
         <ImageCropModal
           imageSrc={cropSrc}
