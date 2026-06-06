@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "../integrations/supabase/auth-middleware";
 import { DESIGNATIONS, PROVINCES } from "./constants";
+import { sanitizeBioHtml } from "./sanitize";
 
 const inputSchema = z.object({
   url: z.string().trim().url().max(500).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
