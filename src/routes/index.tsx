@@ -10,7 +10,8 @@ import {
   MapPin,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
+  Gavel,
+  Users,
 } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
@@ -28,11 +29,9 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+const STROKE = 1.5;
+
 function HomePage() {
-  const [keyword, setKeyword] = useState("");
-  const [area, setArea] = useState("");
-  const [province, setProvince] = useState("");
-  const [type, setType] = useState<"all" | "attorney" | "advocate">("all");
   const navigate = useNavigate();
 
   const { data: practiceAreas } = useQuery({
@@ -71,179 +70,78 @@ function HomePage() {
     },
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (keyword) params.set("q", keyword);
-    if (area) params.set("area", area);
-    if (province) params.set("province", province);
-    if (type !== "all") params.set("type", type);
-    navigate({ to: "/search", search: Object.fromEntries(params) as never });
+  const go = (type: "attorney" | "advocate", q: string, area: string, province: string) => {
+    const params: Record<string, string> = { type };
+    if (q) params.q = q;
+    if (area) params.area = area;
+    if (province) params.province = province;
+    navigate({ to: "/search", search: params as never });
   };
 
   return (
     <>
-      {/* Hero — light + trustworthy */}
+      {/* Intro band */}
       <section className="relative overflow-hidden bg-cream">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-ink/[0.04] to-transparent" />
-        <div className="absolute -top-32 right-[-10%] h-[420px] w-[420px] rounded-full bg-gold/10 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-16 sm:px-6 md:pt-24">
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-gold/[0.05] to-transparent" />
+        <div className="relative mx-auto max-w-7xl px-4 pb-8 pt-16 sm:px-6 md:pt-20">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-              <ShieldCheck className="h-3.5 w-3.5 text-gold" />
+              <ShieldCheck className="h-3.5 w-3.5 text-gold" strokeWidth={STROKE} />
               Verified South African legal directory
             </span>
             <h1 className="mt-6 font-heading text-4xl leading-[1.05] text-ink md:text-6xl">
-              Find the right <span className="text-gold">attorney</span> or{" "}
-              <span className="text-forest">advocate</span> — backed by the cases they've argued.
+              The right counsel for your matter.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-              Search verified profiles linked to reported judgments. Built for clients, in-house counsel
-              and referring attorneys across all nine provinces.
+              South Africa has a split legal profession. Choose who you need — then search verified
+              profiles linked to their reported judgments.
             </p>
-          </div>
-
-          {/* Type selector */}
-          <div className="mx-auto mt-10 flex max-w-md justify-center">
-            <div className="inline-flex rounded-full border border-border bg-card p-1 shadow-sm">
-              {([
-                { key: "all", label: "Both" },
-                { key: "attorney", label: "Attorneys" },
-                { key: "advocate", label: "Advocates" },
-              ] as const).map((t) => (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => setType(t.key)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                    type === t.key
-                      ? t.key === "advocate"
-                        ? "bg-forest text-white"
-                        : t.key === "attorney"
-                        ? "bg-gold text-white"
-                        : "bg-ink text-white"
-                      : "text-muted-foreground hover:text-ink"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Search */}
-          <form onSubmit={handleSearch} className="mx-auto mt-6 max-w-4xl rounded-2xl border border-border bg-card p-3 shadow-xl shadow-ink/5">
-            <div className="grid gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
-              <input
-                type="text"
-                placeholder="Name or firm"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                maxLength={120}
-                className="rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold"
-              />
-              <select value={area} onChange={(e) => setArea(e.target.value)} className="rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold">
-                <option value="">All practice areas</option>
-                {practiceAreas?.map((p) => <option key={p.id} value={p.slug}>{p.name}</option>)}
-              </select>
-              <select value={province} onChange={(e) => setProvince(e.target.value)} className="rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold">
-                <option value="">All provinces</option>
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-ink/90">
-                <Search className="h-4 w-4" /> Search
-              </button>
-            </div>
-          </form>
-
-          {/* Stats */}
-          <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 md:grid-cols-4">
-            {[
-              { icon: Scale, label: "Lawyers Listed", value: stats?.lawyers ?? "—" },
-              { icon: Building2, label: "Firms", value: stats?.firms ?? "—" },
-              { icon: BookOpen, label: "Reported Cases", value: stats?.cases ?? "—" },
-              { icon: MapPin, label: "Provinces Covered", value: stats?.provinces ?? 9 },
-            ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-border bg-card p-5 text-center">
-                <s.icon className="mx-auto h-5 w-5 text-gold" strokeWidth={1.75} />
-                <div className="mt-2 font-heading text-3xl text-ink">{s.value}</div>
-                <div className="mt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Attorney vs Advocate explainer */}
-      <section className="border-y border-border bg-card py-16 md:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="mb-10 text-center">
-            <span className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">South African Legal Profession</span>
-            <h2 className="mt-2 font-heading text-3xl text-ink md:text-4xl">Attorney or Advocate?</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
-              South Africa has a split legal profession. Knowing the difference helps you brief the right counsel.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            {/* Attorney card */}
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-background p-7 transition-shadow hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/12 text-gold ring-1 ring-inset ring-gold/25">
-                <Briefcase className="h-6 w-6" strokeWidth={1.75} />
-              </div>
-              <h3 className="mt-5 font-heading text-2xl text-ink">Attorneys</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Your first point of contact. Attorneys advise clients directly, draft contracts, run litigation,
-                and instruct advocates when courtroom specialists are needed.
-              </p>
-              <ul className="mt-5 space-y-2 text-sm text-foreground/80">
-                {["Direct client engagement", "Transactional & commercial work", "Litigation strategy & filings", "Instruct advocates on your behalf"].map((x) => (
-                  <li key={x} className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-gold" strokeWidth={2} />
-                    <span>{x}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/search"
-                search={{ type: "attorney" } as never}
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-gold hover:text-ink"
-              >
-                Find an attorney <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+      {/* Section Split — Attorneys | Advocates */}
+      <section className="bg-cream pb-20">
+        <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:px-6 md:grid-cols-2">
+          <ProfessionPanel
+            kind="attorney"
+            title="Attorneys"
+            tagline="Your first point of contact"
+            description="Advise clients directly, draft contracts, run litigation, and instruct advocates when courtroom specialists are needed."
+            Icon={Briefcase}
+            practiceAreas={practiceAreas ?? []}
+            onSubmit={(q, area, province) => go("attorney", q, area, province)}
+          />
+          <ProfessionPanel
+            kind="advocate"
+            title="Advocates"
+            tagline="Courtroom specialists"
+            description="Briefed by attorneys to argue in the High Court, SCA and Constitutional Court. Includes Senior Counsel (SC)."
+            Icon={Gavel}
+            practiceAreas={practiceAreas ?? []}
+            onSubmit={(q, area, province) => go("advocate", q, area, province)}
+          />
+        </div>
 
-            {/* Advocate card */}
-            <div className="group relative overflow-hidden rounded-2xl border border-border bg-background p-7 transition-shadow hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-forest/12 text-forest ring-1 ring-inset ring-forest/25">
-                <Scale className="h-6 w-6" strokeWidth={1.75} />
-              </div>
-              <h3 className="mt-5 font-heading text-2xl text-ink">Advocates</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Courtroom specialists. Advocates are briefed by attorneys to argue in the High Court, SCA and
-                Constitutional Court. Senior Counsel (SC) take the most complex matters.
-              </p>
-              <ul className="mt-5 space-y-2 text-sm text-foreground/80">
-                {["Specialist courtroom advocacy", "Drafting heads of argument & opinions", "Briefed via instructing attorneys", "Includes Senior Counsel (SC)"].map((x) => (
-                  <li key={x} className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-forest" strokeWidth={2} />
-                    <span>{x}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/search"
-                search={{ type: "advocate" } as never}
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-forest hover:text-ink"
-              >
-                Find an advocate <ArrowRight className="h-4 w-4" />
-              </Link>
+        {/* Stats */}
+        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 px-4 sm:px-6 md:grid-cols-4">
+          {[
+            { icon: Users, label: "Lawyers Listed", value: stats?.lawyers ?? "—" },
+            { icon: Building2, label: "Firms", value: stats?.firms ?? "—" },
+            { icon: BookOpen, label: "Reported Cases", value: stats?.cases ?? "—" },
+            { icon: MapPin, label: "Provinces Covered", value: stats?.provinces ?? 9 },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl border border-border bg-card p-5 text-center">
+              <s.icon className="mx-auto h-5 w-5 text-gold" strokeWidth={STROKE} />
+              <div className="mt-2 font-heading text-3xl text-ink">{s.value}</div>
+              <div className="mt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{s.label}</div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* Practice areas grid */}
-      <section className="bg-cream py-20 md:py-24">
+      <section className="border-t border-border bg-card py-20 md:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -260,10 +158,10 @@ function HomePage() {
                   key={p.id}
                   to="/search"
                   search={{ area: p.slug } as never}
-                  className="group flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-gold/50 hover:shadow-md"
+                  className="group flex flex-col rounded-xl border border-border bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-gold/50 hover:shadow-md"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold/10 text-gold transition-colors group-hover:bg-gold group-hover:text-white">
-                    <Icon className="h-5 w-5" strokeWidth={1.75} />
+                    <Icon className="h-5 w-5" strokeWidth={STROKE} />
                   </div>
                   <span className="mt-4 font-heading text-sm font-semibold text-card-foreground">
                     {p.name}
@@ -287,10 +185,97 @@ function HomePage() {
             Build trust with verified profiles and linked reported cases.
           </p>
           <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-gold px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-gold/90">
-            Register Your Firm <ArrowRight className="h-4 w-4" />
+            Register Your Firm <ArrowRight className="h-4 w-4" strokeWidth={STROKE} />
           </Link>
         </div>
       </section>
     </>
+  );
+}
+
+type PanelProps = {
+  kind: "attorney" | "advocate";
+  title: string;
+  tagline: string;
+  description: string;
+  Icon: typeof Briefcase;
+  practiceAreas: { id: string; slug: string; name: string }[];
+  onSubmit: (q: string, area: string, province: string) => void;
+};
+
+function ProfessionPanel({ kind, title, tagline, description, Icon, practiceAreas, onSubmit }: PanelProps) {
+  const [q, setQ] = useState("");
+  const [area, setArea] = useState("");
+  const [province, setProvince] = useState("");
+
+  const accent = kind === "attorney" ? "gold" : "forest";
+  const ringClass = kind === "attorney" ? "focus:ring-gold" : "focus:ring-forest";
+  const btnClass =
+    kind === "attorney"
+      ? "bg-gold hover:bg-gold/90"
+      : "bg-forest hover:bg-forest/90";
+  const iconBg = kind === "attorney" ? "bg-gold/10 text-gold" : "bg-forest/10 text-forest";
+  const labelClass = kind === "attorney" ? "text-gold" : "text-forest";
+
+  return (
+    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-sm md:p-8">
+      <div className="flex items-start gap-4">
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-${accent}/20 ${iconBg}`}>
+          <Icon className="h-7 w-7" strokeWidth={STROKE} />
+        </div>
+        <div>
+          <div className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${labelClass}`}>
+            {tagline}
+          </div>
+          <h2 className="mt-1 font-heading text-2xl text-ink md:text-3xl">{title}</h2>
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{description}</p>
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); onSubmit(q, area, province); }}
+        className="mt-6 flex flex-col gap-2 rounded-xl border border-border bg-background p-3"
+      >
+        <input
+          type="text"
+          placeholder={`Search ${title.toLowerCase()} by name or firm`}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          maxLength={120}
+          className={`w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 ${ringClass}`}
+        />
+        <div className="grid gap-2 sm:grid-cols-2">
+          <select value={area} onChange={(e) => setArea(e.target.value)} className={`rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
+            <option value="">All practice areas</option>
+            {practiceAreas.map((p) => <option key={p.id} value={p.slug}>{p.name}</option>)}
+          </select>
+          <select value={province} onChange={(e) => setProvince(e.target.value)} className={`rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
+            <option value="">All provinces</option>
+            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <button
+          type="submit"
+          className={`mt-1 inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition-colors ${btnClass}`}
+        >
+          <Search className="h-4 w-4" strokeWidth={STROKE} /> Find {title}
+        </button>
+      </form>
+
+      <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Scale className="h-3.5 w-3.5" strokeWidth={STROKE} />
+          Verified profiles · linked cases
+        </span>
+        <Link
+          to="/search"
+          search={{ type: kind } as never}
+          className={`inline-flex items-center gap-1 font-semibold ${labelClass} hover:text-ink`}
+        >
+          Browse all <ArrowRight className="h-3.5 w-3.5" strokeWidth={STROKE} />
+        </Link>
+      </div>
+    </div>
   );
 }
