@@ -1,0 +1,1 @@
+GRANT SELECT (email, phone) ON public.lawyers TO anon;
