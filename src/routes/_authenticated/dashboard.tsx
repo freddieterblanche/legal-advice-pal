@@ -1088,3 +1088,139 @@ function BranchFormModal({
     </div>
   );
 }
+
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</label>
+      {children}
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+type Article = {
+  id: string;
+  title: string;
+  publication: string | null;
+  published_date: string | null;
+  url: string | null;
+  sort_order: number;
+};
+
+function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
+  const qc = useQueryClient();
+  const { data: articles } = useQuery({
+    queryKey: ["lawyer-articles", lawyerId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lawyer_articles")
+        .select("*")
+        .eq("lawyer_id", lawyerId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      return (data ?? []) as Article[];
+    },
+  });
+
+  const [draft, setDraft] = useState({ title: "", publication: "", published_date: "", url: "" });
+  const [saving, setSaving] = useState(false);
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["lawyer-articles", lawyerId] });
+
+  const add = async () => {
+    if (!draft.title.trim()) { toast.error("Title is required"); return; }
+    if (draft.url && !/^https?:\/\//i.test(draft.url.trim())) { toast.error("URL must start with http:// or https://"); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from("lawyer_articles").insert({
+        lawyer_id: lawyerId,
+        title: draft.title.trim().slice(0, 255),
+        publication: draft.publication.trim().slice(0, 255) || null,
+        published_date: draft.published_date || null,
+        url: draft.url.trim().slice(0, 500) || null,
+        sort_order: (articles?.length ?? 0),
+      });
+      if (error) throw error;
+      setDraft({ title: "", publication: "", published_date: "", url: "" });
+      refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Remove this article?")) return;
+    const { error } = await supabase.from("lawyer_articles").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    refresh();
+  };
+
+  return (
+    <div className="space-y-3">
+      {(articles ?? []).length > 0 && (
+        <ul className="divide-y divide-border rounded border border-border">
+          {(articles ?? []).map((a) => (
+            <li key={a.id} className="flex items-start justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-ink">{a.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[a.publication, a.published_date ? new Date(a.published_date).toLocaleDateString() : null].filter(Boolean).join(" · ")}
+                </p>
+                {a.url && <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-xs text-forest hover:text-gold">Open ↗</a>}
+              </div>
+              <button type="button" onClick={() => remove(a.id)} className="shrink-0 text-destructive hover:text-destructive/80">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="rounded border border-dashed border-border p-3">
+        <p className="mb-2 text-xs font-semibold text-ink">Add an article</p>
+        <input
+          placeholder="Title *"
+          value={draft.title}
+          onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+          maxLength={255}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <div className="mb-2 grid gap-2 sm:grid-cols-2">
+          <input
+            placeholder="Publication"
+            value={draft.publication}
+            onChange={(e) => setDraft({ ...draft, publication: e.target.value })}
+            maxLength={255}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+          <input
+            type="date"
+            value={draft.published_date}
+            onChange={(e) => setDraft({ ...draft, published_date: e.target.value })}
+            className="rounded border border-border bg-background px-2 py-1.5 text-sm"
+          />
+        </div>
+        <input
+          type="url"
+          placeholder="https://… (link to article)"
+          value={draft.url}
+          onChange={(e) => setDraft({ ...draft, url: e.target.value })}
+          maxLength={500}
+          className="mb-2 w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={saving || !draft.title.trim()}
+          className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-50"
+        >
+          {saving ? "Adding…" : "Add article"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
