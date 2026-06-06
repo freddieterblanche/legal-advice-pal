@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X } from "lucide-react";
+import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -216,6 +216,11 @@ function LawyersTab({ firmId }: { firmId: string }) {
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
                   <td className="px-4 py-3 text-right">
+                    {l.slug && (l.status === "trial" || l.status === "active") && (
+                      <a href={`/lawyers/${l.slug}`} target="_blank" rel="noopener noreferrer" className="mr-2 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold">
+                        <Eye className="h-3 w-3" /> Preview
+                      </a>
+                    )}
                     <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
@@ -262,10 +267,41 @@ function LawyerFormModal({
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
   const importFn = useServerFn(importLawyerProfile);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${firmId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+      if (upErr) throw upErr;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("lawyer-photos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10); // 10 years
+      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
+      toast.success("Photo uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Load existing practice areas when editing
   useEffect(() => {
@@ -401,7 +437,7 @@ function LawyerFormModal({
             <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
             <div className="flex items-start gap-3">
               {form.avatar_url && (
                 <img
@@ -411,13 +447,27 @@ function LawyerFormModal({
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                 />
               )}
-              <input
-                type="url"
-                placeholder="https://yourfirm.co.za/team/jane.jpg"
-                value={form.avatar_url}
-                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
-              />
+              <div className="flex-1 space-y-2">
+                <input
+                  type="url"
+                  placeholder="https://yourfirm.co.za/team/jane.jpg"
+                  value={form.avatar_url}
+                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
+                  <Upload className="h-3.5 w-3.5" />
+                  {uploading ? "Uploading…" : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploading}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
+              </div>
             </div>
           </div>
 
