@@ -101,7 +101,7 @@ function Dashboard() {
           </div>
         </div>
       )}
-      <div className="border-b border-border bg-card">
+      <div className="border-b border-cream/20 bg-ink">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <div className="flex items-center gap-4">
@@ -114,18 +114,18 @@ function Dashboard() {
                 />
               )}
               <div>
-                <h1 className="font-heading text-2xl text-ink md:text-3xl">{firm.name}</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="font-heading text-2xl text-cream md:text-3xl">{firm.name}</h1>
+                <p className="text-sm text-cream/70">
                   Status: <span className="capitalize">{firm.status}</span>
                   {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
                 </p>
               </div>
             </div>
             {firm.status === "active" && (
-              <Link to="/firms/$slug" params={{ slug: firm.slug }} className="text-sm font-medium text-forest hover:text-gold">View public profile →</Link>
+              <Link to="/firms/$slug" params={{ slug: firm.slug }} className="text-sm font-medium text-cream/80 hover:text-gold">View public profile →</Link>
             )}
           </div>
-          <div className="mt-6 flex flex-wrap gap-1 border-b border-border">
+          <div className="mt-6 flex flex-wrap gap-1 border-b border-cream/20">
             {([
               { id: "overview", label: "Overview", icon: FileText },
               { id: "lawyers", label: "Lawyers", icon: Users },
@@ -136,7 +136,7 @@ function Dashboard() {
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                  tab === t.id ? "border-gold text-ink" : "border-transparent text-muted-foreground hover:text-ink"
+                  tab === t.id ? "border-gold text-cream" : "border-transparent text-cream/60 hover:text-cream"
                 }`}
               >
                 <t.icon className="h-4 w-4" /> {t.label}
