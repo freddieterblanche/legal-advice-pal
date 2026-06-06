@@ -89,7 +89,10 @@ function RegisterPage() {
       if (firmErr) throw firmErr;
 
       // Update profile
-      const profileUpdate: Record<string, unknown> = { firm_id: firmRow.id, role: "firm_admin" };
+      const profileUpdate: { firm_id: string; role: string; first_name?: string; last_name?: string } = {
+        firm_id: firmRow.id,
+        role: "firm_admin",
+      };
       if (!existingUserId) {
         profileUpdate.first_name = admin.first_name;
         profileUpdate.last_name = admin.last_name;
