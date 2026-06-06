@@ -134,6 +134,7 @@ const lawyerSchema = z.object({
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(2000).optional(),
+  avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
 });
 
 type LawyerRow = {
@@ -144,10 +145,12 @@ type LawyerRow = {
   city: string | null;
   province: string | null;
   bio: string | null;
+  avatar_url: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
 };
+
 
 function LawyersTab({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
