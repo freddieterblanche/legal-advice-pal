@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Users, Wallet, FileText, Settings as SettingsIcon } from "lucide-react";
+import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
+import { importLawyerProfile } from "../../lib/profile-import.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
@@ -215,7 +217,36 @@ function LawyersTab({ firmId }: { firmId: string }) {
 
 function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose: () => void; onAdded: () => void }) {
   const [form, setForm] = useState({ first_name: "", last_name: "", designation: "Attorney", city: "", province: "Gauteng", bio: "" });
+  const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [imported, setImported] = useState(false);
+  const importFn = useServerFn(importLawyerProfile);
+
+  const handleImport = async () => {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setImported(false);
+    try {
+      const res = await importFn({ data: { url: importUrl.trim() } });
+      setForm({
+        first_name: res.first_name || "",
+        last_name: res.last_name || "",
+        designation: res.designation || "Attorney",
+        city: res.city || "",
+        province: res.province || "Gauteng",
+        bio: res.bio || "",
+      });
+      setPracticeAreas(res.practice_areas);
+      setImported(true);
+      toast.success("Profile imported — please review");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,8 +254,17 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
     try {
       const parsed = lawyerSchema.parse(form);
       const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
-      const { error } = await supabase.from("lawyers").insert({ ...parsed, firm_id: firmId, slug, status: "trial" });
+      const { data: inserted, error } = await supabase
+        .from("lawyers")
+        .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
+        .select("id")
+        .single();
       if (error) throw error;
+      if (inserted && practiceAreas.length > 0) {
+        const links = practiceAreas.map((p) => ({ lawyer_id: inserted.id, practice_area_id: p.id }));
+        const { error: paErr } = await supabase.from("lawyer_practice_areas").insert(links);
+        if (paErr) console.warn("Practice area link failed:", paErr.message);
+      }
       toast.success("Lawyer added");
       onAdded();
     } catch (err) {
@@ -236,8 +276,35 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl">
+      <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
         <h3 className="font-heading text-xl text-ink">Add Lawyer</h3>
+
+        <div className="mt-4 rounded-md border border-dashed border-gold/60 bg-gold/5 p-3">
+          <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink">
+            <Sparkles className="h-3.5 w-3.5 text-gold" /> Import from website (optional)
+          </label>
+          <p className="mt-1 text-xs text-muted-foreground">Paste a link to the lawyer's bio on your firm site and AI will fill the form.</p>
+          <div className="mt-2 flex gap-2">
+            <input
+              type="url"
+              placeholder="https://yourfirm.co.za/team/jane-doe"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              disabled={importing}
+              className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleImport}
+              disabled={importing || !importUrl.trim()}
+              className="rounded bg-gold px-3 py-2 text-sm font-semibold text-ink disabled:opacity-50"
+            >
+              {importing ? "Importing…" : "Import"}
+            </button>
+          </div>
+          {imported && <p className="mt-2 text-xs text-forest">Imported — please review fields below before saving.</p>}
+        </div>
+
         <form onSubmit={submit} className="mt-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <input required placeholder="First name" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
@@ -252,7 +319,22 @@ function AddLawyerModal({ firmId, onClose, onAdded }: { firmId: string; onClose:
               {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
-          <textarea rows={4} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          {practiceAreas.length > 0 && (
+            <div>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Suggested practice areas</p>
+              <div className="flex flex-wrap gap-1.5">
+                {practiceAreas.map((p) => (
+                  <span key={p.id} className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest">
+                    {p.name}
+                    <button type="button" onClick={() => setPracticeAreas(practiceAreas.filter((x) => x.id !== p.id))} className="hover:text-destructive">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : "Add Lawyer"}</button>
