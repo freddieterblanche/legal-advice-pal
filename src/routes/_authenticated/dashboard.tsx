@@ -390,6 +390,27 @@ function LawyerFormModal({
             </select>
           </div>
           <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
+            <div className="flex items-start gap-3">
+              {form.avatar_url && (
+                <img
+                  src={form.avatar_url}
+                  alt="Preview"
+                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-border"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+              <input
+                type="url"
+                placeholder="https://yourfirm.co.za/team/jane.jpg"
+                value={form.avatar_url}
+                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
           {practiceAreas.length > 0 && (
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
