@@ -6,6 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { formatDesignation, headBadges, designationKind } from "../lib/designation";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
