@@ -32,7 +32,7 @@ function LawyerProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url))`)
+        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
         .eq("slug", slug)
         .in("status", ["trial", "active"])
         .maybeSingle();
