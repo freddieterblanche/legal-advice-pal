@@ -366,10 +366,23 @@ function LawyerFormModal({
   onSaved: () => void;
 }) {
   const isEdit = !!lawyer;
+  const initialOtherCode =
+    !!lawyer?.designation_code &&
+    !(ATTORNEY_DESIGNATIONS as readonly string[]).includes(lawyer.designation_code);
+  const [otherDesignation, setOtherDesignation] = useState<boolean>(initialOtherCode);
   const [form, setForm] = useState({
     first_name: lawyer?.first_name ?? "",
     last_name: lawyer?.last_name ?? "",
-    designation: lawyer?.designation ?? "Attorney",
+    designation: lawyer?.designation ?? "",
+    lawyer_type: (lawyer?.lawyer_type as "advocate" | "attorney" | null) ?? "attorney",
+    year_of_admission: lawyer?.year_of_admission ?? null,
+    is_senior_counsel: !!lawyer?.is_senior_counsel,
+    designation_code: initialOtherCode ? "" : (lawyer?.designation_code ?? ""),
+    designation_custom: lawyer?.designation_custom ?? (initialOtherCode ? (lawyer?.designation_code ?? "") : ""),
+    is_practice_head: !!lawyer?.is_practice_head,
+    practice_head_area: lawyer?.practice_head_area ?? "",
+    is_sector_head: !!lawyer?.is_sector_head,
+    sector_head_area: lawyer?.sector_head_area ?? "",
     city: lawyer?.city ?? "",
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
