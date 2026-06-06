@@ -187,9 +187,13 @@ function SearchPage() {
                 const caseCount = l.case_count ?? 0;
                 const first = l.first_name ?? "";
                 const last = l.last_name ?? "";
+                const kind = designationKind(l.designation);
+                const KindIcon = kind === "advocate" ? Scale : Briefcase;
+                const accentRing = kind === "advocate" ? "ring-forest/30" : "ring-gold/30";
+                const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 return (
-                <article key={l.id} className="flex flex-col gap-4 rounded-md border border-border bg-card p-5 transition-shadow hover:shadow-md sm:flex-row">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-xl text-gold">
+                <article key={l.id} className={`flex flex-col gap-4 rounded-xl border border-border bg-card p-5 ring-1 ring-inset ${accentRing} transition-shadow hover:shadow-md sm:flex-row`}>
+                  <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-xl`}>
                     {first[0]}{last[0]}
                   </div>
                   <div className="flex-1">
@@ -197,7 +201,12 @@ function SearchPage() {
                       <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
                         {l.full_name}
                       </Link>
-                      {l.designation && <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-medium text-forest">{l.designation}</span>}
+                      {l.designation && (
+                        <span className={designationBadgeClass(l.designation)}>
+                          <KindIcon className="h-3 w-3" strokeWidth={2} />
+                          {l.designation}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {l.firm_name} · {l.city}, {l.province}
@@ -212,11 +221,11 @@ function SearchPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2 sm:w-32">
                     {caseCount > 0 && (
-                      <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-ink">
+                      <span className="rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
                         {caseCount} case{caseCount === 1 ? "" : "s"}
                       </span>
                     )}
-                    <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded bg-ink px-3 py-1.5 text-xs font-medium text-cream hover:bg-ink/90">
+                    <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
                       View Profile
                     </Link>
                   </div>
