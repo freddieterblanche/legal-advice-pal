@@ -104,12 +104,22 @@ function Dashboard() {
       <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div>
-              <h1 className="font-heading text-2xl text-ink md:text-3xl">{firm.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                Status: <span className="capitalize">{firm.status}</span>
-                {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
-              </p>
+            <div className="flex items-center gap-4">
+              {firm.logo_url && (
+                <img
+                  src={firm.logo_url}
+                  alt={`${firm.name} logo`}
+                  className="h-12 w-12 rounded object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+              <div>
+                <h1 className="font-heading text-2xl text-ink md:text-3xl">{firm.name}</h1>
+                <p className="text-sm text-muted-foreground">
+                  Status: <span className="capitalize">{firm.status}</span>
+                  {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
+                </p>
+              </div>
             </div>
             {firm.status === "active" && (
               <Link to="/firms/$slug" params={{ slug: firm.slug }} className="text-sm font-medium text-forest hover:text-gold">View public profile →</Link>
