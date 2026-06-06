@@ -625,9 +625,9 @@ function LawyerFormModal({
           setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
         } catch (fetchErr) {
           console.error("External photo fetch failed:", fetchErr);
-          toast.error("Could not fetch that photo URL. Try uploading the file instead.");
-          setSaving(false);
-          return;
+          toast.warning("Couldn't fetch that photo — saving without it. You can upload a photo afterwards.");
+          form.avatar_url = "";
+          setForm((f) => ({ ...f, avatar_url: "" }));
         }
       }
 
