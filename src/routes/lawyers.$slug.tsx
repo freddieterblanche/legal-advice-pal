@@ -5,6 +5,7 @@ import { ExternalLink, MapPin, Building2, BookOpen, Mail } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { sanitizeBioHtml } from "../lib/sanitize";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
