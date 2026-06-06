@@ -89,7 +89,7 @@ function Dashboard() {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
-        {tab === "lawyers" && <LawyersTab firmId={firm.id} />}
+        {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
