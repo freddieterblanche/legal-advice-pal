@@ -214,7 +214,10 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
         setPreviewKey((k) => k + 1);
         onSaved(true); // keep modal open so admin can keep editing & previewing
       } else {
-        const slug = `${slugify(form.name)}-${Math.random().toString(36).slice(2, 7)}`;
+        const baseSlug = slugify(form.name);
+        let slug = baseSlug;
+        const { data: clash } = await supabase.from("firms").select("id").eq("slug", slug).maybeSingle();
+        if (clash) slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
           .from("firms")
           .insert({ ...payload, slug })
