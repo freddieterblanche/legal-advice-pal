@@ -235,6 +235,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
+  const [inviting, setInviting] = useState<LawyerRow | null>(null);
 
   const { data: lawyers } = useQuery({
     queryKey: ["firm-lawyers-list", firmId],
