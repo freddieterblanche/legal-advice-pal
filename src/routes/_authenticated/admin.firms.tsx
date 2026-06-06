@@ -1,0 +1,282 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Plus, X, Building2, Trash2, Users, Settings as SettingsIcon } from "lucide-react";
+import { supabase } from "../../integrations/supabase/client";
+import { toast } from "sonner";
+import { PROVINCES, slugify } from "../../lib/constants";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { sanitizeBioHtml } from "../../lib/sanitize";
+
+type FirmRow = {
+  id: string;
+  name: string;
+  slug: string;
+  registration_number: string | null;
+  description: string | null;
+  website: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  status: string | null;
+};
+
+export const Route = createFileRoute("/_authenticated/admin/firms")({
+  head: () => ({ meta: [{ title: "Admin · Firms — Lawexpert.co.za" }] }),
+  component: AdminFirmsPage,
+});
+
+function AdminFirmsPage() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const [editing, setEditing] = useState<FirmRow | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [q, setQ] = useState("");
+
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile-role"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      return data;
+    },
+  });
+
+  const { data: firms, isLoading } = useQuery({
+    queryKey: ["admin-firms"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("firms")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as FirmRow[];
+    },
+    enabled: profile?.role === "platform_admin",
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("firms").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Firm deleted"); qc.invalidateQueries({ queryKey: ["admin-firms"] }); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  if (profile && profile.role !== "platform_admin") {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-20 text-center">
+        <h1 className="font-heading text-2xl text-ink">Not authorised</h1>
+        <p className="mt-2 text-muted-foreground">This page is reserved for platform admins.</p>
+      </div>
+    );
+  }
+
+  const filtered = (firms ?? []).filter((f) => {
+    if (!q.trim()) return true;
+    const s = q.toLowerCase();
+    return f.name.toLowerCase().includes(s) || (f.city ?? "").toLowerCase().includes(s) || (f.province ?? "").toLowerCase().includes(s);
+  });
+
+  return (
+    <div className="bg-cream">
+      <div className="border-b border-border bg-card">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
+          <div>
+            <h1 className="font-heading text-2xl text-ink md:text-3xl">All Firms</h1>
+            <p className="text-sm text-muted-foreground">Platform admin · create, edit and manage every firm.</p>
+          </div>
+          <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 rounded bg-ink px-4 py-2 text-sm font-semibold text-cream hover:bg-ink/90">
+            <Plus className="h-4 w-4" /> Add Firm
+          </button>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search by name, city or province…"
+          className="mb-4 w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm"
+        />
+
+        <div className="overflow-x-auto rounded-md border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-cream text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Firm</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {isLoading && <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">Loading…</td></tr>}
+              {filtered.map((f) => (
+                <tr key={f.id}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-ink">{f.name}</p>
+                        <p className="text-xs text-muted-foreground">/{f.slug}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{[f.city, f.province].filter(Boolean).join(", ") || "—"}</td>
+                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{f.status}</span></td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => navigate({ to: "/dashboard", search: { firmId: f.id, tab: "lawyers" } as never })}
+                      className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold"
+                    >
+                      <Users className="h-3 w-3" /> Lawyers
+                    </button>
+                    <button
+                      onClick={() => navigate({ to: "/dashboard", search: { firmId: f.id, tab: "settings" } as never })}
+                      className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"
+                    >
+                      <SettingsIcon className="h-3 w-3" /> Settings
+                    </button>
+                    <button onClick={() => setEditing(f)} className="mr-3 text-xs font-medium text-ink hover:text-gold">Edit</button>
+                    {f.status === "active" && (
+                      <Link to="/firms/$slug" params={{ slug: f.slug }} className="mr-3 text-xs font-medium text-forest hover:text-gold">View</Link>
+                    )}
+                    <button onClick={() => { if (confirm(`Delete ${f.name}? This also removes its lawyers and branches.`)) remove.mutate(f.id); }} className="text-xs text-destructive">
+                      <Trash2 className="inline h-3 w-3" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {!isLoading && filtered.length === 0 && (
+                <tr><td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">No firms found.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {(adding || editing) && (
+        <FirmFormModal
+          firm={editing ?? undefined}
+          onClose={() => { setAdding(false); setEditing(null); }}
+          onSaved={() => { setAdding(false); setEditing(null); qc.invalidateQueries({ queryKey: ["admin-firms"] }); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: () => void; onSaved: () => void }) {
+  const isEdit = !!firm;
+  const [form, setForm] = useState({
+    name: firm?.name ?? "",
+    registration_number: firm?.registration_number ?? "",
+    description: firm?.description ?? "",
+    website: firm?.website ?? "",
+    phone: firm?.phone ?? "",
+    address: firm?.address ?? "",
+    city: firm?.city ?? "",
+    province: firm?.province ?? "Gauteng",
+    status: firm?.status ?? "active",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) { toast.error("Firm name is required"); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        description: form.description ? sanitizeBioHtml(form.description) : null,
+      };
+      if (isEdit && firm) {
+        const { error } = await supabase.from("firms").update(payload).eq("id", firm.id);
+        if (error) throw error;
+        toast.success("Firm updated");
+      } else {
+        const slug = `${slugify(form.name)}-${Math.random().toString(36).slice(2, 7)}`;
+        const { data: inserted, error } = await supabase
+          .from("firms")
+          .insert({ ...payload, slug })
+          .select("id")
+          .single();
+        if (error) throw error;
+        // Seed a head-office branch from the firm address
+        if (form.city || form.address) {
+          await supabase.from("firm_branches").insert({
+            firm_id: inserted.id,
+            name: "Head Office",
+            address: form.address || null,
+            city: form.city || null,
+            province: form.province || null,
+            phone: form.phone || null,
+            is_head_office: true,
+          });
+        }
+        toast.success("Firm created");
+      }
+      onSaved();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Firm" : "Add Firm"}</h3>
+          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          <input required placeholder="Firm name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input placeholder="Registration number (optional)" value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">About the firm</label>
+            <RichTextEditor
+              value={form.description}
+              onChange={(html) => setForm({ ...form, description: html })}
+              placeholder="Describe the firm — use headings, paragraphs, lists…"
+            />
+          </div>
+
+          <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input placeholder="Main address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div className="grid grid-cols-2 gap-3">
+            <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+            <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
+              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+              <option value="active">Active (public)</option>
+              <option value="pending">Pending review</option>
+              <option value="inactive">Inactive (hidden)</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+              {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Firm"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
