@@ -126,6 +126,24 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       }
     }
 
+    // Validate LinkedIn URL
+    let linkedin_url = "";
+    const rawLi = extracted.linkedin_url.trim();
+    if (rawLi) {
+      try {
+        const u = new URL(rawLi, data.url);
+        if ((u.protocol === "http:" || u.protocol === "https:") && /linkedin\.com/i.test(u.hostname)) {
+          linkedin_url = u.toString().slice(0, 500);
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Lightweight email/phone cleanup
+    const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(extracted.email.trim())
+      ? extracted.email.trim().toLowerCase().slice(0, 200)
+      : "";
+    const phone = extracted.phone.trim().replace(/[^\d+()\-\s]/g, "").slice(0, 60);
+
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
@@ -134,6 +152,9 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       province,
       bio: sanitizeBioHtml(extracted.bio),
       avatar_url,
+      email,
+      phone,
+      linkedin_url,
       practice_areas: practiceAreaIds,
     };
   });
