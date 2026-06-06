@@ -882,8 +882,16 @@ function LawyerFormModal({
             )}
           </Section>
 
-          <Section title="Reported Cases — additional notes" hint="Free-text fallback for cases not yet linked from SAFLII.">
-            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Listed cases, citations, brief commentary…" />
+          <Section title="Reported Cases" hint="Add each case with a name and an optional link (e.g. SAFLII URL).">
+            {lawyer ? (
+              <ReportedCasesEditor lawyerId={lawyer.id} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Save the lawyer first to add reported cases.</p>
+            )}
+          </Section>
+
+          <Section title="Reported Cases — additional notes" hint="Optional free-text notes (commentary, unlinked citations).">
+            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Brief commentary, additional citations…" />
           </Section>
 
           <Section title="Noteworthy Matters" hint="Significant deals, transactions, mandates.">
