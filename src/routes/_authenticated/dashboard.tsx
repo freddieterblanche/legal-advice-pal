@@ -136,9 +136,23 @@ const lawyerSchema = z.object({
   bio: z.string().max(2000).optional(),
 });
 
+type LawyerRow = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  designation: string | null;
+  city: string | null;
+  province: string | null;
+  bio: string | null;
+  status: string | null;
+  trial_end_date: string | null;
+  profile_views: number | null;
+};
+
 function LawyersTab({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<LawyerRow | null>(null);
 
   const { data: lawyers } = useQuery({
     queryKey: ["firm-lawyers-list", firmId],
@@ -162,6 +176,8 @@ function LawyersTab({ firmId }: { firmId: string }) {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
   });
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] });
 
   return (
     <div>
@@ -195,6 +211,7 @@ function LawyersTab({ firmId }: { firmId: string }) {
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
                   <td className="px-4 py-3 text-right">
+                    <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
                     </button>
@@ -210,7 +227,8 @@ function LawyersTab({ firmId }: { firmId: string }) {
         </table>
       </div>
 
-      {showAdd && <AddLawyerModal firmId={firmId} onClose={() => setShowAdd(false)} onAdded={() => { qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }); setShowAdd(false); }} />}
+      {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
+      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
     </div>
   );
 }
