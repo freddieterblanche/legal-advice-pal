@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Globe, Phone } from "lucide-react";
+import { MapPin, Globe, Phone, Building2, Star } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
+import { sanitizeBioHtml } from "../lib/sanitize";
 
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
