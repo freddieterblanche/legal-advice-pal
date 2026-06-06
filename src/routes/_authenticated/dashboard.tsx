@@ -585,8 +585,26 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse({
+      // Normalise structured designation fields by type
+      const isAdvocate = form.lawyer_type === "advocate";
+      const normalised = {
         ...form,
+        designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
+        designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
+        is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
+        is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
+        practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
+        is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
+        sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
+      };
+      // Keep the legacy `designation` text in sync for views/lists that haven't migrated
+      const legacyDesignation = isAdvocate
+        ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
+        : (normalised.designation_code || normalised.designation_custom || "Attorney");
+
+      const parsed = lawyerSchema.parse({
+        ...normalised,
+        designation: legacyDesignation,
         bio: sanitizeBioHtml(form.bio),
         overview: sanitizeBioHtml(form.overview),
         qualifications: sanitizeBioHtml(form.qualifications),
