@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye } from "lucide-react";
+import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye, Building2, Trash2, Star } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -12,6 +12,17 @@ import { fetchImageAsDataUrl } from "../../lib/fetch-image.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
+
+type Branch = {
+  id: string;
+  firm_id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  province: string | null;
+  phone: string | null;
+  is_head_office: boolean;
+};
 
 type Tab = "overview" | "lawyers" | "billing" | "settings";
 
