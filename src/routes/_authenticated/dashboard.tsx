@@ -590,6 +590,39 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
+      // If the avatar_url is an external URL (not already in our storage),
+      // fetch it server-side and upload to lawyer-photos so we don't rely on
+      // hotlinking (many sites block cross-origin image embeds).
+      const currentUrl = form.avatar_url?.trim() ?? "";
+      const isOurStorage = currentUrl.includes("/storage/v1/object/");
+      if (currentUrl && /^https?:\/\//i.test(currentUrl) && !isOurStorage) {
+        try {
+          const { dataUrl } = await fetchImageFn({ data: { url: currentUrl } });
+          const [meta, b64] = dataUrl.split(",");
+          const mime = /data:(.*?);base64/.exec(meta)?.[1] ?? "image/jpeg";
+          const bin = atob(b64);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const ext = mime.split("/")[1]?.split(";")[0] || "jpg";
+          const path = `${firmId}/${crypto.randomUUID()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("lawyer-photos")
+            .upload(path, new Blob([bytes], { type: mime }), { contentType: mime, upsert: false });
+          if (upErr) throw upErr;
+          const { data: signed, error: sErr } = await supabase.storage
+            .from("lawyer-photos")
+            .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+          if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+          form.avatar_url = signed.signedUrl;
+          setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
+        } catch (fetchErr) {
+          console.error("External photo fetch failed:", fetchErr);
+          toast.error("Could not fetch that photo URL. Try uploading the file instead.");
+          setSaving(false);
+          return;
+        }
+      }
+
       // Normalise structured designation fields by type
       const isAdvocate = form.lawyer_type === "advocate";
       const normalised = {
