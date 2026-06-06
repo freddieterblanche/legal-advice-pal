@@ -73,11 +73,20 @@ function RegisterPage() {
             data: { first_name: adminParsed.first_name, last_name: adminParsed.last_name },
           },
         });
-        if (authErr) throw authErr;
+        if (authErr) {
+          const msg = authErr.message.toLowerCase();
+          if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+            toast.error("That email is already registered. Please sign in first, then register your firm.");
+            navigate({ to: "/auth", search: { redirect: "/register" } as never });
+            return;
+          }
+          throw authErr;
+        }
         if (!authData.user) throw new Error("Failed to create user");
         await supabase.auth.signInWithPassword({ email: adminParsed.email, password: adminParsed.password });
         userId = authData.user.id;
       }
+
 
       // Create firm
       const slug = `${slugify(firmParsed.name)}-${Math.random().toString(36).slice(2, 6)}`;
