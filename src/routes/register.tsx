@@ -21,7 +21,13 @@ const firmSchema = z.object({
   registration_number: z.string().trim().max(60).optional(),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   city: z.string().trim().min(1).max(80),
-  website: z.string().trim().url().max(255).optional().or(z.literal("")),
+  website: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .transform((v) => (v ? (/^https?:\/\//i.test(v) ? v : `https://${v}`) : ""))
+    .refine((v) => !v || /^https?:\/\/[^\s.]+\.[^\s]+$/i.test(v), { message: "Enter a valid website (e.g. example.co.za)" }),
   phone: z.string().trim().max(30).optional(),
   address: z.string().trim().max(255).optional(),
 });
