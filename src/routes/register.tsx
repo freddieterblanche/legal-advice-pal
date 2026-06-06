@@ -9,8 +9,8 @@ import { PROVINCES, slugify } from "../lib/constants";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Register Your Firm — Lawexperts.co.za" },
-      { name: "description", content: "List your South African law firm on Lawexperts.co.za. R99/lawyer/month. First 3 months free." },
+      { title: "Register Your Firm — Lawexpert.co.za" },
+      { name: "description", content: "List your South African law firm on Lawexpert.co.za. R99/lawyer/month. First 3 months free." },
     ],
   }),
   component: RegisterPage,
@@ -84,7 +84,7 @@ function RegisterPage() {
         last_name: adminParsed.last_name,
       }).eq("id", authData.user.id);
 
-      toast.success("Firm registered. Welcome to Lawexperts.co.za.");
+      toast.success("Firm registered. Welcome to Lawexpert.co.za.");
       navigate({ to: "/dashboard" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed");
@@ -157,7 +157,7 @@ function RegisterPage() {
                 <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-forest" /> Billing begins after trial via PayFast</p>
                 <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-forest" /> Add unlimited lawyers — only active listings are billed</p>
               </div>
-              <p className="text-xs text-muted-foreground">By registering, your firm enters review. Once approved by Lawexperts.co.za, your profile and lawyers go live.</p>
+              <p className="text-xs text-muted-foreground">By registering, your firm enters review. Once approved by Lawexpert.co.za, your profile and lawyers go live.</p>
               <div className="flex justify-between pt-2">
                 <button onClick={() => setStep(2)} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
                 <button onClick={handleSubmit} disabled={loading} className="rounded bg-gold px-5 py-2 text-sm font-semibold text-ink hover:bg-gold/90 disabled:opacity-50">
