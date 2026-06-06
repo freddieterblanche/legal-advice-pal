@@ -193,7 +193,24 @@ function SearchPage() {
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 return (
                 <article key={l.id} className={`flex flex-col gap-4 rounded-xl border border-border bg-card p-5 ring-1 ring-inset ${accentRing} transition-shadow hover:shadow-md sm:flex-row`}>
-                  <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-xl`}>
+                  {l.avatar_url ? (
+                    <img
+                      src={l.avatar_url}
+                      alt={l.full_name ?? `${first} ${last}`}
+                      loading="lazy"
+                      className={`h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-inset ${accentRing}`}
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.display = "none";
+                        const fallback = img.nextElementSibling as HTMLElement | null;
+                        if (fallback) fallback.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-xl`}
+                    style={l.avatar_url ? { display: "none" } : undefined}
+                  >
                     {first[0]}{last[0]}
                   </div>
                   <div className="flex-1">
