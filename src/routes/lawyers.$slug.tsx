@@ -42,8 +42,21 @@ function LawyerProfile() {
     },
   });
 
+  const { data: myFirmId } = useQuery({
+    queryKey: ["my-firm-id"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("firm_id").eq("id", user.id).maybeSingle();
+      return data?.firm_id ?? null;
+    },
+    staleTime: 60_000,
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!lawyer) return null;
+
+  const canEdit = myFirmId && lawyer.firm_id === myFirmId;
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
   const cases = lawyer.lawyer_cases ?? [];
