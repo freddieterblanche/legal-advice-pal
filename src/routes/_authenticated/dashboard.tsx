@@ -1124,6 +1124,7 @@ function SettingsTab({ firm }: { firm: any }) {
     address: firm.address ?? "",
     city: firm.city ?? "",
     province: firm.province ?? "Gauteng",
+    logo_url: firm.logo_url ?? "",
   });
 
   const save = useMutation({
