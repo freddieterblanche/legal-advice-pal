@@ -10,7 +10,24 @@ export const PROVINCES = [
   "Northern Cape",
 ] as const;
 
-export const DESIGNATIONS = ["SC", "Advocate", "Attorney-Partner", "Attorney"] as const;
+export const DESIGNATIONS = [
+  "Senior Counsel",
+  "Advocate",
+  "Managing Director",
+  "Chairperson",
+  "Chief Executive Officer",
+  "Chief Operating Officer",
+  "Company Secretary",
+  "Managing Partner",
+  "Director",
+  "Partner",
+  "Consultant",
+  "Executive",
+  "Senior Associate",
+  "Associate",
+  "Candidate Legal Practitioner",
+  "Attorney",
+] as const;
 
 export function slugify(input: string) {
   return input
