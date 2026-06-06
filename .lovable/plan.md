@@ -1,73 +1,61 @@
 ## Goal
+Replace the free-text Designation with a structured, role-appropriate selector for Advocates and Attorneys, and surface SC status, year of admission, years in practice, and Practice/Sector Head badges.
 
-Restructure lawyer profiles into the 9 Bowmans-style sections, each editable as its own field, and let lawyers manage their own listing after the firm admin invites them.
+## Database changes (lawyers table)
+Add the following columns (all nullable so existing rows keep working):
+- `lawyer_type` — text: `'advocate' | 'attorney'`
+- `year_of_admission` — integer (e.g. 2008); years in practice computed at render time
+- `is_senior_counsel` — boolean, default false (Advocates only)
+- `designation_code` — text, one of the Attorney values below; null for Advocates
+- `designation_custom` — text, free-text fallback when none of the codes fit
+- `is_practice_head` — boolean, default false
+- `practice_head_area` — text (free text, e.g. "Banking & Finance")
+- `is_sector_head` — boolean, default false
+- `sector_head_area` — text (free text, e.g. "Mining")
 
-## Profile sections (new structure)
+Existing `designation` column stays as-is for back-compat and is shown until the lawyer is next edited.
 
-1. **Details** — Name, Designation *(existing)*
-2. **Contact Details** — Tel, Email, Branch Office *(existing)*
-3. **Areas of Expertise** — practice-area chips *(existing)*
-4. **Qualifications** — rich text *(replaces current "Education" textarea)*
-5. **Overview** — rich text *(replaces current "Bio")*
-6. **Accolades & Awards** — rich text *(new)*
-7. **Articles Published** — structured list: title, publication, date, URL *(new)*
-8. **Reported Cases** — existing linked SAFLII cases **+** a rich-text fallback for unlinked cases *(extended)*
-9. **Noteworthy Matters** — rich text *(new)*
+Attorney `designation_code` values:
+Managing Director, Chairperson, Chief Executive Officer, Chief Operating Officer, Company Secretary, Managing Partner, Director, Partner, Consultant, Executive, Senior Associate, Associate, Candidate Legal Practitioner.
 
-## Database changes
+## Edit form (admin dashboard + /my-profile)
+In the "Details" section, replace the single Designation input with:
 
-Add to `lawyers`:
-- `qualifications text` (migrate existing `education` values in)
-- `overview text` (migrate existing `bio` values in)
-- `accolades text`
-- `noteworthy_matters text`
-- `reported_cases_notes text`
+1. **Lawyer type** — radio: Advocate / Attorney
+2. **If Advocate**:
+   - Checkbox: "Senior Counsel (SC)"
+   - Number: "Year of admission" (1950–current year)
+   - Read-only computed display: "X years in practice"
+3. **If Attorney**:
+   - Select: Attorney designation (the 13 codes above) + "Other (specify)"
+   - If "Other" → free-text `designation_custom`
+   - Number: "Year of admission" (optional)
+   - If designation is "Director": show two checkboxes
+     - "Also Practice Head" → text input for practice area name
+     - "Also Sector Head" → text input for sector name
+4. Legacy `designation` text shown as a small "Current value (will be replaced on save)" note if present.
 
-New table `lawyer_articles`:
-- `id`, `lawyer_id` (FK → lawyers, cascade delete), `title`, `publication`, `published_date` (date, nullable), `url`, `sort_order`, timestamps
-- RLS: public can read articles of trial/active lawyers; firm admin and the lawyer themselves can manage their own.
+## Display logic (public profile, search results, cards)
+Helper `formatDesignation(lawyer)` returns the label string:
 
-New table `lawyer_invites` (for self-manage flow):
-- `id`, `lawyer_id` (unique), `email`, `token` (uuid, unique), `invited_by`, `sent_at`, `accepted_at`, `expires_at` (7 days)
-- RLS: only platform_admin and the inviting firm admin can read.
+- Advocate + SC: `Senior Counsel · 18 years in practice`
+- Advocate + Junior: `Junior Counsel · 4 years in practice`
+- Attorney: `Director` (or chosen code / custom). Append, on a second line/badge:
+  - `Practice Head: Banking & Finance` if set
+  - `Sector Head: Mining` if set
+- Fallback: if `lawyer_type` is null, render the legacy `designation` text.
 
-`profiles.role` gains a `lawyer` role value (already supported as free text).
+Years in practice = `currentYear - year_of_admission` (computed in helper, never stored).
 
-## Lawyer self-manage flow
+## Files touched
+- New migration: add the 9 columns above to `public.lawyers`.
+- `src/lib/designation.ts` — constants (attorney codes), `formatDesignation()`, `yearsInPractice()`.
+- `src/routes/_authenticated/dashboard.tsx` — replace designation input in the lawyer edit modal with the new structured controls.
+- `src/routes/_authenticated/my-profile.tsx` — same controls (when this route exists; otherwise the dashboard form covers it for now).
+- `src/routes/lawyers.$slug.tsx` — render via `formatDesignation`.
+- `src/routes/search.tsx` and any lawyer card components — render via `formatDesignation`.
 
-1. **Invite**: On a lawyer row in the firm/admin dashboard, an **"Invite to manage"** button. It calls a server function that:
-   - Generates an invite token, stores in `lawyer_invites`.
-   - Sends a branded email via the project's email infrastructure with a link: `/claim?token=…`.
-2. **Accept**: `/claim?token=…` route:
-   - Validates token via a public server function.
-   - If user not signed in, shows sign-up / sign-in (email is pre-filled, password they choose).
-   - On accept, links `lawyers.profile_id = auth.uid()`, sets `is_claimed = true`, marks invite accepted, sets profile `role = 'lawyer'` (if currently visitor).
-3. **Manage**: Logged-in lawyer sees a new `/my-profile` route → reuses the existing lawyer-edit form, scoped to *their* lawyer record. The existing "Lawyer can update own record" RLS policy already allows this. Firm admin retains full edit access.
-
-Prerequisite: email infrastructure + transactional email templates need to be set up. If not yet present, the email setup dialog will appear before sending the first invite.
-
-## Edit form (firm dashboard + /my-profile)
-
-Reorganise the existing lawyer modal into collapsible sections matching the 9 categories above. Each rich-text section uses the existing `RichTextEditor`. Articles uses a small repeatable list (add / remove / reorder rows).
-
-## Public profile page (`/lawyers/$slug`)
-
-Render the 9 sections in Bowmans order down the left column; right sidebar keeps Office(s) and Status. Empty sections are hidden. Reported Cases shows linked cases first, then the free-text fallback below if present.
-
-## Migration of existing data
-
-- Copy `lawyers.bio` → `lawyers.overview` (keep `bio` column for back-compat for now; stop writing to it).
-- Copy `lawyers.education` → `lawyers.qualifications` (same).
-
-## Out of scope (this turn)
-
-- Approval workflow for lawyer-edited changes (lawyers' edits go live immediately, same as firm admin).
-- Branded `/claim` landing page styling beyond a simple form.
-- Bulk invite.
-
-## Technical notes
-
-- Sanitize all new rich-text fields with the existing `sanitizeBioHtml`.
-- Article URL validation: `https?://`, max 500 chars; title required, others optional.
-- Invite link uses signed token in URL; server-side single-use, 7-day expiry.
-- Email send route: use `email_domain--scaffold_transactional_email` template `lawyer-invite`.
+## Out of scope
+- No filtering/search by lawyer type or SC status yet (can be a follow-up).
+- No bulk migration of existing `designation` text → new codes (kept as-is per your answer).
+- No validation that an SC was actually admitted as SC — trust the admin/lawyer.
