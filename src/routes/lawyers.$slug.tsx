@@ -60,6 +60,9 @@ function LawyerProfile() {
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
   const cases = lawyer.lawyer_cases ?? [];
+  const branches = (lawyer.lawyer_branches ?? [])
+    .map((x: any) => x.firm_branches)
+    .filter(Boolean);
 
   return (
     <div className="bg-cream">
