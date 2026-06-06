@@ -20,6 +20,7 @@ type FirmRow = {
   city: string | null;
   province: string | null;
   status: string | null;
+  logo_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/firms")({
@@ -192,6 +193,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     city: firm?.city ?? "",
     province: firm?.province ?? "Gauteng",
     status: firm?.status ?? "active",
+    logo_url: firm?.logo_url ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
@@ -282,6 +284,29 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                   onChange={(html) => setForm({ ...form, description: html })}
                   placeholder="Describe the firm — use headings, paragraphs, lists…"
                 />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Logo image URL</label>
+                <div className="flex items-start gap-3">
+                  {form.logo_url && (
+                    <img
+                      src={form.logo_url}
+                      alt="Logo preview"
+                      className="h-16 w-16 shrink-0 rounded border border-border bg-white object-contain p-1"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
+                  )}
+                  <input
+                    type="url"
+                    value={form.logo_url}
+                    onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
+                    placeholder="https://yourfirm.co.za/logo.png"
+                    maxLength={2000}
+                    className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Paste a public URL to your firm logo. PNG or SVG with a transparent background works best.</p>
               </div>
 
               <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
