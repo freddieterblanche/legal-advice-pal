@@ -59,7 +59,16 @@ function LawyerProfile() {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}</h1>
-                {lawyer.designation && <span className="rounded-full border border-gold/40 px-3 py-0.5 text-sm text-gold">{lawyer.designation}</span>}
+                {lawyer.designation && (() => {
+                  const isAdv = lawyer.designation.toLowerCase().includes("advocate") || lawyer.designation.toLowerCase() === "sc";
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${
+                      isAdv ? "bg-white/10 text-white ring-white/30" : "bg-gold/20 text-white ring-gold/40"
+                    }`}>
+                      {isAdv ? "Advocate" : "Attorney"} · {lawyer.designation}
+                    </span>
+                  );
+                })()}
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-cream/70">
                 {lawyer.firms && (
