@@ -19,7 +19,9 @@ const extractionSchema = z.object({
   province: z.string().max(40).default(""),
   bio: z.string().max(2000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
+  photo_url: z.string().max(2000).default(""),
 });
+
 
 export const importLawyerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -68,8 +70,13 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
-          "Bio should be a clean prose summary (max ~1500 chars), no markdown.",
+          "Bio should be a clean prose summary (max ~1500 chars), no markdown. " +
+          "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
+          "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
+          "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
+          "Resolve relative URLs against the source URL. Empty string if none found.",
         prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
+
       });
       extracted = experimental_output;
     } catch (err) {
@@ -93,6 +100,19 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       .filter((p) => matchedSlugs.includes(p.slug))
       .map((p) => ({ id: p.id, slug: p.slug, name: p.name }));
 
+    // Resolve and validate photo URL
+    let avatar_url = "";
+    if (extracted.photo_url.trim()) {
+      try {
+        const resolved = new URL(extracted.photo_url.trim(), data.url).toString();
+        if (resolved.startsWith("http://") || resolved.startsWith("https://")) {
+          avatar_url = resolved.slice(0, 2000);
+        }
+      } catch {
+        // ignore invalid URL
+      }
+    }
+
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
@@ -100,6 +120,8 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       city: extracted.city,
       province,
       bio: extracted.bio,
+      avatar_url,
       practice_areas: practiceAreaIds,
     };
   });
+

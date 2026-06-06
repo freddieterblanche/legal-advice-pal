@@ -53,9 +53,19 @@ function LawyerProfile() {
       <section className="bg-ink py-16 text-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gold/20 font-heading text-3xl text-gold">
-              {lawyer.first_name[0]}{lawyer.last_name[0]}
-            </div>
+            {lawyer.avatar_url ? (
+              <img
+                src={lawyer.avatar_url}
+                alt={`${lawyer.first_name} ${lawyer.last_name}`}
+                className="h-24 w-24 shrink-0 rounded-full object-cover ring-2 ring-gold/40"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              />
+            ) : (
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gold/20 font-heading text-3xl text-gold">
+                {lawyer.first_name[0]}{lawyer.last_name[0]}
+              </div>
+            )}
+
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}</h1>

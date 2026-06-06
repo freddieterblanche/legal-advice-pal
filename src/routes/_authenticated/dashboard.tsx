@@ -134,6 +134,7 @@ const lawyerSchema = z.object({
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(2000).optional(),
+  avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
 });
 
 type LawyerRow = {
@@ -144,10 +145,12 @@ type LawyerRow = {
   city: string | null;
   province: string | null;
   bio: string | null;
+  avatar_url: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
 };
+
 
 function LawyersTab({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
@@ -252,7 +255,9 @@ function LawyerFormModal({
     city: lawyer?.city ?? "",
     province: lawyer?.province ?? "Gauteng",
     bio: lawyer?.bio ?? "",
+    avatar_url: lawyer?.avatar_url ?? "",
   });
+
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [importUrl, setImportUrl] = useState("");
@@ -288,8 +293,10 @@ function LawyerFormModal({
         city: res.city || "",
         province: res.province || "Gauteng",
         bio: res.bio || "",
+        avatar_url: res.avatar_url || "",
       });
       setPracticeAreas(res.practice_areas);
+
       setImported(true);
       toast.success("Profile imported — please review");
     } catch (err) {
@@ -383,6 +390,27 @@ function LawyerFormModal({
             </select>
           </div>
           <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
+            <div className="flex items-start gap-3">
+              {form.avatar_url && (
+                <img
+                  src={form.avatar_url}
+                  alt="Preview"
+                  className="h-16 w-16 shrink-0 rounded-full object-cover ring-1 ring-border"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+              <input
+                type="url"
+                placeholder="https://yourfirm.co.za/team/jane.jpg"
+                value={form.avatar_url}
+                onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
           {practiceAreas.length > 0 && (
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</p>
