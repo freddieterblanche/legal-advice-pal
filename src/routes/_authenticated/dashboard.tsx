@@ -444,16 +444,20 @@ function LawyerFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] w-[90vw] overflow-y-auto rounded-lg bg-card p-6 shadow-xl md:w-[70vw]">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
+      <div onClick={(e) => e.stopPropagation()} className="flex max-h-[90vh] w-[90vw] flex-col overflow-hidden rounded-lg bg-card shadow-xl md:w-[70vw]">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
+          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="overflow-y-auto px-6 py-4">
+
 
         <div className="mt-4 rounded-md border border-dashed border-gold/60 bg-gold/5 p-3">
           <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink">
