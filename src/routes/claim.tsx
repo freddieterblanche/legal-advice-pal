@@ -125,8 +125,8 @@ function ClaimPage() {
         ) : currentEmail ? null : (
           <form onSubmit={submit} className="mt-4 space-y-3">
             <div className="flex gap-2 text-xs">
-              <button type="button" onClick={() => setMode("signup")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signup" ? "bg-gold text-ink" : "bg-muted text-muted-foreground"}`}>New account</button>
-              <button type="button" onClick={() => setMode("signin")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signin" ? "bg-gold text-ink" : "bg-muted text-muted-foreground"}`}>Existing account</button>
+              <button type="button" onClick={() => setMode("signup")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signup" ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>New account</button>
+              <button type="button" onClick={() => setMode("signin")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signin" ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>Existing account</button>
             </div>
             {mode === "signup" && (
               <div className="grid grid-cols-2 gap-2">

@@ -58,7 +58,7 @@ export function Navbar() {
               <Link to="/auth" className="text-sm font-medium text-cream/80 hover:text-cream">
                 Sign In
               </Link>
-              <Link to="/register" className="rounded-md bg-gold px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-gold/90">
+              <Link to="/register" className="rounded-md bg-gold px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold/90">
                 Register Your Firm
               </Link>
             </>
@@ -87,7 +87,7 @@ export function Navbar() {
               ) : (
                 <>
                   <Link to="/auth" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm text-cream/90">Sign In</Link>
-                  <Link to="/register" onClick={() => setOpen(false)} className="mt-2 block rounded bg-gold px-3 py-2 text-center text-sm font-semibold text-ink">Register Your Firm</Link>
+                  <Link to="/register" onClick={() => setOpen(false)} className="mt-2 block rounded bg-gold px-3 py-2 text-center text-sm font-semibold text-white">Register Your Firm</Link>
                 </>
               )}
             </div>

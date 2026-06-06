@@ -96,7 +96,7 @@ function FirmsIndex() {
               <option value="" className="text-ink">All provinces</option>
               {PROVINCES.map((p) => <option key={p} value={p} className="text-ink">{p}</option>)}
             </select>
-            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-ink hover:bg-gold/90">Search</button>
+            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
           </form>
         </div>
       </section>

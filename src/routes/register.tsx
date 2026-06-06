@@ -120,7 +120,7 @@ function RegisterPage() {
         <div className="mt-8 flex items-center gap-2">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex flex-1 items-center gap-2">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${step >= s ? "bg-gold text-ink" : "bg-muted text-muted-foreground"}`}>
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${step >= s ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>
                 {step > s ? <Check className="h-4 w-4" /> : s}
               </div>
               {s < 3 && <div className={`h-0.5 flex-1 ${step > s ? "bg-gold" : "bg-muted"}`} />}
@@ -205,7 +205,7 @@ function RegisterPage() {
               <p className="text-xs text-muted-foreground">By registering, your firm enters review. Once approved by Lawexpert.co.za, your profile and lawyers go live.</p>
               <div className="flex justify-between pt-2">
                 <button onClick={() => setStep(2)} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
-                <button onClick={handleSubmit} disabled={loading} className="rounded bg-gold px-5 py-2 text-sm font-semibold text-ink hover:bg-gold/90 disabled:opacity-50">
+                <button onClick={handleSubmit} disabled={loading} className="rounded bg-gold px-5 py-2 text-sm font-semibold text-white hover:bg-gold/90 disabled:opacity-50">
                   {loading ? "Registering…" : "Complete Registration"}
                 </button>
               </div>
