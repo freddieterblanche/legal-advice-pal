@@ -103,26 +103,24 @@ function Dashboard() {
       )}
       <div className="border-b border-cream/20 bg-ink">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div className="flex items-center gap-4">
-              {firm.logo_url && (
-                <img
-                  src={firm.logo_url}
-                  alt={`${firm.name} logo`}
-                  className="h-14 w-auto max-w-[200px] object-contain"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="font-heading text-2xl text-cream md:text-3xl">{firm.name}</h1>
+              <p className="text-sm text-cream/70">
+                Status: <span className="capitalize">{firm.status}</span>
+                {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
+              </p>
+              {firm.status === "active" && (
+                <Link to="/firms/$slug" params={{ slug: firm.slug }} className="text-sm font-medium text-cream/80 hover:text-gold">View public profile →</Link>
               )}
-              <div>
-                <h1 className="font-heading text-2xl text-cream md:text-3xl">{firm.name}</h1>
-                <p className="text-sm text-cream/70">
-                  Status: <span className="capitalize">{firm.status}</span>
-                  {firm.status === "pending" && " — awaiting Lawexpert.co.za review"}
-                </p>
-              </div>
             </div>
-            {firm.status === "active" && (
-              <Link to="/firms/$slug" params={{ slug: firm.slug }} className="text-sm font-medium text-cream/80 hover:text-gold">View public profile →</Link>
+            {firm.logo_url && (
+              <img
+                src={firm.logo_url}
+                alt={`${firm.name} logo`}
+                className="h-20 w-auto object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
             )}
           </div>
           <div className="mt-6 flex flex-wrap gap-1 border-b border-cream/20">
