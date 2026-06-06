@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "../integrations/supabase/auth-middleware";
 import { DESIGNATIONS, PROVINCES } from "./constants";
+import { sanitizeBioHtml } from "./sanitize";
 
 const inputSchema = z.object({
   url: z.string().trim().url().max(500).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
@@ -17,7 +18,7 @@ const extractionSchema = z.object({
   designation: z.string().max(40).default("Attorney"),
   city: z.string().max(80).default(""),
   province: z.string().max(40).default(""),
-  bio: z.string().max(2000).default(""),
+  bio: z.string().max(10000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
   photo_url: z.string().max(2000).default(""),
 });
@@ -70,7 +71,11 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           `Allowed designation values: ${DESIGNATIONS.join(", ")}. ` +
           `Allowed province values (South Africa): ${PROVINCES.join(", ")}. ` +
           `Allowed practice_area_slugs: ${practiceAreas.map((p) => p.slug).join(", ")}. ` +
-          "Bio should be a clean prose summary (max ~1500 chars), no markdown. " +
+          "Bio: return HTML (NOT markdown) with these tags only: <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, <br>. " +
+          "Use <h2>/<h3> for natural section headings such as 'Experience', 'Education', 'Recognition', 'Practice Areas'. " +
+          "Use <p> for paragraphs (separate ideas into multiple paragraphs for readability). Use lists where appropriate. " +
+          "Do NOT include the lawyer's name as a heading, and do not include inline styles, classes, links, or images. " +
+          "Aim for ~800–4000 characters of well-structured HTML. " +
           "photo_url: the URL of the lawyer's headshot/portrait image if present on the page " +
           "(look for markdown images like ![alt](url) where the alt or surrounding context refers to the lawyer by name, " +
           "or profile/avatar/team images). Prefer a direct image URL (jpg/png/webp). " +
@@ -119,7 +124,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       designation,
       city: extracted.city,
       province,
-      bio: extracted.bio,
+      bio: sanitizeBioHtml(extracted.bio),
       avatar_url,
       practice_areas: practiceAreaIds,
     };

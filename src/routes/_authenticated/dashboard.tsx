@@ -8,6 +8,8 @@ import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, DESIGNATIONS, slugify } from "../../lib/constants";
 import { importLawyerProfile } from "../../lib/profile-import.functions";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
@@ -133,7 +135,7 @@ const lawyerSchema = z.object({
   designation: z.enum(DESIGNATIONS as unknown as [string, ...string[]]),
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
-  bio: z.string().max(2000).optional(),
+  bio: z.string().max(20000).optional(),
   avatar_url: z.string().trim().url().max(2000).or(z.literal("")).optional(),
 });
 
@@ -319,7 +321,7 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse(form);
+      const parsed = lawyerSchema.parse({ ...form, bio: sanitizeBioHtml(form.bio) });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
@@ -389,7 +391,15 @@ function LawyerFormModal({
               {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
-          <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
+            <RichTextEditor
+              value={form.bio}
+              onChange={(html) => setForm({ ...form, bio: html })}
+              placeholder="Short bio with headings, paragraphs, and lists…"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
+          </div>
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
             <div className="flex items-start gap-3">

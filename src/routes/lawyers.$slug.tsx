@@ -5,6 +5,7 @@ import { ExternalLink, MapPin, Building2, BookOpen, Mail } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { sanitizeBioHtml } from "../lib/sanitize";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
@@ -108,9 +109,13 @@ function LawyerProfile() {
           {lawyer.bio && (
             <section>
               <h2 className="font-heading text-xl text-ink">About</h2>
-              <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/80">{lawyer.bio}</p>
+              <div
+                className="mt-3 leading-relaxed text-foreground/80 [&_h2]:font-heading [&_h2]:text-lg [&_h2]:text-ink [&_h2]:mt-5 [&_h2]:mb-2 [&_h3]:font-heading [&_h3]:text-base [&_h3]:text-ink [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-3 [&_li]:my-1 [&_strong]:font-semibold [&_strong]:text-ink"
+                dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(lawyer.bio) }}
+              />
             </section>
           )}
+
 
           {lawyer.education && (
             <section>
