@@ -110,9 +110,20 @@ function LawyerProfile() {
                 </div>
               )}
             </div>
-            <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
-              <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {canEdit && (
+                <Link
+                  to="/dashboard"
+                  search={{ tab: "lawyers", edit: lawyer.id }}
+                  className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+                >
+                  <Pencil className="mr-2 inline h-4 w-4" /> Edit Profile
+                </Link>
+              )}
+              <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
+                <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
+              </button>
+            </div>
           </div>
         </div>
       </section>
