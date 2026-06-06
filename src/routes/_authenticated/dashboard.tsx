@@ -391,7 +391,15 @@ function LawyerFormModal({
               {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
-          <textarea rows={6} maxLength={2000} placeholder="Short bio (optional)" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Biography</label>
+            <RichTextEditor
+              value={form.bio}
+              onChange={(html) => setForm({ ...form, bio: html })}
+              placeholder="Short bio with headings, paragraphs, and lists…"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Paragraph spacing, bold, italic and lists are supported.</p>
+          </div>
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
             <div className="flex items-start gap-3">
