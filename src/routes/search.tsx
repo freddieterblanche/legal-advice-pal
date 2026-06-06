@@ -1,0 +1,216 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { supabase } from "../integrations/supabase/client";
+import { PROVINCES, DESIGNATIONS } from "../lib/constants";
+
+type Search = { q?: string; area?: string; province?: string; designation?: string; page?: number };
+
+export const Route = createFileRoute("/search")({
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    q: typeof s.q === "string" ? s.q : undefined,
+    area: typeof s.area === "string" ? s.area : undefined,
+    province: typeof s.province === "string" ? s.province : undefined,
+    designation: typeof s.designation === "string" ? s.designation : undefined,
+    page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+  }),
+  head: () => ({
+    meta: [
+      { title: "Find a Lawyer — LexSA" },
+      { name: "description", content: "Search South African lawyers by name, practice area, and province." },
+    ],
+  }),
+  component: SearchPage,
+});
+
+const PAGE_SIZE = 20;
+
+function SearchPage() {
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/search" });
+  const [q, setQ] = useState(search.q ?? "");
+
+  useEffect(() => { setQ(search.q ?? ""); }, [search.q]);
+
+  const { data: areas } = useQuery({
+    queryKey: ["practice-areas"],
+    queryFn: async () => (await supabase.from("practice_areas").select("*").order("name")).data ?? [],
+  });
+
+  const { data: results, isLoading } = useQuery({
+    queryKey: ["search", search],
+    queryFn: async () => {
+      let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
+      if (search.q) query = query.ilike("full_name", `%${search.q}%`);
+      if (search.province) query = query.eq("province", search.province);
+      if (search.area) query = query.contains("practice_area_slugs", [search.area]);
+      const page = search.page ?? 1;
+      const from = (page - 1) * PAGE_SIZE;
+      query = query.range(from, from + PAGE_SIZE - 1).order("case_count", { ascending: false });
+      const { data, count, error } = await query;
+      if (error) throw error;
+      let filtered = data ?? [];
+      if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
+      return { rows: filtered, total: count ?? 0 };
+    },
+  });
+
+  const update = (patch: Partial<Search>) => {
+    navigate({ search: (prev) => ({ ...prev, ...patch, page: 1 }) });
+  };
+
+  const onSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    update({ q: q || undefined });
+  };
+
+  const total = results?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = search.page ?? 1;
+
+  return (
+    <div className="bg-cream">
+      <div className="border-b border-border bg-card">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <form onSubmit={onSearchSubmit} className="flex flex-wrap gap-2">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by name or firm…"
+              maxLength={120}
+              className="flex-1 min-w-[200px] rounded-md border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+            />
+            <button type="submit" className="rounded-md bg-ink px-6 py-2 text-sm font-semibold text-cream hover:bg-ink/90">Search</button>
+          </form>
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
+        {/* Sidebar */}
+        <aside className="space-y-6">
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Practice Area</h3>
+            <select
+              value={search.area ?? ""}
+              onChange={(e) => update({ area: e.target.value || undefined })}
+              className="mt-3 w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">All</option>
+              {areas?.map((a) => <option key={a.id} value={a.slug}>{a.name}</option>)}
+            </select>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Province</h3>
+            <select
+              value={search.province ?? ""}
+              onChange={(e) => update({ province: e.target.value || undefined })}
+              className="mt-3 w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">All</option>
+              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Designation</h3>
+            <div className="mt-3 space-y-2">
+              {DESIGNATIONS.map((d) => (
+                <label key={d} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="designation"
+                    checked={search.designation === d}
+                    onChange={() => update({ designation: d })}
+                    className="accent-gold"
+                  />
+                  {d}
+                </label>
+              ))}
+              <button onClick={() => update({ designation: undefined })} className="text-xs text-muted-foreground hover:text-ink">
+                Clear
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Results */}
+        <div>
+          <div className="mb-4 flex items-baseline justify-between">
+            <h1 className="font-heading text-2xl text-ink">
+              {isLoading ? "Searching…" : `${total} lawyer${total === 1 ? "" : "s"} found`}
+            </h1>
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => <div key={i} className="h-32 animate-pulse rounded-md bg-muted" />)}
+            </div>
+          ) : results?.rows.length === 0 ? (
+            <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
+              No lawyers match your search. Try fewer filters.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {results?.rows.map((l) => (
+                <article key={l.id} className="flex flex-col gap-4 rounded-md border border-border bg-card p-5 transition-shadow hover:shadow-md sm:flex-row">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-xl text-gold">
+                    {l.first_name[0]}{l.last_name[0]}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-baseline gap-3">
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                        {l.full_name}
+                      </Link>
+                      {l.designation && <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-medium text-forest">{l.designation}</span>}
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {l.firm_name} · {l.city}, {l.province}
+                    </p>
+                    {l.practice_areas && l.practice_areas[0] && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {l.practice_areas.filter(Boolean).slice(0, 4).map((pa: string) => (
+                          <span key={pa} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pa}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-2 sm:w-32">
+                    {l.case_count > 0 && (
+                      <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-ink">
+                        {l.case_count} case{l.case_count === 1 ? "" : "s"}
+                      </span>
+                    )}
+                    <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded bg-ink px-3 py-1.5 text-xs font-medium text-cream hover:bg-ink/90">
+                      View Profile
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <button
+                disabled={page <= 1}
+                onClick={() => navigate({ search: (prev) => ({ ...prev, page: page - 1 }) })}
+                className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
+              >
+                ← Prev
+              </button>
+              <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+              <button
+                disabled={page >= totalPages}
+                onClick={() => navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })}
+                className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

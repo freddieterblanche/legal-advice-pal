@@ -1,337 +1,179 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Scale,
-  Shield,
-  Users,
-  Briefcase,
-  Home,
-  HeartHandshake,
-  Gavel,
-  Phone,
-  ArrowRight,
-  Star,
-  Clock,
-  Award,
-  TrendingUp,
-} from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { Search, Scale, Building2, BookOpen, MapPin, ArrowRight } from "lucide-react";
+import { supabase } from "../integrations/supabase/client";
+import { PROVINCES } from "../lib/constants";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lawexperts | Expert Legal Counsel" },
-      { name: "description", content: "Trusted legal services for individuals and businesses. Specializing in corporate law, criminal defense, family law, real estate, and personal injury. Free consultations." },
-      { property: "og:title", content: "Lawexperts | Expert Legal Counsel" },
-      { property: "og:description", content: "Trusted legal services for individuals and businesses. Free consultations available." },
+      { title: "LexSA | South Africa's Legal Directory" },
+      { name: "description", content: "Search verified South African lawyers by practice area, province, and reported cases. Find the right counsel — backed by their case record." },
+      { property: "og:title", content: "LexSA | South Africa's Legal Directory" },
+      { property: "og:description", content: "Verified profiles. Linked cases. South Africa's legal directory." },
     ],
   }),
-  component: Index,
+  component: HomePage,
 });
 
-const practiceAreas = [
-  {
-    icon: Briefcase,
-    title: "Corporate Law",
-    description: "Mergers, acquisitions, contracts, and business formation tailored to your strategic goals.",
-  },
-  {
-    icon: Shield,
-    title: "Criminal Defense",
-    description: "Aggressive representation protecting your rights from investigation through trial.",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Family Law",
-    description: "Compassionate guidance through divorce, custody, and adoption proceedings.",
-  },
-  {
-    icon: Home,
-    title: "Real Estate",
-    description: "Seamless transactions, disputes, and development guidance for property matters.",
-  },
-  {
-    icon: Gavel,
-    title: "Personal Injury",
-    description: "Fighting for maximum compensation when you've been wrongfully injured.",
-  },
-  {
-    icon: Users,
-    title: "Employment Law",
-    description: "Advocating for fair treatment, wrongful termination, and workplace disputes.",
-  },
-];
+function HomePage() {
+  const [keyword, setKeyword] = useState("");
+  const [area, setArea] = useState("");
+  const [province, setProvince] = useState("");
+  const navigate = useNavigate();
 
-const stats = [
-  { value: "25+", label: "Years Experience" },
-  { value: "3,500+", label: "Cases Won" },
-  { value: "98%", label: "Client Satisfaction" },
-  { value: "50+", label: "Legal Experts" },
-];
+  const { data: practiceAreas } = useQuery({
+    queryKey: ["practice-areas-home"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("practice_areas").select("*").order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
 
-const testimonials = [
-  {
-    quote: "Lawexperts navigated our complex merger with precision. Their strategic counsel saved us millions and months of delays.",
-    author: "Michael Chen",
-    role: "CEO, Apex Technologies",
-  },
-  {
-    quote: "When my family needed help, they treated us with dignity and fought relentlessly. I cannot recommend them highly enough.",
-    author: "Sarah Williams",
-    role: "Family Law Client",
-  },
-  {
-    quote: "The defense team was exceptional. They believed in my innocence and secured a dismissal that changed my life.",
-    author: "David Park",
-    role: "Criminal Defense Client",
-  },
-];
+  const { data: stats } = useQuery({
+    queryKey: ["home-stats"],
+    queryFn: async () => {
+      const [lawyersRes, firmsRes, casesRes] = await Promise.all([
+        supabase.from("lawyers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
+        supabase.from("firms").select("*", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("cases").select("*", { count: "exact", head: true }),
+      ]);
+      return {
+        lawyers: lawyersRes.count ?? 0,
+        firms: firmsRes.count ?? 0,
+        cases: casesRes.count ?? 0,
+        provinces: PROVINCES.length,
+      };
+    },
+  });
 
-function Index() {
+  const { data: areaCounts } = useQuery({
+    queryKey: ["area-counts"],
+    queryFn: async () => {
+      const { data } = await supabase.from("lawyer_practice_areas").select("practice_area_id");
+      const counts: Record<string, number> = {};
+      data?.forEach((r) => { counts[r.practice_area_id] = (counts[r.practice_area_id] ?? 0) + 1; });
+      return counts;
+    },
+  });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (keyword) params.set("q", keyword);
+    if (area) params.set("area", area);
+    if (province) params.set("province", province);
+    navigate({ to: "/search", search: Object.fromEntries(params) as never });
+  };
+
   return (
     <>
       {/* Hero */}
-      <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="/images/hero-office.jpg"
-            alt="Lawexperts modern office"
-            className="h-full w-full object-cover"
-            loading="eager"
-            width={1536}
-            height={768}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-primary/60" />
-        </div>
-        <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 text-center md:py-40 md:text-left">
-          <div className="max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-accent">
-              <Star className="h-3.5 w-3.5 fill-accent" />
-              Award-Winning Legal Firm
-            </div>
-            <h1 className="font-heading text-4xl font-bold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-              Justice Delivered
-              <br />
-              <span className="text-accent">With Expertise</span>
+      <section className="relative overflow-hidden bg-ink text-cream">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(184,136,42,0.15),_transparent_60%)]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-block text-xs font-medium uppercase tracking-[0.25em] text-gold">
+              South Africa
+            </span>
+            <h1 className="mt-4 font-heading text-4xl leading-tight md:text-6xl">
+              Find the right <span className="text-gold italic">advocate</span> —
+              <br className="hidden md:block" /> backed by the cases they've argued.
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-primary-foreground/80 md:text-xl">
-              For over 25 years, Lawexperts has provided unwavering legal counsel
-              to individuals and businesses navigating complex legal challenges.
+            <p className="mt-6 text-base text-cream/70 md:text-lg">
+              Verified profiles. Linked reported cases. The legal directory South Africa deserved.
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-accent px-8 py-4 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
-              >
-                <Phone className="h-4 w-4" />
-                Free Consultation
-              </Link>
-              <Link
-                to="/practice-areas"
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-primary-foreground/30 bg-transparent px-8 py-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10"
-              >
-                Our Practice Areas
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+          </div>
+
+          {/* Search */}
+          <form onSubmit={handleSearch} className="mx-auto mt-12 max-w-4xl rounded-lg bg-cream p-3 shadow-2xl shadow-black/40">
+            <div className="grid gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
+              <input
+                type="text"
+                placeholder="Name or firm"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                maxLength={120}
+                className="rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <select value={area} onChange={(e) => setArea(e.target.value)} className="rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold">
+                <option value="">All practice areas</option>
+                {practiceAreas?.map((p) => <option key={p.id} value={p.slug}>{p.name}</option>)}
+              </select>
+              <select value={province} onChange={(e) => setProvince(e.target.value)} className="rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-gold">
+                <option value="">All provinces</option>
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-ink px-6 py-3 text-sm font-semibold text-cream hover:bg-ink/90">
+                <Search className="h-4 w-4" /> Search
+              </button>
             </div>
-          </div>
+          </form>
         </div>
-      </section>
 
-      {/* Practice Areas */}
-      <section className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16 text-center">
-            <span className="text-xs font-semibold uppercase tracking-widest text-accent">
-              What We Do
-            </span>
-            <h2 className="mt-3 font-heading text-3xl font-bold text-foreground md:text-4xl">
-              Practice Areas
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              Comprehensive legal expertise across a wide spectrum of disciplines,
-              ensuring you have the right counsel for any challenge.
-            </p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {practiceAreas.map((area) => (
-              <Link
-                key={area.title}
-                to="/practice-areas"
-                className="group rounded-xl border border-border bg-card p-8 transition-all hover:border-accent/50 hover:shadow-lg"
-              >
-                <div className="mb-5 inline-flex rounded-lg bg-accent/10 p-3 text-accent">
-                  <area.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading text-xl font-bold text-card-foreground group-hover:text-accent">
-                  {area.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {area.description}
-                </p>
-                <div className="mt-5 flex items-center gap-1 text-sm font-medium text-accent">
-                  Learn more <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="bg-primary py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-8 divide-y divide-primary-foreground/10 md:grid-cols-4 md:divide-x md:divide-y-0">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center py-4 text-center md:py-0">
-                <span className="font-heading text-4xl font-bold text-accent md:text-5xl">
-                  {stat.value}
-                </span>
-                <span className="mt-2 text-sm font-medium text-primary-foreground/70">
-                  {stat.label}
-                </span>
+        {/* Stats */}
+        <div className="border-t border-cream/10 bg-ink/60">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-10 sm:px-6 md:grid-cols-4">
+            {[
+              { icon: Scale, label: "Lawyers Listed", value: stats?.lawyers ?? "—" },
+              { icon: Building2, label: "Firms", value: stats?.firms ?? "—" },
+              { icon: BookOpen, label: "Reported Cases", value: stats?.cases ?? "—" },
+              { icon: MapPin, label: "Provinces Covered", value: stats?.provinces ?? 9 },
+            ].map((s) => (
+              <div key={s.label} className="flex flex-col items-center text-center">
+                <s.icon className="h-5 w-5 text-gold" />
+                <span className="mt-2 font-heading text-3xl text-cream">{s.value}</span>
+                <span className="mt-1 text-xs uppercase tracking-wider text-cream/60">{s.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About Preview */}
-      <section className="py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid items-center gap-16 lg:grid-cols-2">
+      {/* Practice areas grid */}
+      <section className="bg-cream py-20 md:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-widest text-accent">
-                About Lawexperts
-              </span>
-              <h2 className="mt-3 font-heading text-3xl font-bold text-foreground md:text-4xl">
-                A Legacy of Legal Excellence
-              </h2>
-              <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-                Founded in 1998, Lawexperts has grown from a small partnership into
-                one of the region's most respected full-service law firms. Our team
-                of over 50 attorneys combines deep expertise with a client-first
-                philosophy that has earned us a 98% satisfaction rating.
-              </p>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                We believe every client deserves personalized attention, strategic
-                thinking, and unwavering advocacy — whether you're a Fortune 500
-                company or an individual facing a life-changing legal matter.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-8">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-accent/10 p-2.5 text-accent">
-                    <Award className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-heading text-sm font-bold text-foreground">Award Winning</p>
-                    <p className="text-xs text-muted-foreground">Top 100 Law Firm</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-accent/10 p-2.5 text-accent">
-                    <Clock className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-heading text-sm font-bold text-foreground">24/7 Support</p>
-                    <p className="text-xs text-muted-foreground">Always Available</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-accent/10 p-2.5 text-accent">
-                    <TrendingUp className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-heading text-sm font-bold text-foreground">Proven Results</p>
-                    <p className="text-xs text-muted-foreground">3,500+ Cases Won</p>
-                  </div>
-                </div>
-              </div>
+              <span className="text-xs font-medium uppercase tracking-[0.25em] text-forest">Browse by</span>
+              <h2 className="mt-2 font-heading text-3xl text-ink md:text-4xl">Practice Areas</h2>
+            </div>
+            <Link to="/practice-areas" className="text-sm font-medium text-forest hover:text-ink">View all →</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+            {practiceAreas?.map((p) => (
               <Link
-                to="/about"
-                className="mt-10 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                key={p.id}
+                to="/search"
+                search={{ area: p.slug } as never}
+                className="group flex flex-col rounded-md border border-border bg-card p-5 transition-all hover:border-gold hover:shadow-md"
               >
-                Meet Our Team
-                <ArrowRight className="h-4 w-4" />
+                <span className="text-2xl">{p.icon}</span>
+                <span className="mt-3 font-heading text-sm font-semibold text-card-foreground group-hover:text-gold">
+                  {p.name}
+                </span>
+                <span className="mt-1 text-xs text-muted-foreground">
+                  {areaCounts?.[p.id] ?? 0} lawyer{(areaCounts?.[p.id] ?? 0) === 1 ? "" : "s"}
+                </span>
               </Link>
-            </div>
-            <div className="relative">
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
-                <div className="flex h-full w-full items-center justify-center bg-secondary">
-                  <Scale className="h-24 w-24 text-accent/30" />
-                </div>
-              </div>
-              <div className="absolute -bottom-6 -left-6 hidden rounded-xl bg-card p-6 shadow-xl lg:block">
-                <p className="font-heading text-3xl font-bold text-foreground">25+</p>
-                <p className="text-sm text-muted-foreground">Years of Excellence</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="bg-secondary/50 py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16 text-center">
-            <span className="text-xs font-semibold uppercase tracking-widest text-accent">
-              Client Stories
-            </span>
-            <h2 className="mt-3 font-heading text-3xl font-bold text-foreground md:text-4xl">
-              What Our Clients Say
-            </h2>
-          </div>
-          <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <div
-                key={t.author}
-                className="rounded-xl border border-border bg-card p-8"
-              >
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 fill-accent text-accent" />
-                  ))}
-                </div>
-                <p className="mt-5 text-sm leading-relaxed text-card-foreground italic">
-                  "{t.quote}"
-                </p>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{t.author}</p>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24 md:py-32">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <h2 className="font-heading text-3xl font-bold text-foreground md:text-4xl">
-            Ready to Discuss Your Case?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Schedule a free, no-obligation consultation with one of our experienced
-            attorneys. We're here to help you navigate your legal challenges.
+      <section className="bg-ink py-20 text-cream md:py-28">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+          <h2 className="font-heading text-3xl md:text-4xl">List your firm on LexSA</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-cream/70">
+            R99 per lawyer per month. First 3 months free — no credit card required.
+            Build trust with verified profiles and linked reported cases.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Phone className="h-4 w-4" />
-              Schedule Consultation
-            </Link>
-            <a
-              href="tel:+15551234567"
-              className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-foreground hover:text-accent"
-            >
-              <Phone className="h-4 w-4" />
-              (555) 123-4567
-            </a>
-          </div>
+          <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-md bg-gold px-8 py-4 text-sm font-semibold text-ink transition-colors hover:bg-gold/90">
+            Register Your Firm <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
     </>
