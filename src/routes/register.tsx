@@ -99,7 +99,12 @@ function RegisterPage() {
       toast.success("Firm registered. Welcome to Lawexpert.co.za.");
       navigate({ to: "/dashboard" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Registration failed");
+      const message = err instanceof Error
+        ? err.message
+        : typeof err === "object" && err && "message" in err && typeof err.message === "string"
+          ? err.message
+          : "Registration failed";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
