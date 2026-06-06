@@ -135,13 +135,6 @@ function LawyerProfile() {
                   </a>
                 )}
               </div>
-              {areas.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {areas.map((a: any) => (
-                    <span key={a.slug} className="rounded bg-cream/10 px-2.5 py-1 text-xs text-cream">{a.name}</span>
-                  ))}
-                </div>
-              )}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               {canEdit && (
