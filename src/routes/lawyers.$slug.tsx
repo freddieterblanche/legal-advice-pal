@@ -33,7 +33,7 @@ function LawyerProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
+        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_reported_cases(id, case_name, citation, court, year, url, sort_order), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
         .eq("slug", slug)
         .in("status", ["trial", "active"])
         .maybeSingle();
@@ -61,6 +61,8 @@ function LawyerProfile() {
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
   const cases = lawyer.lawyer_cases ?? [];
+  const reportedCases = (lawyer.lawyer_reported_cases ?? []).slice().sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const totalCases = cases.length + reportedCases.length;
   const branches = (lawyer.lawyer_branches ?? [])
     .map((x: any) => x.firm_branches)
     .filter(Boolean);
@@ -176,14 +178,14 @@ function LawyerProfile() {
 
           <section>
             <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
-              <BookOpen className="h-5 w-5 text-gold" /> Reported Cases ({cases.length})
+              <BookOpen className="h-5 w-5 text-gold" /> Reported Cases ({totalCases})
             </h2>
-            {cases.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">No linked cases yet.</p>
+            {totalCases === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">No reported cases yet.</p>
             ) : (
               <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
                 {cases.map((lc: any, i: number) => lc.cases && (
-                  <li key={i} className="p-4">
+                  <li key={`linked-${i}`} className="p-4">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
                         {lc.cases.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
@@ -197,8 +199,24 @@ function LawyerProfile() {
                       )}
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {lc.cases.citation} · {lc.cases.court} · {lc.cases.year} · {lc.role?.replace(/_/g, " ")}
+                      {[lc.cases.citation, lc.cases.court, lc.cases.year, lc.role?.replace(/_/g, " ")].filter(Boolean).join(" · ")}
                     </p>
+                  </li>
+                ))}
+                {reportedCases.map((rc: any) => (
+                  <li key={`rep-${rc.id}`} className="p-4">
+                    {rc.url ? (
+                      <a href={rc.url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
+                        {rc.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="font-heading text-sm font-semibold text-ink">{rc.case_name}</span>
+                    )}
+                    {(rc.citation || rc.court || rc.year) && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {[rc.citation, rc.court, rc.year].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>

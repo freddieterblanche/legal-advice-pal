@@ -493,6 +493,60 @@ export type Database = {
           },
         ]
       }
+      lawyer_reported_cases: {
+        Row: {
+          case_name: string
+          citation: string | null
+          court: string | null
+          created_at: string
+          id: string
+          lawyer_id: string
+          sort_order: number
+          updated_at: string
+          url: string | null
+          year: number | null
+        }
+        Insert: {
+          case_name: string
+          citation?: string | null
+          court?: string | null
+          created_at?: string
+          id?: string
+          lawyer_id: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+          year?: number | null
+        }
+        Update: {
+          case_name?: string
+          citation?: string | null
+          court?: string | null
+          created_at?: string
+          id?: string
+          lawyer_id?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lawyers: {
         Row: {
           accolades: string | null
