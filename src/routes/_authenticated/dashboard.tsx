@@ -31,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   validateSearch: (s: Record<string, unknown>) => ({
     tab: (s.tab as Tab | undefined) ?? undefined,
     edit: typeof s.edit === "string" ? s.edit : undefined,
+    firmId: typeof s.firmId === "string" ? s.firmId : undefined,
   }),
   component: Dashboard,
 });
@@ -41,7 +42,7 @@ function Dashboard() {
   const [tab, setTab] = useState<Tab>(search.tab ?? (search.edit ? "lawyers" : "overview"));
   const clearEditSearch = () => {
     if (!search.edit) return;
-    navigate({ search: (prev: { tab?: Tab; edit?: string }) => ({ ...prev, edit: undefined }) });
+    navigate({ search: (prev: { tab?: Tab; edit?: string; firmId?: string }) => ({ ...prev, edit: undefined }) });
   };
 
   const { data: profile } = useQuery({
@@ -54,16 +55,34 @@ function Dashboard() {
     },
   });
 
-  const firm = profile?.firms;
+  const isPlatformAdmin = profile?.role === "platform_admin";
+
+  const { data: overrideFirm } = useQuery({
+    queryKey: ["override-firm", search.firmId],
+    queryFn: async () => {
+      if (!search.firmId) return null;
+      const { data } = await supabase.from("firms").select("*").eq("id", search.firmId).maybeSingle();
+      return data;
+    },
+    enabled: !!search.firmId && !!isPlatformAdmin,
+  });
+
+  const firm: any = search.firmId && isPlatformAdmin ? overrideFirm : profile?.firms;
 
   if (!profile) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
 
   if (!firm) {
+    if (search.firmId && isPlatformAdmin) {
+      return <div className="p-12 text-center text-muted-foreground">Loading firm…</div>;
+    }
     return (
       <div className="mx-auto max-w-2xl px-6 py-20 text-center">
         <h1 className="font-heading text-2xl text-ink">No firm linked to your account</h1>
         <p className="mt-2 text-muted-foreground">You haven't registered a firm yet.</p>
         <Link to="/register" className="mt-6 inline-block rounded bg-ink px-6 py-3 text-sm font-semibold text-cream">Register a Firm</Link>
+        {isPlatformAdmin && (
+          <p className="mt-4 text-sm"><Link to="/admin/firms" className="text-forest hover:text-gold">Or manage all firms →</Link></p>
+        )}
       </div>
     );
   }
