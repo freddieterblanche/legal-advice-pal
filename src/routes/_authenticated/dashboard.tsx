@@ -159,7 +159,7 @@ type LawyerRow = {
 };
 
 
-function LawyersTab({ firmId }: { firmId: string }) {
+function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: string }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
@@ -168,6 +168,13 @@ function LawyersTab({ firmId }: { firmId: string }) {
     queryKey: ["firm-lawyers-list", firmId],
     queryFn: async () => (await supabase.from("lawyers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
   });
+
+  useEffect(() => {
+    if (editLawyerId && lawyers && !editing) {
+      const found = lawyers.find((l) => l.id === editLawyerId);
+      if (found) setEditing(found as LawyerRow);
+    }
+  }, [editLawyerId, lawyers, editing]);
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
