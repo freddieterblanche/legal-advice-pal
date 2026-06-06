@@ -81,11 +81,11 @@ function LawyerProfile() {
               <img
                 src={lawyer.avatar_url}
                 alt={`${lawyer.first_name} ${lawyer.last_name}`}
-                className="h-80 w-64 shrink-0 rounded-lg object-cover object-top ring-2 ring-gold/40 shadow-lg sm:h-96 sm:w-72 md:h-[28rem] md:w-80"
+                className="h-80 w-64 shrink-0 object-cover object-top sm:h-96 sm:w-72 md:h-[28rem] md:w-80"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div className="flex h-80 w-64 shrink-0 items-center justify-center rounded-lg bg-gold/20 font-heading text-6xl text-gold sm:h-96 sm:w-72 md:h-[28rem] md:w-80">
+              <div className="flex h-80 w-64 shrink-0 items-center justify-center bg-gold/20 font-heading text-6xl text-gold sm:h-96 sm:w-72 md:h-[28rem] md:w-80">
                 {lawyer.first_name[0]}{lawyer.last_name[0]}
               </div>
             )}
