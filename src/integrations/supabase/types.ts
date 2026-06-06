@@ -169,6 +169,57 @@ export type Database = {
           },
         ]
       }
+      firm_branches: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          firm_id: string
+          id: string
+          is_head_office: boolean
+          name: string
+          phone: string | null
+          province: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          firm_id: string
+          id?: string
+          is_head_office?: boolean
+          name: string
+          phone?: string | null
+          province?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          firm_id?: string
+          id?: string
+          is_head_office?: boolean
+          name?: string
+          phone?: string | null
+          province?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "firm_branches_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firm_billing_summary"
+            referencedColumns: ["firm_id"]
+          },
+          {
+            foreignKeyName: "firm_branches_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firms: {
         Row: {
           address: string | null
@@ -216,6 +267,46 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      lawyer_branches: {
+        Row: {
+          branch_id: string
+          created_at: string
+          lawyer_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          lawyer_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          lawyer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_branches_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "firm_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lawyer_cases: {
         Row: {
