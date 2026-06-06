@@ -179,7 +179,7 @@ type LawyerRow = {
 };
 
 
-function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: string }) {
+function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: string; editLawyerId?: string; onClearEditSearch?: () => void }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
@@ -270,7 +270,7 @@ function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: s
       </div>
 
       {showAdd && <LawyerFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
-      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
+      {editing && <LawyerFormModal firmId={firmId} lawyer={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
     </div>
   );
 }
