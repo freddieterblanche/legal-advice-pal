@@ -182,10 +182,21 @@ function Overview({ firmId }: { firmId: string }) {
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const lawyerSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
-  designation: z.enum(DESIGNATIONS as unknown as [string, ...string[]]),
+  designation: z.string().trim().max(120).optional(),
+  lawyer_type: z.enum(["advocate", "attorney"]).nullable().optional(),
+  year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().optional(),
+  is_senior_counsel: z.boolean().optional(),
+  designation_code: z.string().trim().max(80).nullable().optional(),
+  designation_custom: z.string().trim().max(120).nullable().optional(),
+  is_practice_head: z.boolean().optional(),
+  practice_head_area: z.string().trim().max(120).nullable().optional(),
+  is_sector_head: z.boolean().optional(),
+  sector_head_area: z.string().trim().max(120).nullable().optional(),
   city: z.string().trim().min(1).max(80),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]),
   bio: z.string().max(20000).optional(),
@@ -212,6 +223,15 @@ type LawyerRow = {
   first_name: string | null;
   last_name: string | null;
   designation: string | null;
+  lawyer_type: string | null;
+  year_of_admission: number | null;
+  is_senior_counsel: boolean | null;
+  designation_code: string | null;
+  designation_custom: string | null;
+  is_practice_head: boolean | null;
+  practice_head_area: string | null;
+  is_sector_head: boolean | null;
+  sector_head_area: string | null;
   city: string | null;
   province: string | null;
   bio: string | null;
