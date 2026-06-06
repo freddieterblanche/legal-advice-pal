@@ -17,7 +17,7 @@ const extractionSchema = z.object({
   designation: z.string().max(40).default("Attorney"),
   city: z.string().max(80).default(""),
   province: z.string().max(40).default(""),
-  bio: z.string().max(2000).default(""),
+  bio: z.string().max(10000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
   photo_url: z.string().max(2000).default(""),
 });
