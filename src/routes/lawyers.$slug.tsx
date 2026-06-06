@@ -1,0 +1,186 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { ExternalLink, MapPin, Building2, BookOpen, Mail } from "lucide-react";
+import { supabase } from "../integrations/supabase/client";
+import { toast } from "sonner";
+import { z } from "zod";
+
+export const Route = createFileRoute("/lawyers/$slug")({
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug.replace(/-/g, " ")} — LexSA` },
+      { name: "description", content: "South African lawyer profile on LexSA with linked reported cases." },
+    ],
+  }),
+  component: LawyerProfile,
+});
+
+const enquirySchema = z.object({
+  sender_name: z.string().trim().min(1, "Name required").max(100),
+  sender_email: z.string().trim().email("Valid email required").max(255),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(1000),
+});
+
+function LawyerProfile() {
+  const { slug } = Route.useParams();
+  const [showEnquiry, setShowEnquiry] = useState(false);
+
+  const { data: lawyer, isLoading } = useQuery({
+    queryKey: ["lawyer", slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lawyers")
+        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url))`)
+        .eq("slug", slug)
+        .in("status", ["trial", "active"])
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw notFound();
+      return data;
+    },
+  });
+
+  if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
+  if (!lawyer) return null;
+
+  const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
+  const cases = lawyer.lawyer_cases ?? [];
+
+  return (
+    <div className="bg-cream">
+      {/* Header */}
+      <section className="bg-ink py-16 text-cream">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gold/20 font-heading text-3xl text-gold">
+              {lawyer.first_name[0]}{lawyer.last_name[0]}
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}</h1>
+                {lawyer.designation && <span className="rounded-full border border-gold/40 px-3 py-0.5 text-sm text-gold">{lawyer.designation}</span>}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4 text-sm text-cream/70">
+                {lawyer.firms && (
+                  <Link to="/firms/$slug" params={{ slug: lawyer.firms.slug }} className="flex items-center gap-1.5 hover:text-gold">
+                    <Building2 className="h-4 w-4" /> {lawyer.firms.name}
+                  </Link>
+                )}
+                <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {lawyer.city}, {lawyer.province}</span>
+              </div>
+              {areas.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {areas.map((a: any) => (
+                    <span key={a.slug} className="rounded bg-cream/10 px-2.5 py-1 text-xs text-cream">{a.name}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
+              <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-8">
+          {lawyer.bio && (
+            <section>
+              <h2 className="font-heading text-xl text-ink">About</h2>
+              <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/80">{lawyer.bio}</p>
+            </section>
+          )}
+
+          {lawyer.education && (
+            <section>
+              <h2 className="font-heading text-xl text-ink">Education & Admissions</h2>
+              <p className="mt-3 whitespace-pre-line text-foreground/80">{lawyer.education}</p>
+            </section>
+          )}
+
+          <section>
+            <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
+              <BookOpen className="h-5 w-5 text-gold" /> Reported Cases ({cases.length})
+            </h2>
+            {cases.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">No linked cases yet.</p>
+            ) : (
+              <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
+                {cases.map((lc: any, i: number) => lc.cases && (
+                  <li key={i} className="p-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
+                        {lc.cases.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
+                      </a>
+                      {lc.outcome && (
+                        <span className={`rounded-full px-2 py-0.5 text-xs ${
+                          lc.outcome === "won" ? "bg-forest/15 text-forest" :
+                          lc.outcome === "lost" ? "bg-destructive/15 text-destructive" :
+                          "bg-muted text-muted-foreground"
+                        }`}>{lc.outcome}</span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {lc.cases.citation} · {lc.cases.court} · {lc.cases.year} · {lc.role?.replace(/_/g, " ")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <aside className="space-y-4">
+          <div className="rounded-md border border-border bg-card p-5">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Status</h3>
+            <p className="mt-2 text-sm capitalize text-foreground/80">
+              {lawyer.status === "trial" ? "Listed (Trial)" : "Verified Listing"}
+            </p>
+            {lawyer.linkedin_url && (
+              <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-forest hover:text-gold">
+                LinkedIn →
+              </a>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      {showEnquiry && <EnquiryModal lawyerId={lawyer.id} onClose={() => setShowEnquiry(false)} />}
+    </div>
+  );
+}
+
+function EnquiryModal({ lawyerId, onClose }: { lawyerId: string; onClose: () => void }) {
+  const [form, setForm] = useState({ sender_name: "", sender_email: "", message: "" });
+
+  const submit = useMutation({
+    mutationFn: async () => {
+      const parsed = enquirySchema.parse(form);
+      const { error } = await supabase.from("enquiries").insert({ ...parsed, lawyer_id: lawyerId });
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Enquiry sent."); onClose(); },
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to send"),
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
+        <h3 className="font-heading text-xl text-ink">Send an Enquiry</h3>
+        <form onSubmit={(e) => { e.preventDefault(); submit.mutate(); }} className="mt-4 space-y-3">
+          <input required maxLength={100} placeholder="Your name" value={form.sender_name} onChange={(e) => setForm({ ...form, sender_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input required type="email" maxLength={255} placeholder="Your email" value={form.sender_email} onChange={(e) => setForm({ ...form, sender_email: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <textarea required maxLength={1000} rows={5} placeholder="Your message…" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm text-muted-foreground hover:text-ink">Cancel</button>
+            <button type="submit" disabled={submit.isPending} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+              {submit.isPending ? "Sending…" : "Send"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
