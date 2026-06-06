@@ -11,15 +11,20 @@ import { importLawyerProfile } from "../../lib/profile-import.functions";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
+type Tab = "overview" | "lawyers" | "billing" | "settings";
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    tab: (s.tab as Tab | undefined) ?? undefined,
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   component: Dashboard,
 });
 
-type Tab = "overview" | "lawyers" | "billing" | "settings";
-
 function Dashboard() {
-  const [tab, setTab] = useState<Tab>("overview");
+  const search = Route.useSearch();
+  const [tab, setTab] = useState<Tab>(search.tab ?? (search.edit ? "lawyers" : "overview"));
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile"],
@@ -84,7 +89,7 @@ function Dashboard() {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
-        {tab === "lawyers" && <LawyersTab firmId={firm.id} />}
+        {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
@@ -154,7 +159,7 @@ type LawyerRow = {
 };
 
 
-function LawyersTab({ firmId }: { firmId: string }) {
+function LawyersTab({ firmId, editLawyerId }: { firmId: string; editLawyerId?: string }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<LawyerRow | null>(null);
@@ -163,6 +168,13 @@ function LawyersTab({ firmId }: { firmId: string }) {
     queryKey: ["firm-lawyers-list", firmId],
     queryFn: async () => (await supabase.from("lawyers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
   });
+
+  useEffect(() => {
+    if (editLawyerId && lawyers && !editing) {
+      const found = lawyers.find((l) => l.id === editLawyerId);
+      if (found) setEditing(found as LawyerRow);
+    }
+  }, [editLawyerId, lawyers, editing]);
 
   const remove = useMutation({
     mutationFn: async (id: string) => {

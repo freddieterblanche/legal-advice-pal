@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { ExternalLink, MapPin, Building2, BookOpen, Mail } from "lucide-react";
+import { ExternalLink, MapPin, Building2, BookOpen, Mail, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -42,8 +42,21 @@ function LawyerProfile() {
     },
   });
 
+  const { data: myFirmId } = useQuery({
+    queryKey: ["my-firm-id"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("firm_id").eq("id", user.id).maybeSingle();
+      return data?.firm_id ?? null;
+    },
+    staleTime: 60_000,
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!lawyer) return null;
+
+  const canEdit = myFirmId && lawyer.firm_id === myFirmId;
 
   const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
   const cases = lawyer.lawyer_cases ?? [];
@@ -97,9 +110,20 @@ function LawyerProfile() {
                 </div>
               )}
             </div>
-            <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
-              <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {canEdit && (
+                <Link
+                  to="/dashboard"
+                  search={{ tab: "lawyers", edit: lawyer.id }}
+                  className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+                >
+                  <Pencil className="mr-2 inline h-4 w-4" /> Edit Profile
+                </Link>
+              )}
+              <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-ink hover:bg-gold/90">
+                <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
+              </button>
+            </div>
           </div>
         </div>
       </section>
