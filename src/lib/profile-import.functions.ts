@@ -19,7 +19,9 @@ const extractionSchema = z.object({
   province: z.string().max(40).default(""),
   bio: z.string().max(2000).default(""),
   practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
+  photo_url: z.string().max(2000).default(""),
 });
+
 
 export const importLawyerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
