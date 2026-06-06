@@ -216,6 +216,11 @@ function LawyersTab({ firmId }: { firmId: string }) {
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
                   <td className="px-4 py-3 text-right">
+                    {l.slug && (l.status === "trial" || l.status === "active") && (
+                      <a href={`/lawyers/${l.slug}`} target="_blank" rel="noopener noreferrer" className="mr-2 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold">
+                        <Eye className="h-3 w-3" /> Preview
+                      </a>
+                    )}
                     <button onClick={() => setEditing(l as LawyerRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
                     <button onClick={() => toggle.mutate({ id: l.id, status: l.status ?? "trial" })} className="mr-2 text-xs text-forest hover:text-ink">
                       {l.status === "inactive" ? "Reactivate" : "Deactivate"}
