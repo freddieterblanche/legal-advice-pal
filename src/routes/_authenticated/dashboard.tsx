@@ -282,6 +282,10 @@ function LawyerFormModal({
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [imported, setImported] = useState(false);
+  const importFn = useServerFn(importLawyerProfile);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
