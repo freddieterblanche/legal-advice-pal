@@ -321,7 +321,7 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse(form);
+      const parsed = lawyerSchema.parse({ ...form, bio: sanitizeBioHtml(form.bio) });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
