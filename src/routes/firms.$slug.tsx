@@ -45,6 +45,20 @@ function FirmProfile() {
     },
   });
 
+  const { data: branches } = useQuery({
+    queryKey: ["firm-branches-public", firm?.id],
+    enabled: !!firm?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("firm_branches")
+        .select("*")
+        .eq("firm_id", firm!.id)
+        .order("is_head_office", { ascending: false })
+        .order("created_at", { ascending: true });
+      return data ?? [];
+    },
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!firm) return null;
 
@@ -62,7 +76,41 @@ function FirmProfile() {
       </section>
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-        {firm.description && <p className="text-foreground/80 leading-relaxed">{firm.description}</p>}
+        {firm.description && (
+          <div
+            className="text-foreground/80 leading-relaxed [&_h2]:font-heading [&_h2]:text-xl [&_h2]:text-ink [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:font-heading [&_h3]:text-base [&_h3]:text-ink [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-3 [&_li]:my-1 [&_strong]:font-semibold [&_strong]:text-ink"
+            dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(firm.description) }}
+          />
+        )}
+
+        {branches && branches.length > 0 && (
+          <section className="mt-10">
+            <h2 className="flex items-center gap-2 font-heading text-2xl text-ink">
+              <Building2 className="h-5 w-5 text-gold" /> {branches.length === 1 ? "Office" : "Offices"}
+            </h2>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {branches.map((b: any) => (
+                <div key={b.id} className="rounded-md border border-border bg-card p-4">
+                  <p className="flex items-center gap-2 font-heading text-sm font-semibold text-ink">
+                    {b.is_head_office && <Star className="h-3.5 w-3.5 text-gold" />}
+                    {b.name}
+                  </p>
+                  {(b.address || b.city) && (
+                    <p className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
+                      <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+                      <span>{[b.address, b.city, b.province].filter(Boolean).join(", ")}</span>
+                    </p>
+                  )}
+                  {b.phone && (
+                    <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                      <Phone className="h-3 w-3" /> {b.phone}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <h2 className="mt-12 font-heading text-2xl text-ink">Our Lawyers</h2>
         <div className="mt-6 grid gap-3 md:grid-cols-2">
