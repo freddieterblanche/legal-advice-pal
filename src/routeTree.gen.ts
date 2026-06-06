@@ -10,12 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
+import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PracticeAreasRoute = PracticeAreasRouteImport.update({
@@ -23,40 +40,118 @@ const PracticeAreasRoute = PracticeAreasRouteImport.update({
   path: '/practice-areas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LawyersSlugRoute = LawyersSlugRouteImport.update({
+  id: '/lawyers/$slug',
+  path: '/lawyers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FirmsSlugRoute = FirmsSlugRouteImport.update({
+  id: '/firms/$slug',
+  path: '/firms/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/firms/$slug': typeof FirmsSlugRoute
+  '/lawyers/$slug': typeof LawyersSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/firms/$slug': typeof FirmsSlugRoute
+  '/lawyers/$slug': typeof LawyersSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/register': typeof RegisterRoute
+  '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/firms/$slug': typeof FirmsSlugRoute
+  '/lawyers/$slug': typeof LawyersSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/practice-areas' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/practice-areas'
+    | '/register'
+    | '/search'
+    | '/sitemap.xml'
+    | '/dashboard'
+    | '/firms/$slug'
+    | '/lawyers/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/practice-areas' | '/sitemap.xml'
-  id: '__root__' | '/' | '/practice-areas' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/auth'
+    | '/practice-areas'
+    | '/register'
+    | '/search'
+    | '/sitemap.xml'
+    | '/dashboard'
+    | '/firms/$slug'
+    | '/lawyers/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/practice-areas'
+    | '/register'
+    | '/search'
+    | '/sitemap.xml'
+    | '/_authenticated/dashboard'
+    | '/firms/$slug'
+    | '/lawyers/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   PracticeAreasRoute: typeof PracticeAreasRoute
+  RegisterRoute: typeof RegisterRoute
+  SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  FirmsSlugRoute: typeof FirmsSlugRoute
+  LawyersSlugRoute: typeof LawyersSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +163,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/practice-areas': {
       id: '/practice-areas'
       path: '/practice-areas'
       fullPath: '/practice-areas'
       preLoaderRoute: typeof PracticeAreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -82,13 +205,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lawyers/$slug': {
+      id: '/lawyers/$slug'
+      path: '/lawyers/$slug'
+      fullPath: '/lawyers/$slug'
+      preLoaderRoute: typeof LawyersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/firms/$slug': {
+      id: '/firms/$slug'
+      path: '/firms/$slug'
+      fullPath: '/firms/$slug'
+      preLoaderRoute: typeof FirmsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   PracticeAreasRoute: PracticeAreasRoute,
+  RegisterRoute: RegisterRoute,
+  SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  FirmsSlugRoute: FirmsSlugRoute,
+  LawyersSlugRoute: LawyersSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

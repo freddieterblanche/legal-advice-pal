@@ -56,7 +56,7 @@ function SearchPage() {
   });
 
   const update = (patch: Partial<Search>) => {
-    navigate({ search: (prev) => ({ ...prev, ...patch, page: 1 }) });
+    navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
   };
 
   const onSearchSubmit = (e: React.FormEvent) => {
@@ -152,14 +152,18 @@ function SearchPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {results?.rows.map((l) => (
+              {results?.rows.map((l) => {
+                const caseCount = l.case_count ?? 0;
+                const first = l.first_name ?? "";
+                const last = l.last_name ?? "";
+                return (
                 <article key={l.id} className="flex flex-col gap-4 rounded-md border border-border bg-card p-5 transition-shadow hover:shadow-md sm:flex-row">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-xl text-gold">
-                    {l.first_name[0]}{l.last_name[0]}
+                    {first[0]}{last[0]}
                   </div>
                   <div className="flex-1">
                     <div className="flex flex-wrap items-baseline gap-3">
-                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
                         {l.full_name}
                       </Link>
                       {l.designation && <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-medium text-forest">{l.designation}</span>}
@@ -176,17 +180,18 @@ function SearchPage() {
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2 sm:w-32">
-                    {l.case_count > 0 && (
+                    {caseCount > 0 && (
                       <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-ink">
-                        {l.case_count} case{l.case_count === 1 ? "" : "s"}
+                        {caseCount} case{caseCount === 1 ? "" : "s"}
                       </span>
                     )}
-                    <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded bg-ink px-3 py-1.5 text-xs font-medium text-cream hover:bg-ink/90">
+                    <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded bg-ink px-3 py-1.5 text-xs font-medium text-cream hover:bg-ink/90">
                       View Profile
                     </Link>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -194,7 +199,7 @@ function SearchPage() {
             <div className="mt-8 flex items-center justify-center gap-2">
               <button
                 disabled={page <= 1}
-                onClick={() => navigate({ search: (prev) => ({ ...prev, page: page - 1 }) })}
+                onClick={() => navigate({ search: (prev: Search) => ({ ...prev, page: page - 1 }) })}
                 className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
               >
                 ← Prev
@@ -202,7 +207,7 @@ function SearchPage() {
               <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
               <button
                 disabled={page >= totalPages}
-                onClick={() => navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })}
+                onClick={() => navigate({ search: (prev: Search) => ({ ...prev, page: page + 1 }) })}
                 className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
               >
                 Next →

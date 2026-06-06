@@ -187,7 +187,7 @@ function LawyersTab({ firmId }: { firmId: string }) {
               const daysLeft = l.trial_end_date ? Math.max(0, Math.ceil((new Date(l.trial_end_date).getTime() - Date.now()) / 86400000)) : null;
               return (
                 <tr key={l.id}>
-                  <td className="px-4 py-3 font-medium text-ink">{l.first_name} {l.last_name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{l.first_name ?? ""} {l.last_name ?? ""}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.designation}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{l.status}</span></td>
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
