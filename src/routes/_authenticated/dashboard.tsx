@@ -675,7 +675,7 @@ function LawyerFormModal({
               type="button"
               onClick={handleImport}
               disabled={importing || !importUrl.trim()}
-              className="rounded bg-gold px-3 py-2 text-sm font-semibold text-ink disabled:opacity-50"
+              className="rounded bg-gold px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {importing ? "Importing…" : "Import"}
             </button>
@@ -1036,7 +1036,7 @@ function BillingTab({ firmId }: { firmId: string }) {
         <h2 className="font-heading text-xl text-ink">Monthly Total</h2>
         <p className="mt-2 font-heading text-4xl text-gold">R{activeCount * 99}</p>
         <p className="text-sm text-muted-foreground">{activeCount} active lawyer{activeCount === 1 ? "" : "s"} × R99/month</p>
-        <button className="mt-4 rounded border border-gold bg-transparent px-4 py-2 text-sm font-medium text-gold hover:bg-gold hover:text-ink">
+        <button className="mt-4 rounded border border-gold bg-transparent px-4 py-2 text-sm font-medium text-gold hover:bg-gold hover:text-white">
           Connect PayFast (coming soon)
         </button>
       </div>
