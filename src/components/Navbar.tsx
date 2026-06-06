@@ -24,6 +24,7 @@ export function Navbar() {
 
   const publicLinks = [
     { to: "/search", label: "Find a Lawyer" },
+    { to: "/firms", label: "Law Firms" },
     { to: "/practice-areas", label: "Practice Areas" },
   ];
 
