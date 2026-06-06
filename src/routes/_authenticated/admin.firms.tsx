@@ -194,6 +194,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     status: firm?.status ?? "active",
   });
   const [saving, setSaving] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,7 +208,9 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
       if (isEdit && firm) {
         const { error } = await supabase.from("firms").update(payload).eq("id", firm.id);
         if (error) throw error;
-        toast.success("Firm updated");
+        toast.success("Firm updated — preview refreshed");
+        setPreviewKey((k) => k + 1);
+        onSaved(true); // keep modal open so admin can keep editing & previewing
       } else {
         const slug = `${slugify(form.name)}-${Math.random().toString(36).slice(2, 7)}`;
         const { data: inserted, error } = await supabase
@@ -229,8 +232,8 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
           });
         }
         toast.success("Firm created");
+        onSaved(false);
       }
-      onSaved();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
@@ -239,56 +242,100 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Firm" : "Add Firm"}</h3>
-          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <form onSubmit={submit} className="space-y-3">
-          <input required placeholder="Firm name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <input placeholder="Registration number (optional)" value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">About the firm</label>
-            <RichTextEditor
-              value={form.description}
-              onChange={(html) => setForm({ ...form, description: html })}
-              placeholder="Describe the firm — use headings, paragraphs, lists…"
-            />
-          </div>
-
-          <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <input placeholder="Main address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <div className="grid grid-cols-2 gap-3">
-            <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-              <option value="active">Active (public)</option>
-              <option value="pending">Pending review</option>
-              <option value="inactive">Inactive (hidden)</option>
-            </select>
-          </div>
-
-          {isEdit && firm && <BranchesEditor firmId={firm.id} />}
-
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
-              {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Firm"}
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 p-2 sm:p-4" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`flex max-h-full w-full ${isEdit ? "max-w-[1400px]" : "max-w-2xl"} flex-col overflow-hidden rounded-lg bg-card shadow-xl`}
+      >
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <h3 className="font-heading text-xl text-ink">
+            {isEdit ? `Edit Firm — ${firm?.name}` : "Add Firm"}
+          </h3>
+          <div className="flex items-center gap-2">
+            {isEdit && firm && (
+              <a
+                href={`/firms/${firm.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded border border-border px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted"
+              >
+                Open in new tab ↗
+              </a>
+            )}
+            <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+              <X className="h-5 w-5" />
             </button>
           </div>
-        </form>
+        </div>
+
+        <div className={`flex min-h-0 flex-1 flex-col ${isEdit ? "lg:flex-row" : ""}`}>
+          {/* Editor pane */}
+          <div className={`overflow-y-auto p-6 ${isEdit ? "lg:w-[520px] lg:flex-shrink-0 lg:border-r lg:border-border" : ""}`}>
+            <form onSubmit={submit} className="space-y-3" id="firm-edit-form">
+              <input required placeholder="Firm name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              <input placeholder="Registration number (optional)" value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">About the firm</label>
+                <RichTextEditor
+                  value={form.description}
+                  onChange={(html) => setForm({ ...form, description: html })}
+                  placeholder="Describe the firm — use headings, paragraphs, lists…"
+                />
+              </div>
+
+              <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              <input placeholder="Main address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              <div className="grid grid-cols-2 gap-3">
+                <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+                <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
+                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                  <option value="active">Active (public)</option>
+                  <option value="pending">Pending review</option>
+                  <option value="inactive">Inactive (hidden)</option>
+                </select>
+              </div>
+
+              {isEdit && firm && <BranchesEditor firmId={firm.id} />}
+            </form>
+          </div>
+
+          {/* Live preview pane */}
+          {isEdit && firm && (
+            <div className="flex min-h-[400px] flex-1 flex-col bg-cream/40">
+              <div className="flex items-center justify-between border-b border-border bg-card px-4 py-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Live preview</p>
+                <button
+                  type="button"
+                  onClick={() => setPreviewKey((k) => k + 1)}
+                  className="text-xs font-medium text-forest hover:text-gold"
+                >
+                  Refresh
+                </button>
+              </div>
+              <iframe
+                key={previewKey}
+                src={`/firms/${firm.slug}`}
+                title="Firm preview"
+                className="h-full w-full flex-1 bg-background"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-border bg-card px-6 py-3">
+          <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Close</button>
+          <button type="submit" form="firm-edit-form" disabled={saving} className="rounded bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+            {saving ? "Saving…" : isEdit ? "Save & Preview" : "Create Firm"}
+          </button>
+        </div>
       </div>
     </div>
   );
