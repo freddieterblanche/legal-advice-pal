@@ -545,7 +545,15 @@ function LawyerFormModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const parsed = lawyerSchema.parse({ ...form, bio: sanitizeBioHtml(form.bio) });
+      const parsed = lawyerSchema.parse({
+        ...form,
+        bio: sanitizeBioHtml(form.bio),
+        overview: sanitizeBioHtml(form.overview),
+        qualifications: sanitizeBioHtml(form.qualifications),
+        accolades: sanitizeBioHtml(form.accolades),
+        noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
+        reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+      });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
