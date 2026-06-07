@@ -108,6 +108,13 @@ export type LawyerRow = {
   slug?: string | null;
   is_mediator?: boolean | null;
   is_arbitrator?: boolean | null;
+  mediator_accreditation?: string | null;
+  mediator_style?: string | null;
+  mediator_sectors?: string[] | null;
+  arbitrator_accreditation?: string | null;
+  arbitrator_types?: string[] | null;
+  arbitrator_experience_years?: number | null;
+  availability_notes?: string | null;
   firm_id: string | null;
 };
 
