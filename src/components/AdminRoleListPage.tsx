@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, X, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
+import { MediatorArbitratorFormModal } from "./MediatorArbitratorFormModal";
 
 type Role = "mediator" | "arbitrator";
 
