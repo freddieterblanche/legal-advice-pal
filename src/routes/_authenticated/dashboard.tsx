@@ -1361,6 +1361,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           city: form.city || null,
           province: form.province || null,
           bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+          avatar_url: form.avatar_url?.trim() || null,
         }).eq("id", expert.id);
         if (error) throw error;
       } else {
@@ -1377,6 +1378,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           city: form.city || null,
           province: form.province || null,
           bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+          avatar_url: form.avatar_url?.trim() || null,
         });
         if (error) throw error;
       }
