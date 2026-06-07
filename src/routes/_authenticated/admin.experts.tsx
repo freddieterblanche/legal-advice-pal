@@ -4,10 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../../integrations/supabase/client";
-import { PROVINCES, slugify } from "../../lib/constants";
+import { slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
+import { ProvinceCityFields } from "../../components/ProvinceCityFields";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
@@ -381,15 +382,16 @@ function AdminExpertFormModal({
           <AField label="Registration body (e.g. HPCSA)">
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
-          <div className="grid gap-3 md:grid-cols-2">
-            <AField label="City">
-              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-            </AField>
-            <AField label="Province">
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </AField>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <ProvinceCityFields
+                province={form.province}
+                city={form.city}
+                onProvince={(v: string) => setForm({ ...form, province: v })}
+                onCity={(v: string) => setForm({ ...form, city: v })}
+              />
+            </div>
           </div>
           {isEdit && (
             <AField label="Status">

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, slugify } from "../lib/constants";
+import { ProvinceCityFields } from "./ProvinceCityFields";
 import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../lib/designation";
 import { importLawyerProfile } from "../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
@@ -655,10 +656,12 @@ export function LawyerFormModal({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <ProvinceCityFields
+              province={form.province}
+              city={form.city}
+              onProvince={(v: string) => setForm({ ...form, province: v })}
+              onCity={(v: string) => setForm({ ...form, city: v })}
+            />
           </div>
           {firmBranches.length > 0 && (
             <div>

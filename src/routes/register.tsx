@@ -1,18 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Scale, Handshake, Gavel, Microscope, Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { PROVINCES } from "../lib/constants";
 import {
   registerFirmForCurrentUser,
   registerLawyerForCurrentUser,
   registerExpertForCurrentUser,
 } from "../lib/registration.functions";
-import { ComboboxCreatable } from "../components/ComboboxCreatable";
+import { ProvinceCityFields } from "../components/ProvinceCityFields";
+import { RichTextEditor } from "../components/RichTextEditor";
+import { sanitizeBioHtml } from "../lib/sanitize";
 import { TypePill } from "../components/TypePill";
 import {
   MEDIATION_ACCREDITATIONS,
@@ -126,38 +127,14 @@ function Input({ value, onChange, type = "text", placeholder, required }: { valu
 function ProvinceCitySelect({
   province, city, onProvince, onCity,
 }: { province: string; city: string; onProvince: (v: string) => void; onCity: (v: string) => void }) {
-  const { data: provinces } = useQuery({
-    queryKey: ["provinces"],
-    queryFn: async () => (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
-  });
-  const { data: towns } = useQuery({
-    queryKey: ["towns-all"],
-    queryFn: async () => (await supabase.from("towns").select("name, province_id").order("is_major_city", { ascending: false }).order("name")).data ?? [],
-  });
-  const townOptions = useMemo(() => {
-    if (!towns) return [];
-    const provId = provinces?.find((p) => p.name === province)?.id;
-    const filtered = provId ? towns.filter((t) => t.province_id === provId) : towns;
-    return filtered.map((t) => ({ value: t.name as string, label: t.name as string }));
-  }, [towns, provinces, province]);
-
   return (
-    <>
-      <select value={province} onChange={(e) => { onProvince(e.target.value); onCity(""); }} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-        <option value="">Select province</option>
-        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <ComboboxCreatable
-        value={city}
-        onChange={onCity}
-        options={townOptions}
-        placeholder={province ? "Select or type a city/town…" : "Select a province first…"}
-        emptyLabel="—"
-        disabled={!province}
-        onCreate={async (name) => name}
-        createLabel="Use"
-      />
-    </>
+    <ProvinceCityFields
+      province={province}
+      city={city}
+      onProvince={onProvince}
+      onCity={onCity}
+      selectClassName="w-full rounded border border-border bg-background px-3 py-2.5 text-sm"
+    />
   );
 }
 
@@ -582,7 +559,7 @@ function ExpertWizard() {
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || undefined,
-          qualifications: form.qualifications || undefined,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : undefined,
           registration_body: form.registration_body || undefined,
           company_name: form.company_name || undefined,
           employer: form.employer || undefined,
@@ -612,7 +589,14 @@ function ExpertWizard() {
             <Input placeholder="Last name" value={form.last_name} onChange={(v) => setForm({ ...form, last_name: v })} required />
           </div>
           <Input placeholder="Title (e.g. Dr., Prof., CA(SA))" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          <Input placeholder="Qualifications (free text)" value={form.qualifications} onChange={(v) => setForm({ ...form, qualifications: v })} />
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Qualifications</p>
+            <RichTextEditor
+              value={form.qualifications}
+              onChange={(html) => setForm({ ...form, qualifications: html })}
+              placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification."
+            />
+          </div>
           <Input placeholder="Registration body (e.g. HPCSA, SAICA)" value={form.registration_body} onChange={(v) => setForm({ ...form, registration_body: v })} />
           <label className="flex items-center gap-2 text-sm text-ink">
             <input type="checkbox" checked={form.is_independent} onChange={(e) => setForm({ ...form, is_independent: e.target.checked })} />
