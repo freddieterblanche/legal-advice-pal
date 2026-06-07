@@ -273,7 +273,7 @@ function SearchPage() {
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:flex-row">
+                <article key={l.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:flex-row">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
