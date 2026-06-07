@@ -433,6 +433,8 @@ function LawyerFormModal({
     email: lawyer?.email ?? "",
     phone: lawyer?.phone ?? "",
     linkedin_url: lawyer?.linkedin_url ?? "",
+    is_mediator: !!lawyer?.is_mediator,
+    is_arbitrator: !!lawyer?.is_arbitrator,
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
