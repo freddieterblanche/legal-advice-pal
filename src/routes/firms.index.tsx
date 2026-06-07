@@ -5,12 +5,13 @@ import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; province?: string; page?: number };
+type Search = { q?: string; province?: string; town?: string; page?: number };
 
 export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     q: typeof s.q === "string" ? s.q : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
+    town: typeof s.town === "string" ? s.town : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
   head: () => ({
@@ -38,6 +39,20 @@ function FirmsIndex() {
     queryFn: async () => (await supabase.from("provinces").select("id, name, slug").order("name")).data ?? [],
   });
 
+  const { data: towns } = useQuery({
+    queryKey: ["towns"],
+    queryFn: async () => (await supabase.from("towns").select("id, name, slug, province_id").order("name")).data ?? [],
+  });
+
+  const townOptions = (() => {
+    if (!towns) return [];
+    if (search.province) {
+      const prov = provinces?.find((p) => p.slug === search.province);
+      if (prov) return towns.filter((t) => t.province_id === prov.id);
+    }
+    return towns;
+  })();
+
   const { data, isLoading } = useQuery({
     queryKey: ["firms-index", search],
     queryFn: async () => {
@@ -49,6 +64,10 @@ function FirmsIndex() {
       if (search.province) {
         const provName = provinces?.find((p) => p.slug === search.province)?.name;
         if (provName) query = query.eq("province", provName);
+      }
+      if (search.town) {
+        const townName = towns?.find((t) => t.slug === search.town)?.name;
+        if (townName) query = query.ilike("city", townName);
       }
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
@@ -71,7 +90,11 @@ function FirmsIndex() {
   });
 
   const update = (patch: Partial<Search>) => {
-    navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
+    const next: Search = { ...search, ...patch, page: 1 };
+    if (patch.province !== undefined && patch.province !== search.province) {
+      next.town = undefined;
+    }
+    navigate({ search: next });
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -111,6 +134,17 @@ function FirmsIndex() {
                 onChange={(v) => update({ province: v || undefined })}
                 options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
                 placeholder="Type a province…"
+              />
+            </div>
+          </div>
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town</h3>
+            <div className="mt-3">
+              <Combobox
+                value={search.town ?? ""}
+                onChange={(v) => update({ town: v || undefined })}
+                options={townOptions.map((t) => ({ value: t.slug, label: t.name }))}
+                placeholder={search.province ? "Type a town…" : "Select a province first…"}
               />
             </div>
           </div>
