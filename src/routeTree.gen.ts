@@ -23,6 +23,7 @@ import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
+import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -93,6 +94,11 @@ const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
   path: '/admin/firms',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminBarsRoute = AuthenticatedAdminBarsRouteImport.update({
+  id: '/admin/bars',
+  path: '/admin/bars',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
+  '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms': typeof FirmsIndexRoute
+  '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
+  '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms/'
+    | '/admin/bars'
     | '/admin/firms'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms'
+    | '/admin/bars'
     | '/admin/firms'
     | '/admin'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/firms/$slug'
     | '/lawyers/$slug'
     | '/firms/'
+    | '/_authenticated/admin/bars'
     | '/_authenticated/admin/firms'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -304,17 +316,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFirmsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/bars': {
+      id: '/_authenticated/admin/bars'
+      path: '/admin/bars'
+      fullPath: '/admin/bars'
+      preLoaderRoute: typeof AuthenticatedAdminBarsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
@@ -338,3 +359,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
