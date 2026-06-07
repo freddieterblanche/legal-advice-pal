@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PROVINCES } from "../lib/constants";
 import { registerFirmForCurrentUser } from "../lib/firm-registration.functions";
+import { ComboboxCreatable } from "../components/ComboboxCreatable";
+
 
 export const Route = createFileRoute("/register")({
   head: () => ({
