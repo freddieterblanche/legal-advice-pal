@@ -559,6 +559,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
       const payload = {
         first_name: form.first_name,
         last_name: form.last_name,
+        name_title: form.name_title?.trim() || null,
         title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
