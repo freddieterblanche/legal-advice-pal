@@ -27,7 +27,7 @@ function AdminHub() {
         supabase.from("firms").select("id", { count: "exact", head: true }),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).not("firm_id", "is", null),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "advocate"),
-        supabase.from("expert_witnesses").select("id", { count: "exact", head: true }),
+        supabase.from("service_providers").select("id", { count: "exact", head: true }),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("is_mediator", true),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("is_arbitrator", true),
         supabase.from("bars").select("id", { count: "exact", head: true }),

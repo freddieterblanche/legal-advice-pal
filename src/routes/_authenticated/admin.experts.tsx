@@ -63,7 +63,7 @@ function AdminExpertsPage() {
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expert_witnesses")
+        .from("service_providers")
         .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -91,7 +91,7 @@ function AdminExpertsPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("expert_witnesses").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -213,7 +213,7 @@ function AdminExpertFormModal({
     enabled: !!expert?.id,
     queryFn: async () => {
       const { data } = await supabase
-        .from("expert_witnesses")
+        .from("service_providers")
         .select("*")
         .eq("id", expert!.id)
         .maybeSingle();
@@ -300,14 +300,14 @@ function AdminExpertFormModal({
       };
       if (isEdit && expert) {
         const { error } = await supabase
-          .from("expert_witnesses")
+          .from("service_providers")
           .update({ ...payload, status: form.status })
           .eq("id", expert.id);
         if (error) throw error;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-        const { error } = await supabase.from("expert_witnesses").insert({ ...payload, slug });
+        const { error } = await supabase.from("service_providers").insert({ ...payload, slug });
         if (error) throw error;
       }
       toast.success(isEdit ? "Expert updated" : "Expert added");

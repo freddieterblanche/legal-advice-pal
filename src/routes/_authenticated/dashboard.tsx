@@ -335,7 +335,7 @@ function BillingTab({ firmId }: { firmId: string }) {
 
   const { data: experts } = useQuery({
     queryKey: ["billing-experts", firmId],
-    queryFn: async () => (await supabase.from("expert_witnesses").select("first_name, last_name, status").eq("firm_id", firmId)).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("first_name, last_name, status").eq("firm_id", firmId)).data ?? [],
   });
 
   const activeLawyers = lawyers?.filter((l) => l.status === "active") ?? [];
@@ -449,7 +449,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
   useEffect(() => {
     if (editExpertId && !editing) {
       // fetch on-demand so we can open immediately even if list not loaded
-      supabase.from("expert_witnesses").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
+      supabase.from("service_providers").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
         if (data) setEditing(data as ExpertRow);
       });
     }
@@ -458,12 +458,12 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
 
   const { data: experts } = useQuery({
     queryKey: ["firm-experts-list", firmId],
-    queryFn: async () => (await supabase.from("expert_witnesses").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("expert_witnesses").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Expert removed"); qc.invalidateQueries({ queryKey: ["firm-experts-list", firmId] }); },
@@ -573,12 +573,12 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
         contact_email: form.contact_email?.trim() || null,
       };
       if (isEdit && expert) {
-        const { error } = await supabase.from("expert_witnesses").update(payload).eq("id", expert.id);
+        const { error } = await supabase.from("service_providers").update(payload).eq("id", expert.id);
         if (error) throw error;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-        const { error } = await supabase.from("expert_witnesses").insert({
+        const { error } = await supabase.from("service_providers").insert({
           ...payload,
           firm_id: firmId,
           slug,

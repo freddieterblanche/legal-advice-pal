@@ -23,7 +23,7 @@ function ExpertWitnessProfile() {
     queryKey: ["expert-witness", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expert_witnesses")
+        .from("service_providers")
         .select(`*,
           provider_disciplines(expert_disciplines(name, slug, parent_category)),
           case_service_providers(role, notes, cases(case_name, citation, court, year, saflii_url))

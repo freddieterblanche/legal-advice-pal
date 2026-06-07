@@ -25,7 +25,7 @@ const registerFirmSchema = z.object({
     .optional(),
 });
 
-async function uniqueSlug(table: "firms" | "lawyers" | "expert_witnesses" | "chambers", base: string) {
+async function uniqueSlug(table: "firms" | "lawyers" | "service_providers" | "chambers", base: string) {
   const { supabaseAdmin } = await import("../integrations/supabase/client.server");
   let slug = base;
   const { data: clash } = await supabaseAdmin.from(table).select("id").eq("slug", slug).maybeSingle();
@@ -211,10 +211,10 @@ export const registerExpertForCurrentUser = createServerFn({ method: "POST" })
   .inputValidator((input) => registerExpertSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
-    const slug = await uniqueSlug("expert_witnesses", slugify(`${data.first_name}-${data.last_name}`));
+    const slug = await uniqueSlug("service_providers", slugify(`${data.first_name}-${data.last_name}`));
 
     const { data: expertRow, error: expErr } = await supabaseAdmin
-      .from("expert_witnesses")
+      .from("service_providers")
       .insert({
         slug,
         profile_id: context.userId,

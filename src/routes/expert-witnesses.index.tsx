@@ -47,7 +47,7 @@ function ExpertWitnessSearch() {
     queryKey: ["expert-witness-search", search],
     queryFn: async () => {
       let query = supabase
-        .from("expert_witnesses")
+        .from("service_providers")
         .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category)), case_service_providers(id)", { count: "exact" })
         .in("status", ["trial", "active"]);
       if (search.q) {
