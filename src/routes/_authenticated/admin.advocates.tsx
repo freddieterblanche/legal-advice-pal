@@ -8,6 +8,8 @@ import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { sanitizeBioHtml } from "../../lib/sanitize";
 
 type AdvocateRow = {
   id: string;
