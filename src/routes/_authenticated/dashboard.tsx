@@ -499,7 +499,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
               const daysLeft = e.trial_end_date ? Math.max(0, Math.ceil((new Date(e.trial_end_date).getTime() - Date.now()) / 86400000)) : null;
               return (
                 <tr key={e.id}>
-                  <td className="px-4 py-3 font-medium text-ink">Dr {e.first_name} {e.last_name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
