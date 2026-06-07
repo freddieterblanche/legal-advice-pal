@@ -1,18 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Scale, Handshake, Gavel, Microscope, Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { PROVINCES } from "../lib/constants";
 import {
   registerFirmForCurrentUser,
   registerLawyerForCurrentUser,
   registerExpertForCurrentUser,
 } from "../lib/registration.functions";
-import { ComboboxCreatable } from "../components/ComboboxCreatable";
+import { ProvinceCityFields } from "../components/ProvinceCityFields";
+import { RichTextEditor } from "../components/RichTextEditor";
+import { sanitizeBioHtml } from "../lib/sanitize";
 import { TypePill } from "../components/TypePill";
 import {
   MEDIATION_ACCREDITATIONS,
