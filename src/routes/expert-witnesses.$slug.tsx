@@ -103,14 +103,28 @@ function ExpertWitnessProfile() {
                 )}
               </div>
             </div>
-            {expert.cv_url && (
-              <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="self-start rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
-                <Download className="mr-2 inline h-4 w-4" /> Download CV
-              </a>
+            {(expert.cv_url || canEdit) && (
+              <div className="flex flex-col gap-2 self-start">
+                {canEdit && (editSearch ? (
+                  <Link to="/dashboard" search={editSearch} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                    <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
+                  </Link>
+                ) : isPlatformAdmin ? (
+                  <Link to="/admin/experts" search={{ edit: expert.id }} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                    <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
+                  </Link>
+                ) : null)}
+                {expert.cv_url && (
+                  <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
+                    <Download className="mr-2 inline h-4 w-4" /> Download CV
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
       </section>
+
 
       <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
