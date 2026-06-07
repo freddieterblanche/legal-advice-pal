@@ -273,13 +273,13 @@ function SearchPage() {
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:flex-row">
+                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:gap-0 sm:p-0">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className="h-48 w-full shrink-0 object-cover object-top sm:h-auto sm:w-40 sm:self-stretch"
+                      className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:object-top"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
@@ -289,12 +289,12 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-48 w-full shrink-0 items-center justify-center ${accentBg} font-heading text-3xl sm:h-auto sm:w-40 sm:self-stretch`}
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-lg ${accentBg} font-heading text-xl sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:text-3xl`}
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
                   </div>
-                  <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-baseline gap-3">
                         <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
@@ -324,7 +324,7 @@ function SearchPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-row items-center gap-2 sm:flex-col sm:items-end sm:w-32">
+                    <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                       {caseCount > 0 && (
                         <span className="rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
                           {caseCount} case{caseCount === 1 ? "" : "s"}
