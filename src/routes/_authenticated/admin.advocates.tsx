@@ -613,6 +613,13 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 Also acts as Arbitrator
               </label>
             </div>
+            <label className="mt-3 flex items-start gap-2 text-sm">
+              <input type="checkbox" checked={form.exclude_from_lawyer_listing} onChange={(e) => setForm({ ...form, exclude_from_lawyer_listing: e.target.checked })} className="mt-0.5 accent-gold" />
+              <span>
+                Hide from Advocate directory
+                <span className="block text-xs text-muted-foreground">Use when this person no longer takes advocate briefs and should appear only as a Mediator/Arbitrator.</span>
+              </span>
+            </label>
           </div>
 
 
