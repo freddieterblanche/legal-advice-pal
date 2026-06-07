@@ -191,22 +191,45 @@ function AdminAttorneysPage() {
         </div>
       </div>
 
-      {(adding || editing) && (
-        <AttorneyFormModal
-          attorney={editing ?? undefined}
-          firms={firms ?? []}
-          onClose={() => {
-            setAdding(false); setEditing(null);
-            if (search.edit) navigate({ search: { edit: undefined } });
-          }}
+      {editing && editing.firm_id && (
+        <LawyerFormModal
+          firmId={editing.firm_id}
+          lawyer={editing}
+          onClose={() => { setEditing(null); if (search.edit) navigate({ search: { edit: undefined } }); }}
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["admin-attorneys"] });
-            qc.invalidateQueries({ queryKey: ["firms-options"] });
-            setAdding(false); setEditing(null);
+            setEditing(null);
             if (search.edit) navigate({ search: { edit: undefined } });
           }}
         />
       )}
+      {adding && <AddAttorneyFirmPicker firms={firms ?? []} onCancel={() => setAdding(false)} onPicked={(firmId) => { setAdding(false); setEditing({ id: "", firm_id: firmId } as unknown as AttorneyRow); }} />}
+    </div>
+  );
+}
+
+function AddAttorneyFirmPicker({ firms, onCancel, onPicked }: { firms: { id: string; name: string }[]; onCancel: () => void; onPicked: (firmId: string) => void }) {
+  const [firmId, setFirmId] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className="w-[90vw] max-w-md rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="font-heading text-lg text-ink">Choose firm</h3>
+          <button onClick={onCancel} aria-label="Close" className="text-muted-foreground hover:text-ink"><X className="h-5 w-5" /></button>
+        </div>
+        <p className="mb-3 text-sm text-muted-foreground">Which firm does this attorney belong to?</p>
+        <select value={firmId} onChange={(e) => setFirmId(e.target.value)} className="mb-4 w-full rounded border border-border bg-background px-3 py-2 text-sm">
+          <option value="">Select a firm…</option>
+          {firms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
+        <div className="flex justify-end gap-2">
+          <button onClick={onCancel} className="rounded px-3 py-2 text-sm">Cancel</button>
+          <button onClick={() => firmId && onPicked(firmId)} disabled={!firmId} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue</button>
+        </div>
+      </div>
+    </div>
+  );
+}
     </div>
   );
 }
