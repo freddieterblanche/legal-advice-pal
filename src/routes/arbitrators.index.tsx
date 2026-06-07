@@ -56,7 +56,16 @@ function ArbitratorSearch() {
       if (search.experience === "10+") query = query.gt("arbitrator_experience_years", 10);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("arbitrator_experience_years", { ascending: false, nullsFirst: false });
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "experience") {
+        query = query.order("arbitrator_experience_years", { ascending, nullsFirst: false });
+      } else {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
