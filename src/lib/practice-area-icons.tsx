@@ -14,6 +14,7 @@ import {
   Pickaxe,
   Home,
   ReceiptText,
+  BriefcaseMedical,
   BookOpen,
   type LucideIcon,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const ICONS: Record<string, LucideIcon> = {
   "mining-resources": Pickaxe,
   "property-law": Home,
   "tax-law": ReceiptText,
+  "medical-negligence": BriefcaseMedical,
 };
 
 export function getPracticeAreaIcon(slug: string | null | undefined): LucideIcon {

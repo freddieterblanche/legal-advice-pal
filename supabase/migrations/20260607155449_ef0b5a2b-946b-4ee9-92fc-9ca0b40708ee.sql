@@ -1,0 +1,1 @@
+INSERT INTO public.practice_areas (name, slug, icon) VALUES ('Medical Negligence', 'medical-negligence', '⚕');
