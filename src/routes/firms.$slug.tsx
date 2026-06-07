@@ -122,6 +122,7 @@ function FirmProfile() {
               src={firm.logo_url}
               alt={`${firm.name} logo`}
               className="h-20 w-auto object-contain"
+              style={{ filter: "invert(1) hue-rotate(180deg)" }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
           )}
