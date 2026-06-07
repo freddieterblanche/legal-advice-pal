@@ -3,17 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
-import { PROVINCES, DESIGNATIONS } from "../lib/constants";
+import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; area?: string; province?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
+type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     q: typeof s.q === "string" ? s.q : undefined,
     area: typeof s.area === "string" ? s.area : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
+    town: typeof s.town === "string" ? s.town : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "attorney" || s.type === "advocate" ? s.type : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
@@ -41,12 +42,42 @@ function SearchPage() {
     queryFn: async () => (await supabase.from("practice_areas").select("*").order("name")).data ?? [],
   });
 
+  const { data: provinces } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: async () => (await supabase.from("provinces").select("id, name, slug").order("name")).data ?? [],
+  });
+
+  const selectedProvince = provinces?.find((p) => p.slug === search.province);
+
+  const { data: towns } = useQuery({
+    queryKey: ["towns", selectedProvince?.id],
+    enabled: !!selectedProvince,
+    queryFn: async () => (
+      await supabase
+        .from("towns")
+        .select("id, name, slug")
+        .eq("province_id", selectedProvince!.id)
+        .order("is_major_city", { ascending: false })
+        .order("name")
+    ).data ?? [],
+  });
+
   const { data: results, isLoading } = useQuery({
     queryKey: ["search", search],
     queryFn: async () => {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
       if (search.q) query = query.ilike("full_name", `%${search.q}%`);
-      if (search.province) query = query.eq("province", search.province);
+      if (search.town) {
+        query = query.eq("town_slug", search.town);
+      } else if (search.province) {
+        // Match by linked province OR fall back to legacy text province for rows without town_id
+        const provName = provinces?.find((p) => p.slug === search.province)?.name;
+        if (provName) {
+          query = query.or(`province_slug.eq.${search.province},and(town_id.is.null,province.eq.${provName})`);
+        } else {
+          query = query.eq("province_slug", search.province);
+        }
+      }
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
@@ -137,10 +168,26 @@ function SearchPage() {
             <div className="mt-3">
               <Combobox
                 value={search.province ?? ""}
-                onChange={(v) => update({ province: v || undefined })}
-                options={PROVINCES.map((p) => ({ value: p, label: p }))}
+                onChange={(v) => update({ province: v || undefined, town: undefined })}
+                options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
                 placeholder="Type a province…"
               />
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town / City</h3>
+            <div className="mt-3">
+              {search.province ? (
+                <Combobox
+                  value={search.town ?? ""}
+                  onChange={(v) => update({ town: v || undefined })}
+                  options={(towns ?? []).map((t) => ({ value: t.slug, label: t.name }))}
+                  placeholder={towns ? "Type a town…" : "Loading towns…"}
+                />
+              ) : (
+                <p className="text-xs italic text-muted-foreground">Pick a province first</p>
+              )}
             </div>
           </div>
 

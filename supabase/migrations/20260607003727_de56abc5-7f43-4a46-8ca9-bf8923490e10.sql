@@ -1,0 +1,1 @@
+ALTER VIEW public.lawyer_search_view SET (security_invoker = true);

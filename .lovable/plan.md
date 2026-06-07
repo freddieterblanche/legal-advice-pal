@@ -1,73 +1,44 @@
-## Goal
 
-Give platform admin one obvious place to add anything to the directory, and add proper support for **Advocates** with a normalised **Bar** and **Chambers** structure (no duplicates, no misspellings).
+# Province / Town Search
 
-## What's missing today
+Add a normalized location reference (provinces + towns) so users can filter lawyers by Province and then by Town/City, with typeable comboboxes. Existing free-text `city`/`province` on lawyers stays as a fallback.
 
-- No way to add an Advocate as admin. Advocates live in the `lawyers` table with `lawyer_type = 'advocate'`, but `firm_id` is `NOT NULL` so they're forced under a "firm" they don't actually belong to.
-- No concept of Bar or Chambers in the schema.
-- Admin only has `/admin/firms`; no central hub.
+## Database (single migration)
 
-## Plan
+- `provinces` table — 9 SA provinces seeded: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, Northern Cape, North West, Western Cape. Fields: `name` (citext, unique), `slug`, `code` (e.g. `GP`, `WC`).
+- `towns` table — ~200 major cities and well-known towns across all 9 provinces. Fields: `name` (citext), `slug`, `province_id` (FK, required), `is_major_city` (bool), with `UNIQUE (province_id, name)`. Seed list curated per province (Joburg, Pretoria, Cape Town, Stellenbosch, Durban, Pietermaritzburg, Bloemfontein, Gqeberha, East London, Polokwane, Nelspruit, Kimberley, Mahikeng, etc., plus the larger towns).
+- `lawyers` — add nullable `town_id` (FK → `towns.id`). Existing free-text `city` and `province` columns kept as fallback (no destructive migration). A future cleanup pass can backfill `town_id` by matching text.
+- `firm_branches` — add nullable `town_id` for consistency (lawyer branch records can also be linked).
+- Indexes on `towns.province_id`, `lawyers.town_id`, `firm_branches.town_id`.
+- RLS: public `SELECT` on `provinces` and `towns` (reference data). Only `platform_admin` may `INSERT/UPDATE/DELETE`. Standard grants for `authenticated`, `service_role`, plus `anon SELECT` on these two reference tables.
 
-### 1. Database (single migration)
+## Public search page (`/search`)
 
-- New table **`bars`** — South African Bar Councils.
-  - Fields: `name` (unique, citext), `slug` (unique), `province`.
-  - Seed with the standard SA Bars: Johannesburg, Cape, Pretoria, Durban (KZN), Port Elizabeth, Grahamstown, Bloemfontein, Pietermaritzburg, Polokwane, Mthatha, Mahikeng, Kimberley, Mbombela.
-- New table **`chambers`** (a.k.a. Groups).
-  - Fields: `name` (unique with `bar_id`, citext), `slug`, `bar_id` (nullable — most Chambers belong to one Bar but some can be unaffiliated), `address`, `city`, `province`, `phone`, `website`.
-- **`lawyers`** changes:
-  - `ALTER COLUMN firm_id DROP NOT NULL`.
-  - Add `bar_id uuid` and `chambers_id uuid` (nullable; only used for advocates).
-  - Add CHECK: an advocate must have `bar_id` set; an attorney must have `firm_id` set.
-- RLS: public can `SELECT` from `bars` and `chambers` (they're reference data). Only `platform_admin` can insert/update/delete. Standard GRANTs on the new tables.
-- Update RLS / queries on `lawyers` so listings filter correctly when `firm_id` is null.
+Replace the current free-text Province textbox with two cascading typeable comboboxes (reusing existing `Combobox`):
 
-### 2. Admin hub — `/admin`
+1. **Province** — typeable select from the 9 provinces.
+2. **Town / City** — typeable select; disabled until a Province is picked; options filtered to that province. Optional ("Any town").
 
-New landing page for platform admins with three big cards:
+Both filters are encoded in search params (`province`, `town`). The lawyer query filters on `lawyers.town_id` when town is set, otherwise on any town within the selected province. Falls back to matching the legacy text `province` column for rows without `town_id`, so existing seeded lawyers still appear.
 
-```text
-+--------------+  +------------------+  +------------------+
-|  Add Firm    |  |  Add Attorney    |  |  Add Advocate    |
-|  Manage all  |  |  Across all firms|  |  By Bar/Chambers |
-+--------------+  +------------------+  +------------------+
-```
+## Admin
 
-Plus quick links to manage Bars and Chambers (reference data).
+- **Add/Edit Attorney** and **Add/Edit Advocate** forms get a Province + Town combobox pair. Town list filters by Province. Selecting a town also sets the text `city`/`province` columns for backward compatibility.
+- **New `/admin/towns` page** — small CRUD table so platform admin can add missing towns later (typed Province combobox + Town name). Mirrors the Bars/Chambers admin pages. Linked from the Admin Hub alongside Bars and Chambers.
 
-### 3. Pages
+## Profile + listings
 
-- **`/admin/firms`** — already exists, kept as-is.
-- **`/admin/attorneys`** (new) — table of all attorneys across all firms. "Add Attorney" button opens a modal that asks **Firm** first (typeable combobox over existing firms), then the usual attorney fields. Row actions: edit, open profile, change firm, delete.
-- **`/admin/advocates`** (new) — table of all advocates. "Add Advocate" button opens a modal with:
-  - First name, last name, email, phone, city, province
-  - **Bar** — typeable combobox bound to the `bars` table. No free text — must pick from list. A small "+ Add Bar" affordance opens a tiny inline form (admin only).
-  - **Chambers** — typeable combobox filtered by selected Bar; "+ Add Chambers" inline. Optional.
-  - Designation (Senior Counsel toggle, year of admission, etc. — reuses existing lawyer fields).
-- **`/admin/bars`** and **`/admin/chambers`** (new, small) — simple CRUD tables so admin can rename/merge/clean reference data without duplicates. Name uniqueness is enforced by the DB; inline edit; merge action moves all advocates from Bar A → Bar B then deletes A.
-
-### 4. Profile + listings
-
-- Lawyer profile page (`/lawyers/$slug`) — for advocates, show **Bar** and **Chambers** in the header instead of the firm link. "Office" sidebar shows the Chambers address (if any) instead of firm branches.
-- Search page — Bar and Chambers become filterable (typeable comboboxes) when the user picks "Advocate" designation.
-- Firm page — only attorneys (advocates excluded by the `firm_id IS NOT NULL` filter).
-
-### 5. Anti-duplication safeguards
-
-- DB-level: `UNIQUE` on `bars.name` (citext) and on `(bar_id, chambers.name)` (citext) so casing/whitespace can't create dupes.
-- UI-level: comboboxes ONLY allow selecting existing rows; creating a new Bar or Chambers is a deliberate, separate action behind a button, with a "did you mean …" suggestion if the typed name fuzzy-matches an existing row.
-
-## Technical notes
-
-- Existing `lawyer_type` check constraint already restricts to `'advocate' | 'attorney'`.
-- Schema change requires updating `lawyers` queries that assume `firm_id` is non-null (search page, firm detail, dashboards). I'll grep and patch each.
-- Reuse the existing `Combobox` component for Bar/Chambers pickers.
-- New server fns under `src/lib/advocate-registration.functions.ts` for create/update flows that need admin checks; everything routed through `requireSupabaseAuth` + role check.
-- All new admin routes live under `src/routes/_authenticated/admin.*.tsx` so the existing auth gate applies.
+- Lawyer profile header: prefer joined `town.name, province.name` when `town_id` is set; fall back to text fields.
+- Firm pages: unchanged (firm-level location stays as-is for now).
 
 ## Out of scope
 
-- Letting Bars/Chambers self-register or claim listings (admin-managed only).
-- Migrating any existing fake-firm rows that were created to hold advocates — I'll surface a list so you can re-link them manually.
+- Backfilling `town_id` on existing lawyer rows (admin can do this manually via edit, or a future migration can attempt fuzzy text match).
+- Suburb-level locations.
+- Self-service town requests by firms/lawyers.
+
+## Technical notes
+
+- New server fns in `src/lib/locations.functions.ts` (`listProvinces`, `listTowns({ provinceId })`, admin `createTown`, `updateTown`, `deleteTown`). Admin mutations gate on `platform_admin` role via `requireSupabaseAuth` + role check, same pattern as bars/chambers.
+- Search page loads provinces eagerly; towns lazy-loaded on province change via TanStack Query.
+- Seed data for the ~200 towns lives in the migration SQL as one `INSERT ... VALUES` block per province.
