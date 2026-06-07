@@ -183,6 +183,20 @@ function AdminExpertFormModal({
   onSaved: () => void;
 }) {
   const isEdit = !!expert;
+
+  const { data: existing } = useQuery({
+    queryKey: ["admin-expert-detail", expert?.id],
+    enabled: !!expert?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("expert_witnesses")
+        .select("qualifications, bio")
+        .eq("id", expert!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const [form, setForm] = useState({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
@@ -195,7 +209,18 @@ function AdminExpertFormModal({
     firm_id: expert?.firm_id ?? "",
     status: expert?.status ?? "trial",
   });
+  const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
+
+  // Hydrate qualifications/bio once when editing
+  if (isEdit && existing && !hydrated) {
+    setForm((f) => ({
+      ...f,
+      qualifications: (existing as any).qualifications ?? "",
+      bio: (existing as any).bio ?? "",
+    }));
+    setHydrated(true);
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,11 +234,11 @@ function AdminExpertFormModal({
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         title: form.title || null,
-        qualifications: form.qualifications || null,
+        qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
         city: form.city || null,
         province: form.province || null,
-        bio: form.bio || null,
+        bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         firm_id: form.firm_id || null,
         is_independent: !form.firm_id,
       };
@@ -266,7 +291,7 @@ function AdminExpertFormModal({
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Qualifications">
-            <textarea rows={2} value={form.qualifications} onChange={(e) => setForm({ ...form, qualifications: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />
           </AField>
           <AField label="Registration body (e.g. HPCSA)">
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
@@ -293,8 +318,20 @@ function AdminExpertFormModal({
             </AField>
           )}
           <AField label="Bio / experience">
-            <textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <RichTextEditor value={form.bio} onChange={(html) => setForm({ ...form, bio: html })} placeholder="Background, areas of focus, notable experience…" />
           </AField>
+
+          {isEdit && expert && (
+            <AField label="Samples of work">
+              <ExpertWorkSamples expertId={expert.id} />
+            </AField>
+          )}
+          {!isEdit && (
+            <p className="rounded border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              Save the expert first, then re-open to add samples of work.
+            </p>
+          )}
+
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
