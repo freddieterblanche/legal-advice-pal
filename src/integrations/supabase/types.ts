@@ -1160,6 +1160,13 @@ export type Database = {
             foreignKeyName: "towns_province_id_fkey"
             columns: ["province_id"]
             isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["province_id"]
+          },
+          {
+            foreignKeyName: "towns_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
             referencedRelation: "provinces"
             referencedColumns: ["id"]
           },
@@ -1182,96 +1189,41 @@ export type Database = {
       }
       lawyer_search_view: {
         Row: {
-          accolades: string | null
           arbitrator_accreditation: string | null
           arbitrator_experience_years: number | null
           arbitrator_types: string[] | null
-          availability_notes: string | null
           avatar_url: string | null
-          bar_id: string | null
-          bio: string | null
-          chambers_id: string | null
+          case_count: number | null
           city: string | null
-          created_at: string | null
-          daily_rate_range: string | null
           designation: string | null
-          designation_code: string | null
-          designation_custom: string | null
-          education: string | null
-          email: string | null
-          firm_id: string | null
           firm_name: string | null
           firm_slug: string | null
           first_name: string | null
+          full_name: string | null
           id: string | null
           is_arbitrator: boolean | null
-          is_claimed: boolean | null
           is_mediator: boolean | null
-          is_practice_head: boolean | null
-          is_sector_head: boolean | null
           is_senior_counsel: boolean | null
           languages: string[] | null
           last_name: string | null
-          lawyer_type: string | null
-          linkedin_url: string | null
           mediator_accreditation: string | null
           mediator_sectors: string[] | null
           mediator_style: string | null
-          noteworthy_matters: string | null
-          overview: string | null
-          phone: string | null
-          practice_head_area: string | null
-          profile_id: string | null
+          practice_area_slugs: string[] | null
+          practice_areas: string[] | null
           profile_views: number | null
           province: string | null
-          qualifications: string | null
-          reported_cases_notes: string | null
-          saflii_author_url: string | null
-          search_vector: unknown
-          sector_head_area: string | null
+          province_id: string | null
+          province_name: string | null
+          province_slug: string | null
           slug: string | null
           status: string | null
           town_id: string | null
+          town_name: string | null
+          town_slug: string | null
           trial_end_date: string | null
-          trial_start_date: string | null
-          year_of_admission: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "lawyers_bar_id_fkey"
-            columns: ["bar_id"]
-            isOneToOne: false
-            referencedRelation: "bars"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_chambers_id_fkey"
-            columns: ["chambers_id"]
-            isOneToOne: false
-            referencedRelation: "chambers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firm_billing_summary"
-            referencedColumns: ["firm_id"]
-          },
-          {
-            foreignKeyName: "lawyers_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "lawyers_town_id_fkey"
             columns: ["town_id"]
