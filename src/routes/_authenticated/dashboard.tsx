@@ -175,7 +175,7 @@ function Overview({ firmId }: { firmId: string }) {
     { label: "Total Lawyers", value: stats?.total ?? 0 },
     { label: "In Free Trial", value: stats?.trial ?? 0 },
     { label: "Active (Billing)", value: stats?.active ?? 0 },
-    { label: "Monthly Cost", value: `R${(stats?.active ?? 0) * 99}` },
+    { label: "Monthly Cost", value: `R${(stats?.active ?? 0) * 160}` },
     { label: "Profile Views", value: stats?.views ?? 0 },
     { label: "Pending Payment", value: stats?.pending ?? 0 },
   ];
