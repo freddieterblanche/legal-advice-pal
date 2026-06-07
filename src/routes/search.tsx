@@ -208,7 +208,7 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-xl`}
+                    className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-2xl`}
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
