@@ -1221,6 +1221,7 @@ export type Database = {
           practice_area_slugs: string[] | null
           practice_areas: string[] | null
           profile_views: number | null
+          provider_type: string | null
           province: string | null
           province_id: string | null
           province_name: string | null
