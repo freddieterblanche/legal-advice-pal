@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../../integrations/supabase/client";
-import { PROVINCES, slugify } from "../../lib/constants";
+import { slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
