@@ -25,7 +25,7 @@ function ExpertWitnessProfile() {
       const { data, error } = await supabase
         .from("service_providers")
         .select(`*,
-          provider_disciplines(expert_disciplines(name, slug, parent_category)),
+          provider_disciplines(expert_disciplines(name, slug, parent_category).eq("provider_type", "expert")),
           case_service_providers(role, notes, cases(case_name, citation, court, year, saflii_url))
         `)
         .eq("slug", slug)

@@ -578,7 +578,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-        const { error } = await supabase.from("service_providers").insert({
+        const { error } = await supabase.from("service_providers").insert({ provider_type: 'expert',
           ...payload,
           firm_id: firmId,
           slug,

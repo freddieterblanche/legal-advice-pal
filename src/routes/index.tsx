@@ -49,7 +49,7 @@ function HomePage() {
     queryFn: async () => {
       const [lawyersRes, expertsRes, mediatorsRes, arbitratorsRes] = await Promise.all([
         supabase.from("service_providers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
-        supabase.from("service_providers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
+        supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("provider_type", "expert").in("status", ["trial", "active"]),
         supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("is_mediator", true).in("status", ["trial", "active"]),
         supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("is_arbitrator", true).in("status", ["trial", "active"]),
       ]);

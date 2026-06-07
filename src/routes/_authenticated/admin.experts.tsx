@@ -64,7 +64,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id")
+        .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
@@ -214,7 +214,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("service_providers")
-        .select("*")
+        .select("*").eq("provider_type", "expert")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
@@ -307,7 +307,7 @@ function AdminExpertFormModal({
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-        const { error } = await supabase.from("service_providers").insert({ ...payload, slug });
+        const { error } = await supabase.from("service_providers").insert({ ...payload, slug, provider_type: "expert" });
         if (error) throw error;
       }
       toast.success(isEdit ? "Expert updated" : "Expert added");

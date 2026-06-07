@@ -215,7 +215,7 @@ export const registerExpertForCurrentUser = createServerFn({ method: "POST" })
 
     const { data: expertRow, error: expErr } = await supabaseAdmin
       .from("service_providers")
-      .insert({
+      .insert({ provider_type: 'expert',
         slug,
         profile_id: context.userId,
         first_name: data.first_name,

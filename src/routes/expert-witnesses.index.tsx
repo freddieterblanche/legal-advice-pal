@@ -48,7 +48,7 @@ function ExpertWitnessSearch() {
     queryFn: async () => {
       let query = supabase
         .from("service_providers")
-        .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category)), case_service_providers(id)", { count: "exact" })
+        .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category).eq("provider_type", "expert")), case_service_providers(id)", { count: "exact" })
         .in("status", ["trial", "active"]);
       if (search.q) {
         query = query.or(`first_name.ilike.%${search.q}%,last_name.ilike.%${search.q}%,employer.ilike.%${search.q}%`);
