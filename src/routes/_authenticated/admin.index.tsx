@@ -124,6 +124,3 @@ function AdminHub() {
     </div>
   );
 }
-
-// Re-export so this file is also a valid route module after dot routing
-export { redirect };
