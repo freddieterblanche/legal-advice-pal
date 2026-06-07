@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin.experts'
 import { Route as AuthenticatedAdminChambersRouteImport } from './routes/_authenticated/admin.chambers'
 import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
+import { Route as AuthenticatedAdminAttorneysRouteImport } from './routes/_authenticated/admin.attorneys'
 import { Route as AuthenticatedAdminArbitratorsRouteImport } from './routes/_authenticated/admin.arbitrators'
 import { Route as AuthenticatedAdminAdvocatesRouteImport } from './routes/_authenticated/admin.advocates'
 
@@ -152,6 +153,12 @@ const AuthenticatedAdminBarsRoute = AuthenticatedAdminBarsRouteImport.update({
   path: '/admin/bars',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminAttorneysRoute =
+  AuthenticatedAdminAttorneysRouteImport.update({
+    id: '/admin/attorneys',
+    path: '/admin/attorneys',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminArbitratorsRoute =
   AuthenticatedAdminArbitratorsRouteImport.update({
     id: '/admin/arbitrators',
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/mediators/': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
+  '/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/mediators': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
+  '/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
@@ -237,6 +246,7 @@ export interface FileRoutesById {
   '/mediators/': typeof MediatorsIndexRoute
   '/_authenticated/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/_authenticated/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
+  '/_authenticated/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/mediators/'
     | '/admin/advocates'
     | '/admin/arbitrators'
+    | '/admin/attorneys'
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/experts'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/mediators'
     | '/admin/advocates'
     | '/admin/arbitrators'
+    | '/admin/attorneys'
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/experts'
@@ -318,6 +330,7 @@ export interface FileRouteTypes {
     | '/mediators/'
     | '/_authenticated/admin/advocates'
     | '/_authenticated/admin/arbitrators'
+    | '/_authenticated/admin/attorneys'
     | '/_authenticated/admin/bars'
     | '/_authenticated/admin/chambers'
     | '/_authenticated/admin/experts'
@@ -508,6 +521,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBarsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/attorneys': {
+      id: '/_authenticated/admin/attorneys'
+      path: '/admin/attorneys'
+      fullPath: '/admin/attorneys'
+      preLoaderRoute: typeof AuthenticatedAdminAttorneysRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/arbitrators': {
       id: '/_authenticated/admin/arbitrators'
       path: '/admin/arbitrators'
@@ -529,6 +549,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedAdminAdvocatesRoute: typeof AuthenticatedAdminAdvocatesRoute
   AuthenticatedAdminArbitratorsRoute: typeof AuthenticatedAdminArbitratorsRoute
+  AuthenticatedAdminAttorneysRoute: typeof AuthenticatedAdminAttorneysRoute
   AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
   AuthenticatedAdminChambersRoute: typeof AuthenticatedAdminChambersRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
@@ -542,6 +563,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedAdminAdvocatesRoute: AuthenticatedAdminAdvocatesRoute,
   AuthenticatedAdminArbitratorsRoute: AuthenticatedAdminArbitratorsRoute,
+  AuthenticatedAdminAttorneysRoute: AuthenticatedAdminAttorneysRoute,
   AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
   AuthenticatedAdminChambersRoute: AuthenticatedAdminChambersRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
