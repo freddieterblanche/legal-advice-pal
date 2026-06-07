@@ -1271,6 +1271,7 @@ export type Database = {
           city: string | null
           created_at: string | null
           designation: string | null
+          exclude_from_lawyer_listing: boolean | null
           firm_name: string | null
           firm_slug: string | null
           first_name: string | null
