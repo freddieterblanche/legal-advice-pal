@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
-import { PROVINCES, DESIGNATIONS } from "../lib/constants";
+import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; area?: string; province?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
+type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
