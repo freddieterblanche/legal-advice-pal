@@ -198,7 +198,7 @@ function SearchPage() {
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className={`h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-inset ${accentRing}`}
+                      className={`h-24 w-24 shrink-0 rounded-xl object-cover ring-1 ring-inset ${accentRing}`}
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
@@ -208,7 +208,7 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-xl`}
+                    className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-2xl`}
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
