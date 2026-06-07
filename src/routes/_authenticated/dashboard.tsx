@@ -220,6 +220,8 @@ const lawyerSchema = z.object({
   email: z.string().trim().max(200).optional(),
   phone: z.string().trim().max(60).optional(),
   linkedin_url: z.string().trim().max(500).optional(),
+  is_mediator: z.boolean().optional(),
+  is_arbitrator: z.boolean().optional(),
 });
 
 type LawyerRow = {
