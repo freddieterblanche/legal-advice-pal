@@ -26,7 +26,7 @@ type Branch = {
   is_head_office: boolean;
 };
 
-type Tab = "overview" | "lawyers" | "billing" | "settings";
+type Tab = "overview" | "lawyers" | "experts" | "billing" | "settings";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
