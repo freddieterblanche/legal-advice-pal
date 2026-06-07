@@ -127,6 +127,7 @@ function Dashboard() {
             {([
               { id: "overview", label: "Overview", icon: FileText },
               { id: "lawyers", label: "Lawyers", icon: Users },
+              { id: "experts", label: "Expert Witnesses", icon: Stethoscope },
               { id: "billing", label: "Billing", icon: Wallet },
               { id: "settings", label: "Settings", icon: SettingsIcon },
             ] as const).map((t) => (
@@ -147,6 +148,7 @@ function Dashboard() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
         {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} onClearEditSearch={clearEditSearch} />}
+        {tab === "experts" && <ExpertWitnessesTab firmId={firm.id} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
