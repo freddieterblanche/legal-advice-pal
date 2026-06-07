@@ -14,6 +14,13 @@ import { RichTextEditor } from "./RichTextEditor";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
+import {
+  MEDIATION_SECTORS,
+  MEDIATION_ACCREDITATIONS,
+  MEDIATION_STYLES,
+  ARBITRATION_TYPES,
+  ARBITRATION_ACCREDITATIONS,
+} from "../lib/expert-constants";
 
 export type Branch = {
   id: string;
@@ -57,6 +64,13 @@ export const lawyerSchema = z.object({
   linkedin_url: z.string().trim().max(500).optional(),
   is_mediator: z.boolean().optional(),
   is_arbitrator: z.boolean().optional(),
+  mediator_accreditation: z.string().trim().max(120).nullable().optional(),
+  mediator_style: z.string().trim().max(120).nullable().optional(),
+  mediator_sectors: z.array(z.string().trim().max(120)).nullable().optional(),
+  arbitrator_accreditation: z.string().trim().max(120).nullable().optional(),
+  arbitrator_types: z.array(z.string().trim().max(120)).nullable().optional(),
+  arbitrator_experience_years: z.number().int().min(0).max(80).nullable().optional(),
+  availability_notes: z.string().trim().max(1000).nullable().optional(),
 });
 
 export type LawyerRow = {
@@ -94,6 +108,13 @@ export type LawyerRow = {
   slug?: string | null;
   is_mediator?: boolean | null;
   is_arbitrator?: boolean | null;
+  mediator_accreditation?: string | null;
+  mediator_style?: string | null;
+  mediator_sectors?: string[] | null;
+  arbitrator_accreditation?: string | null;
+  arbitrator_types?: string[] | null;
+  arbitrator_experience_years?: number | null;
+  availability_notes?: string | null;
   firm_id: string | null;
 };
 
@@ -144,7 +165,21 @@ export function LawyerFormModal({
     linkedin_url: lawyer?.linkedin_url ?? "",
     is_mediator: !!lawyer?.is_mediator,
     is_arbitrator: !!lawyer?.is_arbitrator,
+    mediator_accreditation: lawyer?.mediator_accreditation ?? "",
+    mediator_style: lawyer?.mediator_style ?? "",
+    mediator_sectors: (lawyer?.mediator_sectors ?? []) as string[],
+    arbitrator_accreditation: lawyer?.arbitrator_accreditation ?? "",
+    arbitrator_types: (lawyer?.arbitrator_types ?? []) as string[],
+    arbitrator_experience_years:
+      lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
+    availability_notes: lawyer?.availability_notes ?? "",
   });
+
+  const toggleArr = (key: "mediator_sectors" | "arbitrator_types", v: string) =>
+    setForm((f) => ({
+      ...f,
+      [key]: f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v],
+    }));
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [allPracticeAreas, setAllPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
@@ -406,6 +441,18 @@ export function LawyerFormModal({
         accolades: sanitizeBioHtml(form.accolades),
         noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
         reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+        mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
+        mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
+        mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
+        arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
+        arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
+        arbitrator_experience_years:
+          form.is_arbitrator && form.arbitrator_experience_years
+            ? Number(form.arbitrator_experience_years)
+            : null,
+        availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
+          ? form.availability_notes
+          : null,
       });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
@@ -653,6 +700,99 @@ export function LawyerFormModal({
                   Also acts as Arbitrator
                 </label>
               </div>
+
+              {form.is_mediator && (
+                <fieldset className="mt-3 space-y-3 rounded border border-violet-500/30 bg-violet-500/5 p-3">
+                  <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-violet-700">Mediator details</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Accreditation
+                      <select
+                        value={form.mediator_accreditation}
+                        onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {MEDIATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Style
+                      <select
+                        value={form.mediator_style}
+                        onChange={(e) => setForm({ ...form, mediator_style: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">Sectors</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MEDIATION_SECTORS.map((s) => (
+                        <button type="button" key={s} onClick={() => toggleArr("mediator_sectors", s)}
+                          className={`rounded-full border px-2.5 py-1 text-xs ${form.mediator_sectors.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </fieldset>
+              )}
+
+              {form.is_arbitrator && (
+                <fieldset className="mt-3 space-y-3 rounded border border-rose-500/30 bg-rose-500/5 p-3">
+                  <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-rose-700">Arbitrator details</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Accreditation
+                      <select
+                        value={form.arbitrator_accreditation}
+                        onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {ARBITRATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Years of experience
+                      <input
+                        type="number" min={0} max={80}
+                        value={form.arbitrator_experience_years}
+                        onChange={(e) => setForm({ ...form, arbitrator_experience_years: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">Types</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ARBITRATION_TYPES.map((s) => (
+                        <button type="button" key={s} onClick={() => toggleArr("arbitrator_types", s)}
+                          className={`rounded-full border px-2.5 py-1 text-xs ${form.arbitrator_types.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </fieldset>
+              )}
+
+              {(form.is_mediator || form.is_arbitrator) && (
+                <label className="mt-3 block text-xs font-medium text-muted-foreground">
+                  Availability notes
+                  <textarea
+                    rows={2}
+                    value={form.availability_notes}
+                    onChange={(e) => setForm({ ...form, availability_notes: e.target.value })}
+                    className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                    placeholder="e.g. Available weekdays, virtual or in-person"
+                  />
+                </label>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
