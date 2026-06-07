@@ -1350,6 +1350,10 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     province: (expert?.province ?? "Gauteng") as string,
     bio: expert?.bio ?? "",
     avatar_url: expert?.avatar_url ?? "",
+    company_name: expert?.company_name ?? "",
+    office_phone: expert?.office_phone ?? "",
+    mobile_phone: expert?.mobile_phone ?? "",
+    contact_email: expert?.contact_email ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -1359,34 +1363,31 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
     setSaving(true);
     try {
+      const payload = {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        title: form.title || null,
+        qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
+        registration_body: form.registration_body || null,
+        city: form.city || null,
+        province: form.province || null,
+        bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+        avatar_url: form.avatar_url?.trim() || null,
+        company_name: form.company_name?.trim() || null,
+        office_phone: form.office_phone?.trim() || null,
+        mobile_phone: form.mobile_phone?.trim() || null,
+        contact_email: form.contact_email?.trim() || null,
+      };
       if (isEdit && expert) {
-        const { error } = await supabase.from("expert_witnesses").update({
-          first_name: form.first_name,
-          last_name: form.last_name,
-          title: form.title || null,
-          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
-          registration_body: form.registration_body || null,
-          city: form.city || null,
-          province: form.province || null,
-          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
-          avatar_url: form.avatar_url?.trim() || null,
-        }).eq("id", expert.id);
+        const { error } = await supabase.from("expert_witnesses").update(payload).eq("id", expert.id);
         if (error) throw error;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
         const { error } = await supabase.from("expert_witnesses").insert({
+          ...payload,
           firm_id: firmId,
           slug,
-          first_name: form.first_name,
-          last_name: form.last_name,
-          title: form.title || null,
-          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
-          registration_body: form.registration_body || null,
-          city: form.city || null,
-          province: form.province || null,
-          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
-          avatar_url: form.avatar_url?.trim() || null,
         });
         if (error) throw error;
       }
