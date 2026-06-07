@@ -700,6 +700,99 @@ export function LawyerFormModal({
                   Also acts as Arbitrator
                 </label>
               </div>
+
+              {form.is_mediator && (
+                <fieldset className="mt-3 space-y-3 rounded border border-violet-500/30 bg-violet-500/5 p-3">
+                  <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-violet-700">Mediator details</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Accreditation
+                      <select
+                        value={form.mediator_accreditation}
+                        onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {MEDIATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Style
+                      <select
+                        value={form.mediator_style}
+                        onChange={(e) => setForm({ ...form, mediator_style: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">Sectors</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MEDIATION_SECTORS.map((s) => (
+                        <button type="button" key={s} onClick={() => toggleArr("mediator_sectors", s)}
+                          className={`rounded-full border px-2.5 py-1 text-xs ${form.mediator_sectors.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </fieldset>
+              )}
+
+              {form.is_arbitrator && (
+                <fieldset className="mt-3 space-y-3 rounded border border-rose-500/30 bg-rose-500/5 p-3">
+                  <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-rose-700">Arbitrator details</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Accreditation
+                      <select
+                        value={form.arbitrator_accreditation}
+                        onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      >
+                        <option value="">—</option>
+                        {ARBITRATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground">
+                      Years of experience
+                      <input
+                        type="number" min={0} max={80}
+                        value={form.arbitrator_experience_years}
+                        onChange={(e) => setForm({ ...form, arbitrator_experience_years: e.target.value })}
+                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">Types</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ARBITRATION_TYPES.map((s) => (
+                        <button type="button" key={s} onClick={() => toggleArr("arbitrator_types", s)}
+                          className={`rounded-full border px-2.5 py-1 text-xs ${form.arbitrator_types.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </fieldset>
+              )}
+
+              {(form.is_mediator || form.is_arbitrator) && (
+                <label className="mt-3 block text-xs font-medium text-muted-foreground">
+                  Availability notes
+                  <textarea
+                    rows={2}
+                    value={form.availability_notes}
+                    onChange={(e) => setForm({ ...form, availability_notes: e.target.value })}
+                    className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
+                    placeholder="e.g. Available weekdays, virtual or in-person"
+                  />
+                </label>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
