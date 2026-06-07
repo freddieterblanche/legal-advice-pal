@@ -38,6 +38,8 @@ export const Route = createFileRoute("/_authenticated/admin/advocates")({
 
 function AdminAdvocatesPage() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [editing, setEditing] = useState<AdvocateRow | null>(null);
   const [adding, setAdding] = useState(false);
   const [q, setQ] = useState("");
