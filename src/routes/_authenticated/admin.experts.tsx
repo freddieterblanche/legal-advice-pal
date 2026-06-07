@@ -335,6 +335,20 @@ function AdminExpertFormModal({
           <AField label="Title (e.g. Orthopaedic Surgeon)">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
+          <AField label="Company / practice name">
+            <input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} placeholder="e.g. De Kroon Forensic Accounting" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
+          <div className="grid gap-3 md:grid-cols-2">
+            <AField label="Office phone">
+              <input type="tel" value={form.office_phone} onChange={(e) => setForm({ ...form, office_phone: e.target.value })} placeholder="+27 21 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            </AField>
+            <AField label="Mobile phone">
+              <input type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} placeholder="+27 82 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            </AField>
+          </div>
+          <AField label="Contact email">
+            <input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="eric@example.co.za" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
           <AField label="Qualifications">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />
           </AField>
