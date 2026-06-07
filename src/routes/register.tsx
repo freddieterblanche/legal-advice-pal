@@ -127,38 +127,14 @@ function Input({ value, onChange, type = "text", placeholder, required }: { valu
 function ProvinceCitySelect({
   province, city, onProvince, onCity,
 }: { province: string; city: string; onProvince: (v: string) => void; onCity: (v: string) => void }) {
-  const { data: provinces } = useQuery({
-    queryKey: ["provinces"],
-    queryFn: async () => (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
-  });
-  const { data: towns } = useQuery({
-    queryKey: ["towns-all"],
-    queryFn: async () => (await supabase.from("towns").select("name, province_id").order("is_major_city", { ascending: false }).order("name")).data ?? [],
-  });
-  const townOptions = useMemo(() => {
-    if (!towns) return [];
-    const provId = provinces?.find((p) => p.name === province)?.id;
-    const filtered = provId ? towns.filter((t) => t.province_id === provId) : towns;
-    return filtered.map((t) => ({ value: t.name as string, label: t.name as string }));
-  }, [towns, provinces, province]);
-
   return (
-    <>
-      <select value={province} onChange={(e) => { onProvince(e.target.value); onCity(""); }} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-        <option value="">Select province</option>
-        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <ComboboxCreatable
-        value={city}
-        onChange={onCity}
-        options={townOptions}
-        placeholder={province ? "Select or type a city/town…" : "Select a province first…"}
-        emptyLabel="—"
-        disabled={!province}
-        onCreate={async (name) => name}
-        createLabel="Use"
-      />
-    </>
+    <ProvinceCityFields
+      province={province}
+      city={city}
+      onProvince={onProvince}
+      onCity={onCity}
+      selectClassName="w-full rounded border border-border bg-background px-3 py-2.5 text-sm"
+    />
   );
 }
 
