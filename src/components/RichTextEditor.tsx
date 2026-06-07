@@ -21,6 +21,7 @@ type Props = {
 };
 
 export function RichTextEditor({ value, onChange, placeholder }: Props) {
+  const lastEmittedRef = useRef<string>(value || "");
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -43,23 +44,30 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      // Treat empty editor as empty string
-      onChange(html === "<p></p>" ? "" : html);
+      const next = html === "<p></p>" ? "" : html;
+      lastEmittedRef.current = next;
+      onChange(next);
     },
     immediatelyRender: false,
   });
 
-  // Sync external value changes (e.g. after AI import)
+  // Sync external value changes (e.g. initial hydration, AI import).
+  // Skip echoes of our own onUpdate to avoid resetting cursor / breaking
+  // list toggles when parent re-renders mid-edit.
   useEffect(() => {
     if (!editor) return;
-    const current = editor.getHTML();
     const next = value || "";
-    if (next && next !== current) {
+    if (next === lastEmittedRef.current) return;
+    const current = editor.getHTML();
+    if (next === current) return;
+    if (next) {
       editor.commands.setContent(next, { emitUpdate: false });
-    } else if (!next && current !== "<p></p>") {
+    } else if (current !== "<p></p>") {
       editor.commands.clearContent(false);
     }
+    lastEmittedRef.current = next;
   }, [value, editor]);
+
 
   if (!editor) return null;
 
