@@ -87,8 +87,9 @@ function SearchPage() {
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
-      if (search.type) filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
-      return { rows: filtered, total: search.type ? filtered.length : (count ?? 0) };
+      // Always filter by type — attorneys and advocates are separate datasets
+      filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
+      return { rows: filtered, total: filtered.length };
     },
   });
 
