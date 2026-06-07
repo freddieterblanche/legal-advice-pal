@@ -78,6 +78,14 @@ function AdminAdvocatesPage() {
     },
   });
 
+  // Auto-open edit modal when arriving with ?edit=<id>
+  useEffect(() => {
+    if (!search.edit || !advocates) return;
+    const found = advocates.find((a) => a.id === search.edit);
+    if (found && (!editing || editing.id !== found.id)) setEditing(found);
+  }, [search.edit, advocates, editing]);
+
+
   const remove = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("lawyers").delete().eq("id", id);
