@@ -239,34 +239,18 @@ function SearchPage() {
                 ? "Searching…"
                 : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sort by</span>
-              {([
-                { key: "surname" as const, label: "Surname" },
-                { key: "experience" as const, label: "Years Experience" },
-                { key: "listed" as const, label: "Date Listed" },
-              ]).map((s) => {
-                const active = (search.sort ?? "surname") === s.key;
-                const asc = active && (search.dir ?? "asc") === "asc";
-                return (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => {
-                      if (active) {
-                        navigate({ search: (prev: Search) => ({ ...prev, dir: asc ? "desc" : "asc", page: 1 }) });
-                      } else {
-                        navigate({ search: (prev: Search) => ({ ...prev, sort: s.key, dir: "asc", page: 1 }) });
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-card text-ink hover:border-ink"}`}
-                  >
-                    {s.label}
-                    {active ? (asc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-40" />}
-                  </button>
-                );
-              })}
-            </div>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "experience", label: "Years Experience" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) =>
+                navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
+              }
+            />
           </div>
 
 
