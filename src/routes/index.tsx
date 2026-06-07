@@ -182,7 +182,7 @@ function HomePage() {
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
           <h2 className="font-heading text-3xl md:text-4xl">List your firm on Lawexpert.co.za</h2>
           <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            R99 per lawyer per month. First 3 months free — no credit card required.
+            R160 per listing per month. First 3 months free — no credit card required.
             Build trust with verified profiles and linked reported cases.
           </p>
           <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-gold px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-gold/90">

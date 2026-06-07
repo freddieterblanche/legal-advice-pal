@@ -175,7 +175,7 @@ function Overview({ firmId }: { firmId: string }) {
     { label: "Total Lawyers", value: stats?.total ?? 0 },
     { label: "In Free Trial", value: stats?.trial ?? 0 },
     { label: "Active (Billing)", value: stats?.active ?? 0 },
-    { label: "Monthly Cost", value: `R${(stats?.active ?? 0) * 99}` },
+    { label: "Monthly Cost", value: `R${(stats?.active ?? 0) * 160}` },
     { label: "Profile Views", value: stats?.views ?? 0 },
     { label: "Pending Payment", value: stats?.pending ?? 0 },
   ];
@@ -342,7 +342,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                         type="button"
                         onClick={() => toggleFlag.mutate({ id: l.id, field: "is_mediator", value: !l.is_mediator })}
                         className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_mediator ? "border-forest bg-forest text-white" : "border-border text-muted-foreground hover:border-forest"}`}
-                        title="Toggle mediator role (+R149/mo when active)"
+                        title="Toggle mediator role"
                       >
                         Mediator
                       </button>
@@ -350,7 +350,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                         type="button"
                         onClick={() => toggleFlag.mutate({ id: l.id, field: "is_arbitrator", value: !l.is_arbitrator })}
                         className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_arbitrator ? "border-gold bg-gold text-white" : "border-border text-muted-foreground hover:border-gold"}`}
-                        title="Toggle arbitrator role (+R199/mo when active)"
+                        title="Toggle arbitrator role"
                       >
                         Arbitrator
                       </button>
@@ -1153,18 +1153,16 @@ function BillingTab({ firmId }: { firmId: string }) {
   const arbitrators = activeLawyers.filter((l) => l.is_arbitrator).length;
   const activeExperts = experts?.filter((e) => e.status === "active").length ?? 0;
 
-  const baseTotal = activeLawyers.length * 99;
-  const mediatorTotal = mediators * 149;
-  const arbitratorTotal = arbitrators * 199;
-  const expertTotal = activeExperts * 149;
-  const monthlyTotal = baseTotal + mediatorTotal + arbitratorTotal + expertTotal;
+  const RATE = 160;
+  const lawyerTotal = activeLawyers.length * RATE;
+  const expertTotal = activeExperts * RATE;
+  const monthlyTotal = lawyerTotal + expertTotal;
 
   const lines = [
-    { label: `${activeLawyers.length} active lawyer${activeLawyers.length === 1 ? "" : "s"} × R99`, amount: baseTotal },
-    { label: `${mediators} mediator add-on${mediators === 1 ? "" : "s"} × R149`, amount: mediatorTotal },
-    { label: `${arbitrators} arbitrator add-on${arbitrators === 1 ? "" : "s"} × R199`, amount: arbitratorTotal },
-    { label: `${activeExperts} expert witness${activeExperts === 1 ? "" : "es"} × R149`, amount: expertTotal },
+    { label: `${activeLawyers.length} active lawyer${activeLawyers.length === 1 ? "" : "s"} × R${RATE}`, amount: lawyerTotal },
+    { label: `${activeExperts} expert witness${activeExperts === 1 ? "" : "es"} × R${RATE}`, amount: expertTotal },
   ];
+  void mediators; void arbitrators;
 
   return (
     <div className="space-y-6">
