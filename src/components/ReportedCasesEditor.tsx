@@ -20,9 +20,9 @@ export function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
     queryKey: ["lawyer-reported-cases", lawyerId],
     queryFn: async () => {
       const { data } = await supabase
-        .from("lawyer_reported_cases")
+        .from("provider_reported_cases")
         .select("*")
-        .eq("lawyer_id", lawyerId)
+        .eq("service_provider_id", lawyerId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       return (data ?? []) as ReportedCase[];
@@ -48,8 +48,8 @@ export function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
     if (!validateCase(draft)) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("lawyer_reported_cases").insert({
-        lawyer_id: lawyerId,
+      const { error } = await supabase.from("provider_reported_cases").insert({
+        service_provider_id: lawyerId,
         case_name: draft.case_name.trim().slice(0, 300),
         citation: draft.citation.trim().slice(0, 200) || null,
         court: draft.court.trim().slice(0, 200) || null,
@@ -69,7 +69,7 @@ export function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
     if (!validateCase(editForm)) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from("lawyer_reported_cases").update({
+      const { error } = await supabase.from("provider_reported_cases").update({
         case_name: editForm.case_name.trim().slice(0, 300),
         citation: editForm.citation.trim().slice(0, 200) || null,
         court: editForm.court.trim().slice(0, 200) || null,
@@ -86,7 +86,7 @@ export function ReportedCasesEditor({ lawyerId }: { lawyerId: string }) {
 
   const remove = async (id: string) => {
     if (!confirm("Remove this case?")) return;
-    const { error } = await supabase.from("lawyer_reported_cases").delete().eq("id", id);
+    const { error } = await supabase.from("provider_reported_cases").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     refresh();
   };

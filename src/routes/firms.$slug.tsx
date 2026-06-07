@@ -37,8 +37,8 @@ function FirmProfile() {
     enabled: !!firm?.id,
     queryFn: async () => {
       const { data } = await supabase
-        .from("lawyers")
-        .select("id, slug, first_name, last_name, is_senior_counsel, lawyer_type, designation, designation_code, year_of_admission, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
+        .from("service_providers")
+        .select("id, slug, first_name, last_name, is_senior_counsel, provider_type, designation, designation_code, year_of_admission, city, avatar_url, provider_practice_areas(practice_areas(name))")
         .eq("firm_id", firm!.id)
         .in("status", ["trial", "active"]);
       if (!data) return [];
@@ -48,11 +48,11 @@ function FirmProfile() {
         "Executive", "Senior Associate", "Associate", "Candidate Legal Practitioner",
       ];
       const rank = (l: any): number => {
-        if (l.lawyer_type === "advocate" && l.is_senior_counsel) return 0;
+        if (l.provider_type === "advocate" && l.is_senior_counsel) return 0;
         const code = l.designation_code || l.designation || "";
         const idx = attorneyOrder.findIndex(d => code.toLowerCase().includes(d.toLowerCase()));
         if (idx >= 0) return 10 + idx;
-        if (l.lawyer_type === "advocate") return 50;
+        if (l.provider_type === "advocate") return 50;
         return 100;
       };
       return [...data].sort((a: any, b: any) => {
@@ -171,7 +171,7 @@ function FirmProfile() {
         <h2 className="mt-12 font-heading text-2xl text-ink">Our Lawyers</h2>
         <div className="mt-6 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {lawyers?.map((l: any) => {
-            const areas = (l.lawyer_practice_areas ?? [])
+            const areas = (l.provider_practice_areas ?? [])
               .map((x: any) => x.practice_areas?.name)
               .filter(Boolean)
               .slice(0, 3);

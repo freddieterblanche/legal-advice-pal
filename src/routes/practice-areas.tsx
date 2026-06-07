@@ -22,7 +22,7 @@ function PracticeAreasPage() {
   const { data: counts } = useQuery({
     queryKey: ["pa-counts"],
     queryFn: async () => {
-      const { data } = await supabase.from("lawyer_practice_areas").select("practice_area_id");
+      const { data } = await supabase.from("provider_practice_areas").select("practice_area_id");
       const c: Record<string, number> = {};
       data?.forEach((r) => { c[r.practice_area_id] = (c[r.practice_area_id] ?? 0) + 1; });
       return c;

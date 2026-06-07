@@ -48,10 +48,10 @@ function HomePage() {
     queryKey: ["home-stats"],
     queryFn: async () => {
       const [lawyersRes, expertsRes, mediatorsRes, arbitratorsRes] = await Promise.all([
-        supabase.from("lawyers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
-        supabase.from("expert_witnesses").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
-        supabase.from("lawyers").select("*", { count: "exact", head: true }).eq("is_mediator", true).in("status", ["trial", "active"]),
-        supabase.from("lawyers").select("*", { count: "exact", head: true }).eq("is_arbitrator", true).in("status", ["trial", "active"]),
+        supabase.from("service_providers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
+        supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("provider_type", "expert").in("status", ["trial", "active"]),
+        supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("is_mediator", true).in("status", ["trial", "active"]),
+        supabase.from("service_providers").select("*", { count: "exact", head: true }).eq("is_arbitrator", true).in("status", ["trial", "active"]),
       ]);
       return {
         lawyers: lawyersRes.count ?? 0,
@@ -65,7 +65,7 @@ function HomePage() {
   const { data: areaCounts } = useQuery({
     queryKey: ["area-counts"],
     queryFn: async () => {
-      const { data } = await supabase.from("lawyer_practice_areas").select("practice_area_id");
+      const { data } = await supabase.from("provider_practice_areas").select("practice_area_id");
       const counts: Record<string, number> = {};
       data?.forEach((r) => { counts[r.practice_area_id] = (counts[r.practice_area_id] ?? 0) + 1; });
       return counts;

@@ -160,7 +160,7 @@ function Overview({ firmId }: { firmId: string }) {
   const { data: stats } = useQuery({
     queryKey: ["firm-stats", firmId],
     queryFn: async () => {
-      const { data } = await supabase.from("lawyers").select("status, profile_views").eq("firm_id", firmId);
+      const { data } = await supabase.from("service_providers").select("status, profile_views").eq("firm_id", firmId);
       const lawyers = data ?? [];
       return {
         total: lawyers.length,
@@ -203,7 +203,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 
   const { data: lawyers } = useQuery({
     queryKey: ["firm-lawyers-list", firmId],
-    queryFn: async () => (await supabase.from("lawyers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
   });
 
   useEffect(() => {
@@ -215,7 +215,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("lawyers").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Lawyer removed"); qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }); },
@@ -225,7 +225,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
   const toggle = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const newStatus = status === "inactive" ? "trial" : "inactive";
-      const { error } = await supabase.from("lawyers").update({ status: newStatus }).eq("id", id);
+      const { error } = await supabase.from("service_providers").update({ status: newStatus }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
@@ -234,7 +234,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
   const toggleFlag = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: "is_mediator" | "is_arbitrator"; value: boolean }) => {
       const patch = field === "is_mediator" ? { is_mediator: value } : { is_arbitrator: value };
-      const { error } = await supabase.from("lawyers").update(patch).eq("id", id);
+      const { error } = await supabase.from("service_providers").update(patch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
@@ -330,12 +330,12 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 function BillingTab({ firmId }: { firmId: string }) {
   const { data: lawyers } = useQuery({
     queryKey: ["billing-lawyers", firmId],
-    queryFn: async () => (await supabase.from("lawyers").select("first_name, last_name, status, trial_end_date, is_mediator, is_arbitrator").eq("firm_id", firmId)).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("first_name, last_name, status, trial_end_date, is_mediator, is_arbitrator").eq("firm_id", firmId)).data ?? [],
   });
 
   const { data: experts } = useQuery({
     queryKey: ["billing-experts", firmId],
-    queryFn: async () => (await supabase.from("expert_witnesses").select("first_name, last_name, status").eq("firm_id", firmId)).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("first_name, last_name, status").eq("firm_id", firmId)).data ?? [],
   });
 
   const activeLawyers = lawyers?.filter((l) => l.status === "active") ?? [];
@@ -449,7 +449,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
   useEffect(() => {
     if (editExpertId && !editing) {
       // fetch on-demand so we can open immediately even if list not loaded
-      supabase.from("expert_witnesses").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
+      supabase.from("service_providers").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
         if (data) setEditing(data as ExpertRow);
       });
     }
@@ -458,12 +458,12 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
 
   const { data: experts } = useQuery({
     queryKey: ["firm-experts-list", firmId],
-    queryFn: async () => (await supabase.from("expert_witnesses").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("service_providers").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
   });
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("expert_witnesses").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Expert removed"); qc.invalidateQueries({ queryKey: ["firm-experts-list", firmId] }); },
@@ -573,12 +573,12 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
         contact_email: form.contact_email?.trim() || null,
       };
       if (isEdit && expert) {
-        const { error } = await supabase.from("expert_witnesses").update(payload).eq("id", expert.id);
+        const { error } = await supabase.from("service_providers").update(payload).eq("id", expert.id);
         if (error) throw error;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-        const { error } = await supabase.from("expert_witnesses").insert({
+        const { error } = await supabase.from("service_providers").insert({ provider_type: 'expert',
           ...payload,
           firm_id: firmId,
           slug,
@@ -935,7 +935,7 @@ function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onC
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast.error("Enter a valid email"); return; }
     setSending(true);
     try {
-      const res = await inviteFn({ data: { lawyer_id: lawyer.id, email } });
+      const res = await inviteFn({ data: { service_provider_id: lawyer.id, email } });
       const url = `${window.location.origin}/claim?token=${res.token}`;
       setInviteUrl(url);
       toast.success("Invite created — share the link below.");

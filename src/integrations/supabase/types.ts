@@ -47,10 +47,10 @@ export type Database = {
           created_at: string | null
           firm_id: string | null
           id: string
-          lawyer_id: string | null
           payfast_payment_id: string | null
           period_end: string | null
           period_start: string | null
+          service_provider_id: string | null
           status: string | null
         }
         Insert: {
@@ -58,10 +58,10 @@ export type Database = {
           created_at?: string | null
           firm_id?: string | null
           id?: string
-          lawyer_id?: string | null
           payfast_payment_id?: string | null
           period_end?: string | null
           period_start?: string | null
+          service_provider_id?: string | null
           status?: string | null
         }
         Update: {
@@ -69,10 +69,10 @@ export type Database = {
           created_at?: string | null
           firm_id?: string | null
           id?: string
-          lawyer_id?: string | null
           payfast_payment_id?: string | null
           period_end?: string | null
           period_start?: string | null
+          service_provider_id?: string | null
           status?: string | null
         }
         Relationships: [
@@ -92,44 +92,44 @@ export type Database = {
           },
           {
             foreignKeyName: "billing_records_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            columns: ["service_provider_id"]
             isOneToOne: false
             referencedRelation: "lawyer_search_view"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "billing_records_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            columns: ["service_provider_id"]
             isOneToOne: false
-            referencedRelation: "lawyers"
+            referencedRelation: "service_providers"
             referencedColumns: ["id"]
           },
         ]
       }
-      case_expert_witnesses: {
+      case_service_providers: {
         Row: {
           case_id: string
           created_at: string
-          expert_witness_id: string
           id: string
           notes: string | null
           role: string
+          service_provider_id: string
         }
         Insert: {
           case_id: string
           created_at?: string
-          expert_witness_id: string
           id?: string
           notes?: string | null
           role?: string
+          service_provider_id: string
         }
         Update: {
           case_id?: string
           created_at?: string
-          expert_witness_id?: string
           id?: string
           notes?: string | null
           role?: string
+          service_provider_id?: string
         }
         Relationships: [
           {
@@ -140,10 +140,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "case_expert_witnesses_expert_witness_id_fkey"
-            columns: ["expert_witness_id"]
+            foreignKeyName: "case_service_providers_provider_fkey"
+            columns: ["service_provider_id"]
             isOneToOne: false
-            referencedRelation: "expert_witnesses"
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_service_providers_provider_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
             referencedColumns: ["id"]
           },
         ]
@@ -250,40 +257,40 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          lawyer_id: string | null
           message: string | null
           sender_email: string | null
           sender_name: string | null
+          service_provider_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
-          lawyer_id?: string | null
           message?: string | null
           sender_email?: string | null
           sender_name?: string | null
+          service_provider_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
-          lawyer_id?: string | null
           message?: string | null
           sender_email?: string | null
           sender_name?: string | null
+          service_provider_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "enquiries_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            columns: ["service_provider_id"]
             isOneToOne: false
             referencedRelation: "lawyer_search_view"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "enquiries_lawyer_id_fkey"
-            columns: ["lawyer_id"]
+            columns: ["service_provider_id"]
             isOneToOne: false
-            referencedRelation: "lawyers"
+            referencedRelation: "service_providers"
             referencedColumns: ["id"]
           },
         ]
@@ -314,198 +321,6 @@ export type Database = {
           slug?: string
         }
         Relationships: []
-      }
-      expert_witness_disciplines: {
-        Row: {
-          discipline_id: string
-          expert_witness_id: string
-        }
-        Insert: {
-          discipline_id: string
-          expert_witness_id: string
-        }
-        Update: {
-          discipline_id?: string
-          expert_witness_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expert_witness_disciplines_discipline_id_fkey"
-            columns: ["discipline_id"]
-            isOneToOne: false
-            referencedRelation: "expert_disciplines"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expert_witness_disciplines_expert_witness_id_fkey"
-            columns: ["expert_witness_id"]
-            isOneToOne: false
-            referencedRelation: "expert_witnesses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      expert_witnesses: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          city: string | null
-          company_name: string | null
-          contact_email: string | null
-          courts_accepted_in: string[] | null
-          created_at: string
-          cv_url: string | null
-          employer: string | null
-          fee_range: string | null
-          firm_id: string | null
-          first_name: string
-          geographic_availability: string | null
-          id: string
-          is_independent: boolean
-          languages: string[] | null
-          last_name: string
-          mobile_phone: string | null
-          name_title: string | null
-          office_phone: string | null
-          profile_id: string | null
-          profile_views: number
-          province: string | null
-          qualifications: string | null
-          registration_body: string | null
-          slug: string
-          status: string
-          title: string | null
-          trial_end_date: string
-          trial_start_date: string
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          company_name?: string | null
-          contact_email?: string | null
-          courts_accepted_in?: string[] | null
-          created_at?: string
-          cv_url?: string | null
-          employer?: string | null
-          fee_range?: string | null
-          firm_id?: string | null
-          first_name: string
-          geographic_availability?: string | null
-          id?: string
-          is_independent?: boolean
-          languages?: string[] | null
-          last_name: string
-          mobile_phone?: string | null
-          name_title?: string | null
-          office_phone?: string | null
-          profile_id?: string | null
-          profile_views?: number
-          province?: string | null
-          qualifications?: string | null
-          registration_body?: string | null
-          slug: string
-          status?: string
-          title?: string | null
-          trial_end_date?: string
-          trial_start_date?: string
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          company_name?: string | null
-          contact_email?: string | null
-          courts_accepted_in?: string[] | null
-          created_at?: string
-          cv_url?: string | null
-          employer?: string | null
-          fee_range?: string | null
-          firm_id?: string | null
-          first_name?: string
-          geographic_availability?: string | null
-          id?: string
-          is_independent?: boolean
-          languages?: string[] | null
-          last_name?: string
-          mobile_phone?: string | null
-          name_title?: string | null
-          office_phone?: string | null
-          profile_id?: string | null
-          profile_views?: number
-          province?: string | null
-          qualifications?: string | null
-          registration_body?: string | null
-          slug?: string
-          status?: string
-          title?: string | null
-          trial_end_date?: string
-          trial_start_date?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expert_witnesses_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firm_billing_summary"
-            referencedColumns: ["firm_id"]
-          },
-          {
-            foreignKeyName: "expert_witnesses_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expert_witnesses_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      expert_work_samples: {
-        Row: {
-          created_at: string
-          expert_id: string
-          id: string
-          project_date: string | null
-          project_name: string
-          synopsis: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          expert_id: string
-          id?: string
-          project_date?: string | null
-          project_name: string
-          synopsis?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          expert_id?: string
-          id?: string
-          project_date?: string | null
-          project_name?: string
-          synopsis?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "expert_work_samples_expert_id_fkey"
-            columns: ["expert_id"]
-            isOneToOne: false
-            referencedRelation: "expert_witnesses"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       firm_branches: {
         Row: {
@@ -616,499 +431,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lawyer_articles: {
-        Row: {
-          created_at: string
-          id: string
-          lawyer_id: string
-          publication: string | null
-          published_date: string | null
-          sort_order: number
-          title: string
-          updated_at: string
-          url: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          lawyer_id: string
-          publication?: string | null
-          published_date?: string | null
-          sort_order?: number
-          title: string
-          updated_at?: string
-          url?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          lawyer_id?: string
-          publication?: string | null
-          published_date?: string | null
-          sort_order?: number
-          title?: string
-          updated_at?: string
-          url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyer_branches: {
-        Row: {
-          branch_id: string
-          created_at: string
-          lawyer_id: string
-        }
-        Insert: {
-          branch_id: string
-          created_at?: string
-          lawyer_id: string
-        }
-        Update: {
-          branch_id?: string
-          created_at?: string
-          lawyer_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_branches_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "firm_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyer_cases: {
-        Row: {
-          case_id: string | null
-          created_at: string | null
-          id: string
-          lawyer_id: string | null
-          outcome: string | null
-          role: string | null
-        }
-        Insert: {
-          case_id?: string | null
-          created_at?: string | null
-          id?: string
-          lawyer_id?: string | null
-          outcome?: string | null
-          role?: string | null
-        }
-        Update: {
-          case_id?: string | null
-          created_at?: string | null
-          id?: string
-          lawyer_id?: string | null
-          outcome?: string | null
-          role?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_cases_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
-            referencedRelation: "cases"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_cases_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_cases_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyer_invites: {
-        Row: {
-          accepted_at: string | null
-          email: string
-          expires_at: string
-          id: string
-          invited_by: string | null
-          lawyer_id: string
-          sent_at: string
-          token: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          email: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          lawyer_id: string
-          sent_at?: string
-          token?: string
-        }
-        Update: {
-          accepted_at?: string | null
-          email?: string
-          expires_at?: string
-          id?: string
-          invited_by?: string | null
-          lawyer_id?: string
-          sent_at?: string
-          token?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: true
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: true
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyer_practice_areas: {
-        Row: {
-          lawyer_id: string
-          practice_area_id: string
-        }
-        Insert: {
-          lawyer_id: string
-          practice_area_id: string
-        }
-        Update: {
-          lawyer_id?: string
-          practice_area_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_practice_areas_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_practice_areas_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_practice_areas_practice_area_id_fkey"
-            columns: ["practice_area_id"]
-            isOneToOne: false
-            referencedRelation: "practice_areas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyer_reported_cases: {
-        Row: {
-          case_name: string
-          citation: string | null
-          court: string | null
-          created_at: string
-          id: string
-          lawyer_id: string
-          sort_order: number
-          updated_at: string
-          url: string | null
-          year: number | null
-        }
-        Insert: {
-          case_name: string
-          citation?: string | null
-          court?: string | null
-          created_at?: string
-          id?: string
-          lawyer_id: string
-          sort_order?: number
-          updated_at?: string
-          url?: string | null
-          year?: number | null
-        }
-        Update: {
-          case_name?: string
-          citation?: string | null
-          court?: string | null
-          created_at?: string
-          id?: string
-          lawyer_id?: string
-          sort_order?: number
-          updated_at?: string
-          url?: string | null
-          year?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyer_search_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "lawyers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lawyers: {
-        Row: {
-          accolades: string | null
-          arbitrator_accreditation: string | null
-          arbitrator_experience_years: number | null
-          arbitrator_types: string[] | null
-          availability_notes: string | null
-          avatar_url: string | null
-          bar_id: string | null
-          bio: string | null
-          chambers_id: string | null
-          city: string | null
-          created_at: string | null
-          daily_rate_range: string | null
-          designation: string | null
-          designation_code: string | null
-          designation_custom: string | null
-          education: string | null
-          email: string | null
-          exclude_from_lawyer_listing: boolean
-          firm_id: string | null
-          first_name: string
-          id: string
-          is_arbitrator: boolean
-          is_claimed: boolean | null
-          is_mediator: boolean
-          is_practice_head: boolean
-          is_sector_head: boolean
-          is_senior_counsel: boolean
-          languages: string[] | null
-          last_name: string
-          lawyer_type: string | null
-          linkedin_url: string | null
-          mediator_accreditation: string | null
-          mediator_sectors: string[] | null
-          mediator_style: string | null
-          mobile_phone: string | null
-          noteworthy_matters: string | null
-          office_phone: string | null
-          overview: string | null
-          phone: string | null
-          practice_head_area: string | null
-          profile_id: string | null
-          profile_views: number | null
-          province: string | null
-          qualifications: string | null
-          reported_cases_notes: string | null
-          saflii_author_url: string | null
-          search_vector: unknown
-          sector_head_area: string | null
-          slug: string
-          status: string | null
-          town_id: string | null
-          trial_end_date: string | null
-          trial_start_date: string | null
-          year_of_admission: number | null
-        }
-        Insert: {
-          accolades?: string | null
-          arbitrator_accreditation?: string | null
-          arbitrator_experience_years?: number | null
-          arbitrator_types?: string[] | null
-          availability_notes?: string | null
-          avatar_url?: string | null
-          bar_id?: string | null
-          bio?: string | null
-          chambers_id?: string | null
-          city?: string | null
-          created_at?: string | null
-          daily_rate_range?: string | null
-          designation?: string | null
-          designation_code?: string | null
-          designation_custom?: string | null
-          education?: string | null
-          email?: string | null
-          exclude_from_lawyer_listing?: boolean
-          firm_id?: string | null
-          first_name: string
-          id?: string
-          is_arbitrator?: boolean
-          is_claimed?: boolean | null
-          is_mediator?: boolean
-          is_practice_head?: boolean
-          is_sector_head?: boolean
-          is_senior_counsel?: boolean
-          languages?: string[] | null
-          last_name: string
-          lawyer_type?: string | null
-          linkedin_url?: string | null
-          mediator_accreditation?: string | null
-          mediator_sectors?: string[] | null
-          mediator_style?: string | null
-          mobile_phone?: string | null
-          noteworthy_matters?: string | null
-          office_phone?: string | null
-          overview?: string | null
-          phone?: string | null
-          practice_head_area?: string | null
-          profile_id?: string | null
-          profile_views?: number | null
-          province?: string | null
-          qualifications?: string | null
-          reported_cases_notes?: string | null
-          saflii_author_url?: string | null
-          search_vector?: unknown
-          sector_head_area?: string | null
-          slug: string
-          status?: string | null
-          town_id?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          year_of_admission?: number | null
-        }
-        Update: {
-          accolades?: string | null
-          arbitrator_accreditation?: string | null
-          arbitrator_experience_years?: number | null
-          arbitrator_types?: string[] | null
-          availability_notes?: string | null
-          avatar_url?: string | null
-          bar_id?: string | null
-          bio?: string | null
-          chambers_id?: string | null
-          city?: string | null
-          created_at?: string | null
-          daily_rate_range?: string | null
-          designation?: string | null
-          designation_code?: string | null
-          designation_custom?: string | null
-          education?: string | null
-          email?: string | null
-          exclude_from_lawyer_listing?: boolean
-          firm_id?: string | null
-          first_name?: string
-          id?: string
-          is_arbitrator?: boolean
-          is_claimed?: boolean | null
-          is_mediator?: boolean
-          is_practice_head?: boolean
-          is_sector_head?: boolean
-          is_senior_counsel?: boolean
-          languages?: string[] | null
-          last_name?: string
-          lawyer_type?: string | null
-          linkedin_url?: string | null
-          mediator_accreditation?: string | null
-          mediator_sectors?: string[] | null
-          mediator_style?: string | null
-          mobile_phone?: string | null
-          noteworthy_matters?: string | null
-          office_phone?: string | null
-          overview?: string | null
-          phone?: string | null
-          practice_head_area?: string | null
-          profile_id?: string | null
-          profile_views?: number | null
-          province?: string | null
-          qualifications?: string | null
-          reported_cases_notes?: string | null
-          saflii_author_url?: string | null
-          search_vector?: unknown
-          sector_head_area?: string | null
-          slug?: string
-          status?: string | null
-          town_id?: string | null
-          trial_end_date?: string | null
-          trial_start_date?: string | null
-          year_of_admission?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lawyers_bar_id_fkey"
-            columns: ["bar_id"]
-            isOneToOne: false
-            referencedRelation: "bars"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_chambers_id_fkey"
-            columns: ["chambers_id"]
-            isOneToOne: false
-            referencedRelation: "chambers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firm_billing_summary"
-            referencedColumns: ["firm_id"]
-          },
-          {
-            foreignKeyName: "lawyers_firm_id_fkey"
-            columns: ["firm_id"]
-            isOneToOne: false
-            referencedRelation: "firms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lawyers_town_id_fkey"
-            columns: ["town_id"]
-            isOneToOne: false
-            referencedRelation: "towns"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       practice_areas: {
         Row: {
           icon: string | null
@@ -1175,6 +497,367 @@ export type Database = {
           },
         ]
       }
+      provider_articles: {
+        Row: {
+          created_at: string
+          id: string
+          publication: string | null
+          published_date: string | null
+          service_provider_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          publication?: string | null
+          published_date?: string | null
+          service_provider_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          publication?: string | null
+          published_date?: string | null
+          service_provider_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_articles_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_branches: {
+        Row: {
+          branch_id: string
+          created_at: string
+          service_provider_id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          service_provider_id: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          service_provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_branches_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "firm_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_branches_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_cases: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          id: string
+          outcome: string | null
+          role: string | null
+          service_provider_id: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          id?: string
+          outcome?: string | null
+          role?: string | null
+          service_provider_id?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          id?: string
+          outcome?: string | null
+          role?: string | null
+          service_provider_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_cases_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_cases_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_cases_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_disciplines: {
+        Row: {
+          discipline_id: string
+          service_provider_id: string
+        }
+        Insert: {
+          discipline_id: string
+          service_provider_id: string
+        }
+        Update: {
+          discipline_id?: string
+          service_provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_witness_disciplines_discipline_id_fkey"
+            columns: ["discipline_id"]
+            isOneToOne: false
+            referencedRelation: "expert_disciplines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_disciplines_provider_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_disciplines_provider_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_invites: {
+        Row: {
+          accepted_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          sent_at: string
+          service_provider_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          sent_at?: string
+          service_provider_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          sent_at?: string
+          service_provider_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: true
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_invites_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: true
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_practice_areas: {
+        Row: {
+          practice_area_id: string
+          service_provider_id: string
+        }
+        Insert: {
+          practice_area_id: string
+          service_provider_id: string
+        }
+        Update: {
+          practice_area_id?: string
+          service_provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_practice_areas_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_practice_areas_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_practice_areas_practice_area_id_fkey"
+            columns: ["practice_area_id"]
+            isOneToOne: false
+            referencedRelation: "practice_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_reported_cases: {
+        Row: {
+          case_name: string
+          citation: string | null
+          court: string | null
+          created_at: string
+          id: string
+          service_provider_id: string
+          sort_order: number
+          updated_at: string
+          url: string | null
+          year: number | null
+        }
+        Insert: {
+          case_name: string
+          citation?: string | null
+          court?: string | null
+          created_at?: string
+          id?: string
+          service_provider_id: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+          year?: number | null
+        }
+        Update: {
+          case_name?: string
+          citation?: string | null
+          court?: string | null
+          created_at?: string
+          id?: string
+          service_provider_id?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_reported_cases_lawyer_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_work_samples: {
+        Row: {
+          created_at: string
+          id: string
+          project_date: string | null
+          project_name: string
+          service_provider_id: string
+          synopsis: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_date?: string | null
+          project_name: string
+          service_provider_id: string
+          synopsis?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_date?: string | null
+          project_name?: string
+          service_provider_id?: string
+          synopsis?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_work_samples_provider_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_work_samples_provider_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provinces: {
         Row: {
           code: string
@@ -1198,6 +881,256 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      service_providers: {
+        Row: {
+          accolades: string | null
+          arbitrator_accreditation: string | null
+          arbitrator_experience_years: number | null
+          arbitrator_types: string[] | null
+          availability_notes: string | null
+          avatar_url: string | null
+          bar_id: string | null
+          bio: string | null
+          chambers_id: string | null
+          city: string | null
+          company_name: string | null
+          contact_email: string | null
+          courts_accepted_in: string[] | null
+          created_at: string | null
+          cv_url: string | null
+          daily_rate_range: string | null
+          designation: string | null
+          designation_code: string | null
+          designation_custom: string | null
+          education: string | null
+          email: string | null
+          employer: string | null
+          exclude_from_lawyer_listing: boolean
+          fee_range: string | null
+          firm_id: string | null
+          first_name: string
+          geographic_availability: string | null
+          id: string
+          is_arbitrator: boolean
+          is_claimed: boolean | null
+          is_independent: boolean
+          is_mediator: boolean
+          is_practice_head: boolean
+          is_sector_head: boolean
+          is_senior_counsel: boolean
+          job_title: string | null
+          languages: string[] | null
+          last_name: string
+          linkedin_url: string | null
+          mediator_accreditation: string | null
+          mediator_sectors: string[] | null
+          mediator_style: string | null
+          mobile_phone: string | null
+          name_title: string | null
+          noteworthy_matters: string | null
+          office_phone: string | null
+          overview: string | null
+          phone: string | null
+          practice_head_area: string | null
+          profile_id: string | null
+          profile_views: number | null
+          provider_type: string
+          province: string | null
+          qualifications: string | null
+          registration_body: string | null
+          reported_cases_notes: string | null
+          saflii_author_url: string | null
+          search_vector: unknown
+          sector_head_area: string | null
+          slug: string
+          status: string | null
+          town_id: string | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          updated_at: string
+          year_of_admission: number | null
+        }
+        Insert: {
+          accolades?: string | null
+          arbitrator_accreditation?: string | null
+          arbitrator_experience_years?: number | null
+          arbitrator_types?: string[] | null
+          availability_notes?: string | null
+          avatar_url?: string | null
+          bar_id?: string | null
+          bio?: string | null
+          chambers_id?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_email?: string | null
+          courts_accepted_in?: string[] | null
+          created_at?: string | null
+          cv_url?: string | null
+          daily_rate_range?: string | null
+          designation?: string | null
+          designation_code?: string | null
+          designation_custom?: string | null
+          education?: string | null
+          email?: string | null
+          employer?: string | null
+          exclude_from_lawyer_listing?: boolean
+          fee_range?: string | null
+          firm_id?: string | null
+          first_name: string
+          geographic_availability?: string | null
+          id?: string
+          is_arbitrator?: boolean
+          is_claimed?: boolean | null
+          is_independent?: boolean
+          is_mediator?: boolean
+          is_practice_head?: boolean
+          is_sector_head?: boolean
+          is_senior_counsel?: boolean
+          job_title?: string | null
+          languages?: string[] | null
+          last_name: string
+          linkedin_url?: string | null
+          mediator_accreditation?: string | null
+          mediator_sectors?: string[] | null
+          mediator_style?: string | null
+          mobile_phone?: string | null
+          name_title?: string | null
+          noteworthy_matters?: string | null
+          office_phone?: string | null
+          overview?: string | null
+          phone?: string | null
+          practice_head_area?: string | null
+          profile_id?: string | null
+          profile_views?: number | null
+          provider_type: string
+          province?: string | null
+          qualifications?: string | null
+          registration_body?: string | null
+          reported_cases_notes?: string | null
+          saflii_author_url?: string | null
+          search_vector?: unknown
+          sector_head_area?: string | null
+          slug: string
+          status?: string | null
+          town_id?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string
+          year_of_admission?: number | null
+        }
+        Update: {
+          accolades?: string | null
+          arbitrator_accreditation?: string | null
+          arbitrator_experience_years?: number | null
+          arbitrator_types?: string[] | null
+          availability_notes?: string | null
+          avatar_url?: string | null
+          bar_id?: string | null
+          bio?: string | null
+          chambers_id?: string | null
+          city?: string | null
+          company_name?: string | null
+          contact_email?: string | null
+          courts_accepted_in?: string[] | null
+          created_at?: string | null
+          cv_url?: string | null
+          daily_rate_range?: string | null
+          designation?: string | null
+          designation_code?: string | null
+          designation_custom?: string | null
+          education?: string | null
+          email?: string | null
+          employer?: string | null
+          exclude_from_lawyer_listing?: boolean
+          fee_range?: string | null
+          firm_id?: string | null
+          first_name?: string
+          geographic_availability?: string | null
+          id?: string
+          is_arbitrator?: boolean
+          is_claimed?: boolean | null
+          is_independent?: boolean
+          is_mediator?: boolean
+          is_practice_head?: boolean
+          is_sector_head?: boolean
+          is_senior_counsel?: boolean
+          job_title?: string | null
+          languages?: string[] | null
+          last_name?: string
+          linkedin_url?: string | null
+          mediator_accreditation?: string | null
+          mediator_sectors?: string[] | null
+          mediator_style?: string | null
+          mobile_phone?: string | null
+          name_title?: string | null
+          noteworthy_matters?: string | null
+          office_phone?: string | null
+          overview?: string | null
+          phone?: string | null
+          practice_head_area?: string | null
+          profile_id?: string | null
+          profile_views?: number | null
+          provider_type?: string
+          province?: string | null
+          qualifications?: string | null
+          registration_body?: string | null
+          reported_cases_notes?: string | null
+          saflii_author_url?: string | null
+          search_vector?: unknown
+          sector_head_area?: string | null
+          slug?: string
+          status?: string | null
+          town_id?: string | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          updated_at?: string
+          year_of_admission?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyers_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_chambers_id_fkey"
+            columns: ["chambers_id"]
+            isOneToOne: false
+            referencedRelation: "chambers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firm_billing_summary"
+            referencedColumns: ["firm_id"]
+          },
+          {
+            foreignKeyName: "lawyers_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       towns: {
         Row: {

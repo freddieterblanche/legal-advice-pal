@@ -47,8 +47,8 @@ function ExpertWitnessSearch() {
     queryKey: ["expert-witness-search", search],
     queryFn: async () => {
       let query = supabase
-        .from("expert_witnesses")
-        .select("*, expert_witness_disciplines(expert_disciplines(name, slug, parent_category)), case_expert_witnesses(id)", { count: "exact" })
+        .from("service_providers")
+        .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category).eq("provider_type", "expert")), case_service_providers(id)", { count: "exact" })
         .in("status", ["trial", "active"]);
       if (search.q) {
         query = query.or(`first_name.ilike.%${search.q}%,last_name.ilike.%${search.q}%,employer.ilike.%${search.q}%`);
@@ -74,13 +74,13 @@ function ExpertWitnessSearch() {
       let rows = data ?? [];
       if (search.discipline) {
         rows = rows.filter((r: any) =>
-          r.expert_witness_disciplines?.some((d: any) => d.expert_disciplines?.slug === search.discipline)
+          r.provider_disciplines?.some((d: any) => d.expert_disciplines?.slug === search.discipline)
         );
       }
       if (sort === "cases") {
         rows = [...rows].sort((a: any, b: any) => {
-          const ac = a.case_expert_witnesses?.length ?? 0;
-          const bc = b.case_expert_witnesses?.length ?? 0;
+          const ac = a.case_service_providers?.length ?? 0;
+          const bc = b.case_service_providers?.length ?? 0;
           return ascending ? ac - bc : bc - ac;
         });
       }
@@ -217,8 +217,8 @@ function ExpertWitnessSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((e: any) => {
-                const disciplines: any[] = (e.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
-                const caseCount = e.case_expert_witnesses?.length ?? 0;
+                const disciplines: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
+                const caseCount = e.case_service_providers?.length ?? 0;
                 return (
                   <article key={e.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
                     {e.avatar_url ? (

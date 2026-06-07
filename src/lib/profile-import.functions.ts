@@ -19,7 +19,7 @@ const extractionSchema = z.object({
   first_name: z.string().max(80).default(""),
   last_name: z.string().max(80).default(""),
   // Structured designation
-  lawyer_type: z.enum(["attorney", "advocate", ""]).default(""),
+  provider_type: z.enum(["attorney", "advocate", ""]).default(""),
   is_senior_counsel: z.boolean().default(false),
   designation_code: z.string().max(60).default(""),
   designation_custom: z.string().max(60).default(""),
@@ -88,7 +88,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
           "Look at the page title, the main heading, the URL slug, repeated mentions in the bio, the alt text of the headshot, and any 'About <Name>' phrasing. " +
           "Strip titles (Mr, Mrs, Ms, Dr, Adv, Adv., Attorney, Prof). Split into first and last name. Never leave both blank if any human name appears anywhere on the page. " +
           // Lawyer type & designation
-          "lawyer_type: 'advocate' if the page describes an advocate / member of the Bar / counsel / SC / Senior Counsel / Junior Counsel; otherwise 'attorney' (Director, Partner, Associate, Consultant, etc.). Default 'attorney' if a law-firm page mentions a title like Director/Partner/Associate. " +
+          "provider_type: 'advocate' if the page describes an advocate / member of the Bar / counsel / SC / Senior Counsel / Junior Counsel; otherwise 'attorney' (Director, Partner, Associate, Consultant, etc.). Default 'attorney' if a law-firm page mentions a title like Director/Partner/Associate. " +
           "is_senior_counsel: true ONLY if the page indicates 'SC', 'Senior Counsel', or 'Silk'. " +
           `designation_code (attorneys only — pick the closest match from this list, else leave empty): ${ATTORNEY_DESIGNATIONS.join(", ")}. ` +
           "designation_custom: only if lawyer is an attorney AND the title clearly does NOT match any item in designation_code (e.g. 'Of Counsel', 'Head of Tax'). Otherwise empty. " +
@@ -124,7 +124,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
     }
 
     // 3. Coerce to allowed enums
-    const lawyer_type: "attorney" | "advocate" = extracted.lawyer_type === "advocate" ? "advocate" : "attorney";
+    const provider_type: "attorney" | "advocate" = extracted.provider_type === "advocate" ? "advocate" : "attorney";
     const designation_code = (ATTORNEY_DESIGNATIONS as readonly string[]).includes(extracted.designation_code)
       ? extracted.designation_code
       : "";
@@ -173,15 +173,15 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
     const phone = extracted.phone.trim().replace(/[^\d+()\-\s]/g, "").slice(0, 60);
 
     // Derive legacy designation label for backwards-compatibility consumers
-    const legacyDesignation = lawyer_type === "advocate"
+    const legacyDesignation = provider_type === "advocate"
       ? (extracted.is_senior_counsel ? "Senior Counsel" : "Advocate")
       : (designation_code || designation_custom || "Attorney");
 
     return {
       first_name: extracted.first_name,
       last_name: extracted.last_name,
-      lawyer_type,
-      is_senior_counsel: lawyer_type === "advocate" ? !!extracted.is_senior_counsel : false,
+      provider_type,
+      is_senior_counsel: provider_type === "advocate" ? !!extracted.is_senior_counsel : false,
       designation_code,
       designation_custom,
       year_of_admission: extracted.year_of_admission,

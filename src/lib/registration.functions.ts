@@ -25,7 +25,7 @@ const registerFirmSchema = z.object({
     .optional(),
 });
 
-async function uniqueSlug(table: "firms" | "lawyers" | "expert_witnesses" | "chambers", base: string) {
+async function uniqueSlug(table: "firms" | "lawyers" | "service_providers" | "chambers", base: string) {
   const { supabaseAdmin } = await import("../integrations/supabase/client.server");
   let slug = base;
   const { data: clash } = await supabaseAdmin.from(table).select("id").eq("slug", slug).maybeSingle();
@@ -147,7 +147,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
       province: data.province ?? null,
       city: data.city ?? null,
       status: "trial",
-      lawyer_type: data.is_lawyer ? (data.kind === "advocate" ? "advocate" : "attorney") : null,
+      provider_type: data.is_lawyer ? (data.kind === "advocate" ? "advocate" : "attorney") : null,
       designation: data.title ?? null,
       is_senior_counsel: data.kind === "advocate" ? !!data.is_senior_counsel : false,
       year_of_admission: data.is_lawyer ? data.year_of_admission ?? null : null,
@@ -165,7 +165,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
     };
 
     const { data: lawyerRow, error: lawyerErr } = await supabaseAdmin
-      .from("lawyers")
+      .from("service_providers")
       .insert(insertRow)
       .select("id, slug").single();
     if (lawyerErr) throw lawyerErr;
@@ -211,11 +211,11 @@ export const registerExpertForCurrentUser = createServerFn({ method: "POST" })
   .inputValidator((input) => registerExpertSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
-    const slug = await uniqueSlug("expert_witnesses", slugify(`${data.first_name}-${data.last_name}`));
+    const slug = await uniqueSlug("service_providers", slugify(`${data.first_name}-${data.last_name}`));
 
     const { data: expertRow, error: expErr } = await supabaseAdmin
-      .from("expert_witnesses")
-      .insert({
+      .from("service_providers")
+      .insert({ provider_type: 'expert',
         slug,
         profile_id: context.userId,
         first_name: data.first_name,

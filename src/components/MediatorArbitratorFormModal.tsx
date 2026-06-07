@@ -88,7 +88,7 @@ export function MediatorArbitratorFormModal({
     queryKey: ["mediator-arbitrator-edit", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lawyers")
+        .from("service_providers")
         .select("*")
         .eq("id", id)
         .maybeSingle();
@@ -160,7 +160,7 @@ export function MediatorArbitratorFormModal({
     }
     setSaving(true);
     // Build payload using ONLY fields this modal owns — never touch
-    // advocate-only columns (lawyer_type, bar_id, chambers_id, is_senior_counsel,
+    // advocate-only columns (provider_type, bar_id, chambers_id, is_senior_counsel,
     // year_of_admission, designation_*).
     const payload = {
       first_name: form.first_name.trim(),
@@ -190,7 +190,7 @@ export function MediatorArbitratorFormModal({
           ? Number(form.arbitrator_experience_years)
           : null,
     };
-    const { error } = await supabase.from("lawyers").update(payload).eq("id", id);
+    const { error } = await supabase.from("service_providers").update(payload).eq("id", id);
     setSaving(false);
     if (error) {
       toast.error(error.message);

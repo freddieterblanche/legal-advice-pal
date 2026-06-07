@@ -15,7 +15,7 @@ type LawyerRow = {
   last_name: string;
   city: string | null;
   province: string | null;
-  lawyer_type: string | null;
+  provider_type: string | null;
   firm_id: string | null;
   status: string | null;
   is_mediator: boolean;
@@ -57,8 +57,8 @@ export function AdminRoleListPage({ role }: { role: Role }) {
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lawyers")
-        .select("id, slug, first_name, last_name, city, province, lawyer_type, firm_id, status, is_mediator, is_arbitrator")
+        .from("service_providers")
+        .select("id, slug, first_name, last_name, city, province, provider_type, firm_id, status, is_mediator, is_arbitrator")
         .eq(meta.column, true)
         .order("last_name");
       if (error) throw error;
@@ -69,7 +69,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
   const setFlag = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
       const payload = meta.column === "is_mediator" ? { is_mediator: value } : { is_arbitrator: value };
-      const { error } = await supabase.from("lawyers").update(payload).eq("id", id);
+      const { error } = await supabase.from("service_providers").update(payload).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -91,12 +91,12 @@ export function AdminRoleListPage({ role }: { role: Role }) {
   });
 
   // Edit routing:
-  //  - Advocates (lawyer_type === "advocate") → existing advocate admin form.
+  //  - Advocates (provider_type === "advocate") → existing advocate admin form.
   //  - Firm attorneys (firm_id set, no advocate type) → firm dashboard.
   //  - Pure mediators/arbitrators (no firm, no advocate type) → dedicated
   //    in-place modal so they are NEVER forced through the advocate form.
   const editAdvocateHref = (id: string) => `/admin/advocates?edit=${id}`;
-  const editsInPlace = (r: LawyerRow) => r.lawyer_type !== "advocate" && !r.firm_id;
+  const editsInPlace = (r: LawyerRow) => r.provider_type !== "advocate" && !r.firm_id;
 
   return (
     <div className="bg-cream">
@@ -136,7 +136,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
               {filtered.map((r) => (
                 <tr key={r.id}>
                   <td className="px-4 py-3 font-medium text-ink">{r.first_name} {r.last_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground capitalize">{r.lawyer_type ?? (r.firm_id ? "attorney" : "—")}</td>
+                  <td className="px-4 py-3 text-muted-foreground capitalize">{r.provider_type ?? (r.firm_id ? "attorney" : "—")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[r.city, r.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status ?? "—"}</span></td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -147,7 +147,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
-                    ) : r.firm_id && r.lawyer_type !== "advocate" ? (
+                    ) : r.firm_id && r.provider_type !== "advocate" ? (
                       <Link to="/dashboard" className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold">
                         <Pencil className="h-3 w-3" /> Edit
                       </Link>
@@ -222,8 +222,8 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
     queryKey: ["admin-role-candidates", column, q],
     queryFn: async () => {
       let query = supabase
-        .from("lawyers")
-        .select("id, first_name, last_name, lawyer_type, firm_id, city, province, is_mediator, is_arbitrator")
+        .from("service_providers")
+        .select("id, first_name, last_name, provider_type, firm_id, city, province, is_mediator, is_arbitrator")
         .eq(column, false)
         .order("last_name")
         .limit(50);
@@ -240,7 +240,7 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
   const add = async (id: string, name: string) => {
     setSaving(id);
     const payload = column === "is_mediator" ? { is_mediator: true } : { is_arbitrator: true };
-    const { error } = await supabase.from("lawyers").update(payload).eq("id", id);
+    const { error } = await supabase.from("service_providers").update(payload).eq("id", id);
     setSaving(null);
     if (error) { toast.error(error.message); return; }
     toast.success(`${name} added as ${role}`);
@@ -289,7 +289,7 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
                         <td className="px-3 py-2">
                           <div className="font-medium text-ink">{c.first_name} {c.last_name}</div>
                           <div className="text-xs capitalize text-muted-foreground">
-                            {c.lawyer_type ?? (c.firm_id ? "attorney" : "—")}
+                            {c.provider_type ?? (c.firm_id ? "attorney" : "—")}
                             {([c.city, c.province].filter(Boolean).join(", ") && ` · ${[c.city, c.province].filter(Boolean).join(", ")}`)}
                           </div>
                         </td>
@@ -344,19 +344,19 @@ function CreateNewPersonForm({ role, column, onSaved }: {
     setSaving(true);
     const baseSlug = slugify(`${firstName} ${lastName}`);
     const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-    const lawyer_type = background === "retired_attorney" ? "attorney" : background === "retired_advocate" ? "advocate" : null;
+    const provider_type = background === "retired_attorney" ? "attorney" : background === "retired_advocate" ? "advocate" : null;
     const payload = {
       slug,
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      lawyer_type,
+      provider_type,
       city: city.trim() || null,
       province: province.trim() || null,
       status: "active",
       is_mediator: column === "is_mediator",
       is_arbitrator: column === "is_arbitrator",
     };
-    const { error } = await supabase.from("lawyers").insert(payload);
+    const { error } = await supabase.from("service_providers").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(`${firstName} ${lastName} created as ${role}`);

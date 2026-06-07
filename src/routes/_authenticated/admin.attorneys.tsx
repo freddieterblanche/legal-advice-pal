@@ -47,9 +47,9 @@ function AdminAttorneysPage() {
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lawyers")
+        .from("service_providers")
         .select("*")
-        .or("lawyer_type.eq.attorney,and(lawyer_type.is.null,firm_id.not.is.null)")
+        .or("provider_type.eq.attorney,and(provider_type.is.null,firm_id.not.is.null)")
         .order("last_name");
       if (error) throw error;
       return (data ?? []) as AttorneyRow[];
@@ -64,7 +64,7 @@ function AdminAttorneysPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("lawyers").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Attorney deleted"); qc.invalidateQueries({ queryKey: ["admin-attorneys"] }); },
