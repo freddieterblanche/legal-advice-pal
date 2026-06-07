@@ -207,7 +207,8 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
 
   const add = async (id: string, name: string) => {
     setSaving(id);
-    const { error } = await supabase.from("lawyers").update({ [column]: true }).eq("id", id);
+    const payload = column === "is_mediator" ? { is_mediator: true } : { is_arbitrator: true };
+    const { error } = await supabase.from("lawyers").update(payload).eq("id", id);
     setSaving(null);
     if (error) { toast.error(error.message); return; }
     toast.success(`${name} added as ${role}`);
