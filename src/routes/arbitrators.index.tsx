@@ -167,41 +167,43 @@ function ArbitratorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm sm:flex-row">
+                <article key={l.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:flex-row">
                   {l.avatar_url ? (
-                    <img src={l.avatar_url} alt={l.full_name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+                    <img src={l.avatar_url} alt={l.full_name} className="h-48 w-full shrink-0 object-cover object-top sm:h-auto sm:w-40 sm:self-stretch" />
                   ) : (
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-forest/10 font-heading text-2xl text-forest">
+                    <div className="flex h-48 w-full shrink-0 items-center justify-center bg-forest/10 font-heading text-3xl text-forest sm:h-auto sm:w-40 sm:self-stretch">
                       {l.first_name?.[0]}{l.last_name?.[0]}
                     </div>
                   )}
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-baseline gap-3">
-                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
-                        {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                      </Link>
-                      {l.arbitrator_accreditation && (
-                        <span className="rounded-full bg-forest/15 px-2.5 py-0.5 text-xs font-medium text-forest">{l.arbitrator_accreditation}</span>
-                      )}
-                      {typeof l.arbitrator_experience_years === "number" && (
-                        <span className="rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-ink">{l.arbitrator_experience_years} yrs</span>
+                  <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-baseline gap-3">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                          {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                        </Link>
+                        {l.arbitrator_accreditation && (
+                          <span className="rounded-full bg-forest/15 px-2.5 py-0.5 text-xs font-medium text-forest">{l.arbitrator_accreditation}</span>
+                        )}
+                        {typeof l.arbitrator_experience_years === "number" && (
+                          <span className="rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-ink">{l.arbitrator_experience_years} yrs</span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
+                      </p>
+                      {l.arbitrator_types?.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {l.arbitrator_types.slice(0, 4).map((s: string) => (
+                            <span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
-                    </p>
-                    {l.arbitrator_types?.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {l.arbitrator_types.slice(0, 4).map((s: string) => (
-                          <span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-2 sm:w-32">
-                    <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
-                      View Profile
-                    </Link>
+                    <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                        View Profile
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}

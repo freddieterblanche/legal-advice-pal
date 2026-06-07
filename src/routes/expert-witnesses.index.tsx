@@ -220,62 +220,64 @@ function ExpertWitnessSearch() {
                 const disciplines: any[] = (e.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_expert_witnesses?.length ?? 0;
                 return (
-                  <article key={e.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
+                  <article key={e.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:flex-row">
                     {e.avatar_url ? (
                       <img
                         src={e.avatar_url}
                         alt={`${e.first_name} ${e.last_name}`}
-                        className="h-20 w-20 shrink-0 rounded-xl object-cover"
+                        className="h-48 w-full shrink-0 object-cover object-top sm:h-auto sm:w-40 sm:self-stretch"
                       />
                     ) : (
-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gold/10 font-heading text-2xl text-gold">
+                      <div className="flex h-48 w-full shrink-0 items-center justify-center bg-gold/10 font-heading text-3xl text-gold sm:h-auto sm:w-40 sm:self-stretch">
                         {e.first_name?.[0]}{e.last_name?.[0]}
                       </div>
                     )}
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-baseline gap-3">
-                        <Link
-                          to="/expert-witnesses/$slug"
-                          params={{ slug: e.slug }}
-                          className="font-heading text-lg font-semibold text-ink hover:text-gold"
-                        >
-                          {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
+                    <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-baseline gap-3">
+                          <Link
+                            to="/expert-witnesses/$slug"
+                            params={{ slug: e.slug }}
+                            className="font-heading text-lg font-semibold text-ink hover:text-gold"
+                          >
+                            {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
+                          </Link>
+                          {e.title && (
+                            <span className="text-sm text-muted-foreground">
+                              <span aria-hidden className="mr-2">•</span>{e.title}
+                            </span>
+                          )}
+                          {disciplines[0] && (
+                            <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">
+                              {disciplines[0].name}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {e.is_independent ? "Independent Practice" : e.employer}
+                          {(e.city || e.province) && (
+                            <> · <MapPin className="inline h-3 w-3" /> {[e.city, e.province].filter(Boolean).join(", ")}</>
+                          )}
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {e.registration_body && (
+                            <span className="rounded bg-ink/5 px-2 py-0.5 text-xs text-ink">{e.registration_body}</span>
+                          )}
+                          {disciplines.slice(1, 4).map((d) => (
+                            <span key={d.slug} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{d.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
+                        {caseCount > 0 && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
+                            <BookOpen className="h-3 w-3" /> {caseCount} case{caseCount === 1 ? "" : "s"}
+                          </span>
+                        )}
+                        <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                          View Profile
                         </Link>
-                        {e.title && (
-                          <span className="text-sm text-muted-foreground">
-                            <span aria-hidden className="mr-2">•</span>{e.title}
-                          </span>
-                        )}
-                        {disciplines[0] && (
-                          <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">
-                            {disciplines[0].name}
-                          </span>
-                        )}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {e.is_independent ? "Independent Practice" : e.employer}
-                        {(e.city || e.province) && (
-                          <> · <MapPin className="inline h-3 w-3" /> {[e.city, e.province].filter(Boolean).join(", ")}</>
-                        )}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {e.registration_body && (
-                          <span className="rounded bg-ink/5 px-2 py-0.5 text-xs text-ink">{e.registration_body}</span>
-                        )}
-                        {disciplines.slice(1, 4).map((d) => (
-                          <span key={d.slug} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{d.name}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2 sm:w-32">
-                      {caseCount > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
-                          <BookOpen className="h-3 w-3" /> {caseCount} case{caseCount === 1 ? "" : "s"}
-                        </span>
-                      )}
-                      <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
-                        View Profile
-                      </Link>
                     </div>
                   </article>
                 );
