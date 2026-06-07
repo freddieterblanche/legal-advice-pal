@@ -8,6 +8,8 @@ import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { sanitizeBioHtml } from "../../lib/sanitize";
 
 type AdvocateRow = {
   id: string;
@@ -268,7 +270,48 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
+    bio: "",
   });
+  // Hydrate the full row (incl. bio + any columns not in the list query) before allowing edit
+  const [hydrated, setHydrated] = useState(!isEdit);
+  useEffect(() => {
+    if (!isEdit || !advocate?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("lawyers")
+        .select("*")
+        .eq("id", advocate.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        toast.error(error?.message ?? "Could not load advocate");
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        first_name: data.first_name ?? f.first_name,
+        last_name: data.last_name ?? f.last_name,
+        email: data.email ?? "",
+        phone: data.phone ?? "",
+        office_phone: data.office_phone ?? "",
+        mobile_phone: data.mobile_phone ?? data.phone ?? "",
+        city: data.city ?? "",
+        province: data.province ?? "",
+        bar_id: data.bar_id ?? "",
+        chambers_id: data.chambers_id ?? "",
+        is_senior_counsel: !!data.is_senior_counsel,
+        is_mediator: !!data.is_mediator,
+        is_arbitrator: !!data.is_arbitrator,
+        year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
+        avatar_url: data.avatar_url ?? "",
+        status: data.status ?? "active",
+        bio: data.bio ?? "",
+      }));
+      setHydrated(true);
+    })();
+    return () => { cancelled = true; };
+  }, [isEdit, advocate?.id]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -366,7 +409,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     }
   };
 
-  // Chambers list narrows to selected Bar (plus unaffiliated)
+  // Chambers list narrows to selected Bar when one is set; otherwise show all
   const chambersOptions = useMemo(() => {
     return chambers
       .filter((c) => !form.bar_id || c.bar_id === form.bar_id || c.bar_id === null)
@@ -404,7 +447,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.first_name.trim() || !form.last_name.trim()) { toast.error("First and last name required"); return; }
-    if (!form.bar_id) { toast.error("Bar is required for advocates"); return; }
+    if (isEdit && !hydrated) { toast.error("Still loading — please wait a moment"); return; }
     setSaving(true);
     try {
       const year = form.year_of_admission ? parseInt(form.year_of_admission, 10) : null;
@@ -417,7 +460,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         mobile_phone: form.mobile_phone.trim() || null,
         city: form.city.trim() || null,
         province: form.province || null,
-        bar_id: form.bar_id,
+        bar_id: form.bar_id || null,
         chambers_id: form.chambers_id || null,
         is_senior_counsel: form.is_senior_counsel,
         is_mediator: form.is_mediator,
@@ -427,6 +470,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         status: form.status,
         lawyer_type: "advocate" as const,
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
+        bio: sanitizeBioHtml(form.bio) || null,
         firm_id: null,
       };
       let advocateId = advocate?.id;
@@ -494,7 +538,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bar *</label>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bar (optional)</label>
             <ComboboxCreatable
               value={form.bar_id}
               onChange={(v) => setForm({ ...form, bar_id: v, chambers_id: "" })}
@@ -504,7 +548,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
               onCreate={createBar}
               createLabel="Add Bar"
             />
-            <p className="mt-1 text-xs text-muted-foreground">Pick from the list to avoid duplicates. New Bars are added rarely.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Optional — leave blank for mediators/arbitrators not affiliated with a Bar.</p>
           </div>
 
           <div>
@@ -521,10 +565,9 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 });
               }}
               options={chambersOptions}
-              placeholder={form.bar_id ? "Type or select Chambers…" : "Select a Bar first"}
+              placeholder="Type or select Chambers…"
               emptyLabel="— None —"
-              disabled={!form.bar_id}
-              onCreate={form.bar_id ? createChambers : undefined}
+              onCreate={createChambers}
               createLabel="Add Chambers"
             />
           </div>
@@ -626,6 +669,20 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
             </div>
             <p className="mt-1 text-xs text-muted-foreground">Same list used for lawyers. Click to select / deselect.</p>
           </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description / Bio</label>
+            {isEdit && !hydrated ? (
+              <div className="rounded border border-dashed border-border bg-muted/30 px-3 py-6 text-center text-xs text-muted-foreground">Loading existing description…</div>
+            ) : (
+              <RichTextEditor
+                value={form.bio}
+                onChange={(html) => setForm({ ...form, bio: html })}
+                placeholder="Background, practice focus, mediation/arbitration experience…"
+              />
+            )}
+          </div>
+
 
           {isEdit && (
             <div>
