@@ -8,9 +8,7 @@ import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 
-type LawyerType = "attorney" | "advocate";
-type SortField = "surname" | "experience" | "listed" | "relevance";
-type SortDir = "asc" | "desc";
+type SortField = "surname" | "experience" | "listed";
 type Search = {
   q?: string;
   area?: string;
