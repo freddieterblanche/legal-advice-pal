@@ -42,12 +42,42 @@ function SearchPage() {
     queryFn: async () => (await supabase.from("practice_areas").select("*").order("name")).data ?? [],
   });
 
+  const { data: provinces } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: async () => (await supabase.from("provinces").select("id, name, slug").order("name")).data ?? [],
+  });
+
+  const selectedProvince = provinces?.find((p) => p.slug === search.province);
+
+  const { data: towns } = useQuery({
+    queryKey: ["towns", selectedProvince?.id],
+    enabled: !!selectedProvince,
+    queryFn: async () => (
+      await supabase
+        .from("towns")
+        .select("id, name, slug")
+        .eq("province_id", selectedProvince!.id)
+        .order("is_major_city", { ascending: false })
+        .order("name")
+    ).data ?? [],
+  });
+
   const { data: results, isLoading } = useQuery({
     queryKey: ["search", search],
     queryFn: async () => {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
       if (search.q) query = query.ilike("full_name", `%${search.q}%`);
-      if (search.province) query = query.eq("province", search.province);
+      if (search.town) {
+        query = query.eq("town_slug", search.town);
+      } else if (search.province) {
+        // Match by linked province OR fall back to legacy text province for rows without town_id
+        const provName = provinces?.find((p) => p.slug === search.province)?.name;
+        if (provName) {
+          query = query.or(`province_slug.eq.${search.province},and(town_id.is.null,province.eq.${provName})`);
+        } else {
+          query = query.eq("province_slug", search.province);
+        }
+      }
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
