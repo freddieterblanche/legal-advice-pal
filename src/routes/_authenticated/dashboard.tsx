@@ -342,7 +342,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                         type="button"
                         onClick={() => toggleFlag.mutate({ id: l.id, field: "is_mediator", value: !l.is_mediator })}
                         className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_mediator ? "border-forest bg-forest text-white" : "border-border text-muted-foreground hover:border-forest"}`}
-                        title="Toggle mediator role (+R149/mo when active)"
+                        title="Toggle mediator role"
                       >
                         Mediator
                       </button>
