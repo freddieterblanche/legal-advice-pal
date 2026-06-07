@@ -1261,6 +1261,7 @@ export type Database = {
           avatar_url: string | null
           case_count: number | null
           city: string | null
+          created_at: string | null
           designation: string | null
           firm_name: string | null
           firm_slug: string | null
@@ -1288,6 +1289,7 @@ export type Database = {
           town_name: string | null
           town_slug: string | null
           trial_end_date: string | null
+          year_of_admission: number | null
         }
         Relationships: [
           {
