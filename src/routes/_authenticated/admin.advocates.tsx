@@ -29,7 +29,6 @@ type AdvocateRow = {
   status: string | null;
   avatar_url: string | null;
   created_at: string | null;
-  year_of_admission: number | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/advocates")({
