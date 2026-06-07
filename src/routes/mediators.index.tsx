@@ -5,8 +5,10 @@ import { Handshake, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number };
+type SortField = "surname" | "listed";
+type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/mediators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/mediators/")({
     style: typeof s.style === "string" ? s.style : undefined,
     accreditation: typeof s.accreditation === "string" ? s.accreditation : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
