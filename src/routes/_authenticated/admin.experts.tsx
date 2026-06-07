@@ -323,7 +323,12 @@ function AdminExpertFormModal({
               expertId={expert?.id}
             />
           </AField>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-[7rem_1fr_1fr]">
+            <AField label="Title">
+              <select value={form.name_title} onChange={(e) => setForm({ ...form, name_title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                {NAME_TITLES.map((t) => <option key={t} value={t}>{t || "— none —"}</option>)}
+              </select>
+            </AField>
             <AField label="First name *">
               <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </AField>
