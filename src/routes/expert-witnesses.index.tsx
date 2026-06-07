@@ -190,9 +190,17 @@ function ExpertWitnessSearch() {
                 const caseCount = e.case_expert_witnesses?.length ?? 0;
                 return (
                   <article key={e.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
-                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gold/10 font-heading text-2xl text-gold">
-                      {e.first_name?.[0]}{e.last_name?.[0]}
-                    </div>
+                    {e.avatar_url ? (
+                      <img
+                        src={e.avatar_url}
+                        alt={`${e.first_name} ${e.last_name}`}
+                        className="h-20 w-20 shrink-0 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gold/10 font-heading text-2xl text-gold">
+                        {e.first_name?.[0]}{e.last_name?.[0]}
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex flex-wrap items-baseline gap-3">
                         <Link

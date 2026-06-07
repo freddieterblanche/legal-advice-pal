@@ -7,6 +7,7 @@ import { supabase } from "../../integrations/supabase/client";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
+import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
@@ -209,7 +210,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("expert_witnesses")
-        .select("qualifications, bio")
+        .select("qualifications, bio, avatar_url")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
@@ -225,18 +226,20 @@ function AdminExpertFormModal({
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
     bio: "",
+    avatar_url: "",
     firm_id: expert?.firm_id ?? "",
     status: expert?.status ?? "trial",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio once when editing
+  // Hydrate qualifications/bio/avatar once when editing
   if (isEdit && existing && !hydrated) {
     setForm((f) => ({
       ...f,
       qualifications: (existing as any).qualifications ?? "",
       bio: (existing as any).bio ?? "",
+      avatar_url: (existing as any).avatar_url ?? "",
     }));
     setHydrated(true);
   }
@@ -258,6 +261,7 @@ function AdminExpertFormModal({
         city: form.city || null,
         province: form.province || null,
         bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+        avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
         is_independent: !form.firm_id,
       };
@@ -292,6 +296,14 @@ function AdminExpertFormModal({
           </button>
         </div>
         <form onSubmit={submit} className="space-y-3">
+          <AField label="Photo">
+            <ExpertPhotoField
+              value={form.avatar_url}
+              onChange={(url) => setForm({ ...form, avatar_url: url })}
+              firmId={form.firm_id || null}
+              expertId={expert?.id}
+            />
+          </AField>
           <div className="grid gap-3 md:grid-cols-2">
             <AField label="First name *">
               <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />

@@ -15,6 +15,7 @@ import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
 import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
+import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 
 type Branch = {
   id: string;
@@ -1225,17 +1226,19 @@ type ExpertRow = {
   qualifications: string | null;
   registration_body: string | null;
   bio: string | null;
+  avatar_url: string | null;
 };
 
 const expertSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
   title: z.string().trim().max(120).optional(),
-  qualifications: z.string().trim().max(2000).optional(),
+  qualifications: z.string().trim().max(20000).optional(),
   registration_body: z.string().trim().max(200).optional(),
   city: z.string().trim().max(80).optional(),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]).optional(),
-  bio: z.string().trim().max(5000).optional(),
+  bio: z.string().trim().max(20000).optional(),
+  avatar_url: z.string().trim().max(2000).optional(),
 });
 
 function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
@@ -1338,6 +1341,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
     bio: expert?.bio ?? "",
+    avatar_url: expert?.avatar_url ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -1357,6 +1361,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           city: form.city || null,
           province: form.province || null,
           bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+          avatar_url: form.avatar_url?.trim() || null,
         }).eq("id", expert.id);
         if (error) throw error;
       } else {
@@ -1373,6 +1378,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           city: form.city || null,
           province: form.province || null,
           bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+          avatar_url: form.avatar_url?.trim() || null,
         });
         if (error) throw error;
       }
@@ -1395,6 +1401,14 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           </button>
         </div>
         <form onSubmit={submit} className="space-y-3">
+          <Field label="Photo">
+            <ExpertPhotoField
+              value={form.avatar_url}
+              onChange={(url) => setForm({ ...form, avatar_url: url })}
+              firmId={firmId}
+              expertId={expert?.id}
+            />
+          </Field>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>

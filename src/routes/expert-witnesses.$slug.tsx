@@ -77,9 +77,17 @@ function ExpertWitnessProfile() {
       <section className="bg-ink py-16 text-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
-            <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-xl bg-gold/20 font-heading text-4xl text-gold">
-              {expert.first_name[0]}{expert.last_name[0]}
-            </div>
+            {expert.avatar_url ? (
+              <img
+                src={expert.avatar_url}
+                alt={`${expert.first_name} ${expert.last_name}`}
+                className="h-32 w-32 shrink-0 rounded-xl object-cover ring-1 ring-gold/30"
+              />
+            ) : (
+              <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-xl bg-gold/20 font-heading text-4xl text-gold">
+                {expert.first_name[0]}{expert.last_name[0]}
+              </div>
+            )}
             <div className="flex-1">
               <h1 className="font-heading text-3xl md:text-4xl">
                 {expert.title ? `${expert.title} ` : ""}{expert.first_name} {expert.last_name}
