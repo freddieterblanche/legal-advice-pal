@@ -66,7 +66,8 @@ export function AdminRoleListPage({ role }: { role: Role }) {
 
   const setFlag = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
-      const { error } = await supabase.from("lawyers").update({ [meta.column]: value }).eq("id", id);
+      const payload = meta.column === "is_mediator" ? { is_mediator: value } : { is_arbitrator: value };
+      const { error } = await supabase.from("lawyers").update(payload).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
