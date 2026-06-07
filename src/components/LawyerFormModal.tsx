@@ -14,6 +14,13 @@ import { RichTextEditor } from "./RichTextEditor";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
+import {
+  MEDIATION_SECTORS,
+  MEDIATION_ACCREDITATIONS,
+  MEDIATION_STYLES,
+  ARBITRATION_TYPES,
+  ARBITRATION_ACCREDITATIONS,
+} from "../lib/expert-constants";
 
 export type Branch = {
   id: string;
