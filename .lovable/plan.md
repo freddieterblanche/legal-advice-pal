@@ -1,84 +1,73 @@
-## LexSA expansion — Expert Witnesses, Mediators & Arbitrators
+## Goal
 
-Expand the directory from lawyers-only to four service types, with shared search/profile patterns, new database tables/flags, billing add-ons, and updated navigation/homepage.
+Turn `/register` from a firm-only flow into a single entry point that handles five listing types: **Law Firm**, **Advocate**, **Mediator**, **Arbitrator**, and **Expert Witness**. Mediators and arbitrators may be non-lawyers, so they don't require admission or chambers.
 
-### 1. Database (single migration)
+## User-facing flow
 
-New tables in `public`:
-- `expert_disciplines` — `id, name, slug (unique), parent_category, icon`
-- `expert_witnesses` — all fields per spec + `firm_id uuid null references firms`, `status` enum check, trial dates default `now()` / `now() + 90 days`
-- `expert_witness_disciplines` — composite PK join
-- `case_expert_witnesses` — links expert to `cases`
+**Step 0 — Choose what you're registering** (new):
+Five `TypePill`-coloured cards. Selecting one routes the rest of the wizard.
 
-Extend `lawyers` with: `is_mediator, is_arbitrator, mediator_accreditation, mediator_style, mediator_sectors text[], arbitrator_accreditation, arbitrator_types text[], arbitrator_experience_years, languages text[], daily_rate_range, availability_notes`.
+**Step 1 — Listing details** (varies by type):
 
-Each new table: `GRANT SELECT TO anon, authenticated` (publicly browsable) + `GRANT ALL TO service_role`; writes restricted by RLS to firm admins / platform admins. `expert_disciplines` public read, admin write.
+| Type | Step 1 fields |
+|---|---|
+| Law Firm | (unchanged) firm name, reg #, province, city, address, website, phone |
+| Advocate | first/last name, title, year of admission, SC toggle, **bar** (pick), **chambers** (pick or "Create new" — opens chambers sub-form with name + address + city + province), province, city, phone, email |
+| Mediator | first/last name, title (optional), `is_lawyer` toggle → if yes, year of admission + bar; if no, profession/background field; accreditation, style, sectors, province, city, phone, email |
+| Arbitrator | first/last name, title, `is_lawyer` toggle (same branch as mediator), accreditation, types, experience years, province, city, phone, email |
+| Expert | first/last name, title, discipline(s), registration body, employer / company, independent toggle, province, city, phone, email |
 
-Update view: recreate `lawyer_search_view` (currently includes `is_senior_counsel`) to also expose `is_mediator`, `is_arbitrator`, and the new mediator/arbitrator/languages fields needed by the new search pages.
+**Step 2 — Account** (unchanged): if not signed in, capture admin first/last/email/password; if signed in, confirm.
 
-Config seed: insert `expert_witness_monthly_price_rands=149`, `mediator_monthly_price_rands=149`, `arbitrator_monthly_price_rands=199`.
+**Step 3 — Confirmation**: generic copy ("subscription details to follow per listing type"); on submit, listing is created in `status = 'trial'` and user is redirected to `/dashboard`.
 
-Seed `expert_disciplines` with the ~50 disciplines grouped by `parent_category` from the spec. Seed Dr Priya Naidoo demo expert witness + link to Orthopaedics & Occupational Medicine.
+## Data model
 
-### 2. Routes (TanStack file-based)
+- **Firm**: existing `firms` insert + `profiles.role = 'firm_admin'` (no change).
+- **Advocate / Mediator / Arbitrator (lawyer-flavour)**: insert into `lawyers` with `lawyer_type = 'advocate'` (or null for non-lawyer M/A), `is_mediator` / `is_arbitrator` flags as appropriate, `chambers_id` set for advocates, `firm_id` left null for solo advocates and non-lawyer neutrals. `profile_id` links to the signed-in user.
+- **Expert**: insert into `expert_witnesses` as today; `firm_id` null for independents. Link via a new `expert_witnesses.profile_id` column (currently the table has no owner column — see migration).
+- New `profiles.role` values used: `lawyer_owner` (solo advocate / mediator / arbitrator), `expert_owner`. `firm_admin` unchanged.
 
-New route files:
-- `src/routes/expert-witnesses.index.tsx` — search/list
-- `src/routes/expert-witnesses.$slug.tsx` — profile
-- `src/routes/mediators.index.tsx` — search/list (queries `lawyers` where `is_mediator`)
-- `src/routes/arbitrators.index.tsx` — search/list (queries `lawyers` where `is_arbitrator`)
-- Mediator/arbitrator profiles reuse `lawyers.$slug.tsx` with conditional "Mediation" / "Arbitration" sections appended
+## Migrations needed
 
-Each route gets unique `head()` meta (title, description, og:title, og:description).
+1. Add `lawyers.profile_id uuid references auth.users(id)` (nullable) — already exists; verify and add owner-edit RLS policy:
+   `lawyers can be updated by their profile_id owner`.
+2. Add `expert_witnesses.profile_id uuid references auth.users(id)` (nullable) + owner-update + owner-delete RLS policies mirroring existing firm-admin ones.
+3. Allow authenticated users to insert their own `lawyers` row (with `profile_id = auth.uid()`) and their own `expert_witnesses` row. Today insert is restricted; we need a per-owner insert policy.
+4. Allow authenticated users to insert `chambers` (currently platform-admin only) so an advocate can create theirs during signup. Scope via `WITH CHECK (true)` for authenticated; platform admin keeps full management rights.
 
-### 3. Navigation & homepage
+## Server functions
 
-`Navbar.tsx` public links → `Find a Lawyer`, `Find an Expert Witness`, `Find a Mediator`, `Find an Arbitrator`. Mobile menu mirrors.
+Replace `registerFirmForCurrentUser` with one new file `src/lib/registration.functions.ts` exporting:
 
-`routes/index.tsx`:
-- Update hero copy
-- Add tab row above search (Lawyers / Experts / Mediators / Arbitrators) switching the search form & target route
-- Stats bar → 4 counts (lawyers, expert witnesses, mediators, arbitrators)
-- Add four "Find a …" cards above the existing practice area grid (keep practice areas below)
+- `registerFirmForCurrentUser` (kept, unchanged signature)
+- `registerLawyerForCurrentUser` — Zod input discriminated on `kind: 'advocate' | 'mediator' | 'arbitrator'`; sets `is_mediator`/`is_arbitrator`, `chambers_id` (creates chambers on-the-fly if a new-chambers payload is supplied), `lawyer_type`. Sets `profile_id = userId`. Updates `profiles.role = 'lawyer_owner'` (unless already firm_admin/platform_admin).
+- `registerExpertForCurrentUser` — Zod input mirroring expert form. Creates expert row, sets `profile_id`, updates `profiles.role = 'expert_owner'`.
 
-### 4. Search pages — shared pattern
+All use `supabaseAdmin` (imported inside handler) so we don't have to widen anon/auth insert policies for everything.
 
-Each search page reuses the visual pattern from existing `search.tsx`:
-- Hero with keyword + primary dropdown + province
-- Left sidebar multi-select filters per spec
-- Result cards per spec
-- Server queries via `supabase` browser client + RLS-safe public reads
+## UI changes
 
-### 5. Firm dashboard
+- `src/routes/register.tsx` becomes a thin shell that owns step state + the new step 0 picker and renders one of:
+  - `RegisterFirmSteps` (existing markup extracted)
+  - `RegisterLawyerSteps` (new — handles advocate/mediator/arbitrator with conditional fields)
+  - `RegisterExpertSteps` (new)
+- Step-0 cards use `TypePill` colours (firm=slate, advocate=emerald, mediator=violet, arbitrator=rose, expert=amber). Each card: icon, type name, one-line description.
+- Page H1 changes to "Register your listing"; existing "Register Your Firm" SEO meta stays as the default but is updated to "Register on Lawexpert.co.za — Firms, Advocates, Mediators, Arbitrators & Experts".
+- Bar + chambers pickers reuse `ComboboxCreatable`; long-text fields (bio if any in step 1) use `RichTextEditor` per the project rule.
+- After successful signup, navigate to `/dashboard` — the dashboard already shows the relevant owner's listing.
 
-Existing `_authenticated/dashboard.tsx` Lawyers tab:
-- Add Mediator / Arbitrator toggle columns per lawyer row
-- Expanding a toggle reveals inline edit fields (accreditation, style/types, sectors, years)
+## Dashboard impact (light)
 
-New Expert Witnesses tab in firm dashboard:
-- Table of firm's `expert_witnesses` (filtered by `firm_id = get_my_firm_id()`)
-- "Add Expert Witness" modal form (name, title, disciplines multi-select, qualifications, registration body, city, province, bio)
-- Edit / delete actions
-- Status, trial days remaining, profile views columns
+`dashboard.tsx` already supports firm admins managing firm + lawyers + experts. For new solo owners we just need the existing per-row owner edit to work, which the new RLS policies enable. No dashboard rewrite in this pass — defer larger "solo lawyer dashboard" tweaks to a follow-up.
 
-Billing tab: extend to compute `R99 base + R149 (mediator) + R199 (arbitrator) + R149 × expert_witness_count`, with a per-line breakdown.
+## Out of scope (deferred)
 
-### 6. RLS
+- Per-type pricing copy (Step 3 stays generic).
+- Lawyer-invite flow changes.
+- Dashboard sections tailored to solo neutrals/experts beyond what exists.
 
-- `expert_witnesses`: public SELECT where `status in ('trial','active')`; firm admin full access where `firm_id = get_my_firm_id()`; platform_admin full access
-- `expert_witness_disciplines`, `case_expert_witnesses`: public SELECT joined to visible experts; firm admin manage own; platform admin all
-- `expert_disciplines`: public SELECT; platform admin write
-- Trigger to prevent non-platform-admins changing `expert_witnesses.status` (mirroring `prevent_firm_admin_status_change` on firms)
+## Risks
 
-### 7. Out of scope (matches spec)
-
-Booking calendar, verified badges, reviews, award uploads — not built.
-
-### Technical notes
-
-- All new server-side reads use the browser supabase client for public pages; firm dashboard writes go via supabase from the authenticated client (RLS scopes by `firm_id`).
-- Slugs generated with existing `slugify` helper in `src/lib/constants.ts`.
-- New constants file `src/lib/expert-constants.ts` for mediation sectors, arbitration types, accreditation lists.
-- Practice-area icon helper extended to map expert discipline slugs → lucide icons.
-- One supabase migration for schema + grants + RLS + triggers; one separate insert for `expert_disciplines` and demo data and config rows (data, not schema).
-- Existing `lawyer_search_view` recreated to include the new mediator/arbitrator/languages columns so search pages can read in one query.
+- Widening `chambers` insert to authenticated users opens spammy chambers creation. Mitigated by: only invoked through signup server fn (which we keep admin-elevated), so the RLS widening may not be needed — instead, the server fn creates chambers with `supabaseAdmin` and we leave the client policy locked down. **Recommended**: keep chambers policies as-is, do chambers creation server-side only.
+- `lawyers` insert policy widening: same — do it server-side via `supabaseAdmin`, so no client-side insert policy change needed. Migration #3 is therefore unnecessary; we only need the **owner UPDATE** policies (and matching `expert_witnesses.profile_id` column + UPDATE/DELETE policies) so users can edit their own listing from the dashboard later.
