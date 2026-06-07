@@ -274,13 +274,13 @@ function SearchPage() {
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:gap-0 sm:p-0">
+                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:object-top"
+                      className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
@@ -290,12 +290,13 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-lg ${accentBg} font-heading text-xl sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:text-3xl`}
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-lg ${accentBg} font-heading text-xl sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl`}
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
+
                     <div className="flex-1">
                       <div className="flex flex-wrap items-baseline gap-3">
                         <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
