@@ -1153,18 +1153,16 @@ function BillingTab({ firmId }: { firmId: string }) {
   const arbitrators = activeLawyers.filter((l) => l.is_arbitrator).length;
   const activeExperts = experts?.filter((e) => e.status === "active").length ?? 0;
 
-  const baseTotal = activeLawyers.length * 99;
-  const mediatorTotal = mediators * 149;
-  const arbitratorTotal = arbitrators * 199;
-  const expertTotal = activeExperts * 149;
-  const monthlyTotal = baseTotal + mediatorTotal + arbitratorTotal + expertTotal;
+  const RATE = 160;
+  const lawyerTotal = activeLawyers.length * RATE;
+  const expertTotal = activeExperts * RATE;
+  const monthlyTotal = lawyerTotal + expertTotal;
 
   const lines = [
-    { label: `${activeLawyers.length} active lawyer${activeLawyers.length === 1 ? "" : "s"} × R99`, amount: baseTotal },
-    { label: `${mediators} mediator add-on${mediators === 1 ? "" : "s"} × R149`, amount: mediatorTotal },
-    { label: `${arbitrators} arbitrator add-on${arbitrators === 1 ? "" : "s"} × R199`, amount: arbitratorTotal },
-    { label: `${activeExperts} expert witness${activeExperts === 1 ? "" : "es"} × R149`, amount: expertTotal },
+    { label: `${activeLawyers.length} active lawyer${activeLawyers.length === 1 ? "" : "s"} × R${RATE}`, amount: lawyerTotal },
+    { label: `${activeExperts} expert witness${activeExperts === 1 ? "" : "es"} × R${RATE}`, amount: expertTotal },
   ];
+  void mediators; void arbitrators;
 
   return (
     <div className="space-y-6">
