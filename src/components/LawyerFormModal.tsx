@@ -93,6 +93,7 @@ export type LawyerRow = {
   slug?: string | null;
   is_mediator?: boolean | null;
   is_arbitrator?: boolean | null;
+  firm_id?: string | null;
 };
 
 
