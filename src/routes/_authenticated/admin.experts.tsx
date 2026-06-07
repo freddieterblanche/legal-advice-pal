@@ -18,11 +18,14 @@ export const Route = createFileRoute("/_authenticated/admin/experts")({
   component: AdminExpertsPage,
 });
 
+const NAME_TITLES = ["", "Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Adv", "Rev"] as const;
+
 type ExpertRow = {
   id: string;
   slug: string;
   first_name: string;
   last_name: string;
+  name_title: string | null;
   title: string | null;
   city: string | null;
   province: string | null;
