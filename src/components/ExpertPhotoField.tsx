@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, X, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
@@ -14,8 +14,19 @@ type Props = {
 export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [showUrlInput, setShowUrlInput] = useState(false);
+  // Auto-open the URL field when the existing value already looks like a
+  // pasted external link (not one of our storage signed URLs), so admins can
+  // immediately see and edit it on opening the form.
+  const looksExternal = !!value && !value.includes("/storage/v1/object/");
+  const [showUrlInput, setShowUrlInput] = useState(looksExternal);
   const [urlDraft, setUrlDraft] = useState(value ?? "");
+
+  // Keep the local draft in sync with the parent value (e.g. after hydration
+  // from an async fetch).
+  useEffect(() => {
+    setUrlDraft(value ?? "");
+  }, [value]);
+
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,23 +99,39 @@ export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
         </div>
       </div>
       {showUrlInput && (
-        <div className="flex gap-2">
-          <input
-            type="url"
-            value={urlDraft}
-            onChange={(e) => setUrlDraft(e.target.value)}
-            placeholder="https://…/photo.jpg"
-            className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
-          />
-          <button
-            type="button"
-            onClick={() => { onChange(urlDraft.trim()); setShowUrlInput(false); }}
-            className="rounded bg-ink px-3 py-2 text-xs font-semibold text-cream hover:bg-ink/90"
-          >
-            Use link
-          </button>
+        <div className="space-y-1">
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={urlDraft}
+              // Live-commit so users don't have to remember to click an extra
+              // button before saving the parent form.
+              onChange={(e) => { setUrlDraft(e.target.value); onChange(e.target.value.trim()); }}
+              onBlur={() => onChange(urlDraft.trim())}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onChange(urlDraft.trim());
+                  setShowUrlInput(false);
+                }
+              }}
+              placeholder="https://…/photo.jpg"
+              className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => { onChange(urlDraft.trim()); setShowUrlInput(false); }}
+              className="rounded bg-ink px-3 py-2 text-xs font-semibold text-cream hover:bg-ink/90"
+            >
+              Done
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Paste a publicly accessible image URL (https). The link is saved automatically — no need to click Done before saving the form.
+          </p>
         </div>
       )}
     </div>
   );
 }
+
