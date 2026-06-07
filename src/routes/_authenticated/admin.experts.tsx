@@ -63,7 +63,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expert_witnesses")
-        .select("id, slug, first_name, last_name, title, city, province, status, trial_end_date, profile_views, firm_id")
+        .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
