@@ -230,7 +230,5 @@ function AddAttorneyFirmPicker({ firms, onCancel, onPicked }: { firms: { id: str
     </div>
   );
 }
-    </div>
-  );
-}
+
 
