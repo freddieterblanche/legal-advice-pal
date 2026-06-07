@@ -7,7 +7,8 @@ import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
+type LawyerType = "attorney" | "advocate";
+type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type: LawyerType; page?: number };
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,13 +17,13 @@ export const Route = createFileRoute("/search")({
     province: typeof s.province === "string" ? s.province : undefined,
     town: typeof s.town === "string" ? s.town : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
-    type: s.type === "attorney" || s.type === "advocate" ? s.type : undefined,
+    type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
   head: () => ({
     meta: [
-      { title: "Find a Lawyer — Lawexpert.co.za" },
-      { name: "description", content: "Search South African lawyers by name, practice area, and province." },
+      { title: "Find Attorneys & Advocates — Lawexpert.co.za" },
+      { name: "description", content: "Search South African attorneys and advocates by name, practice area, and province." },
     ],
   }),
   component: SearchPage,
@@ -86,8 +87,9 @@ function SearchPage() {
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
-      if (search.type) filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
-      return { rows: filtered, total: search.type ? filtered.length : (count ?? 0) };
+      // Always filter by type — attorneys and advocates are separate datasets
+      filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
+      return { rows: filtered, total: filtered.length };
     },
   });
 
@@ -209,9 +211,7 @@ function SearchPage() {
             <h1 className="font-heading text-2xl text-ink">
               {isLoading
                 ? "Searching…"
-                : `${total} ${
-                    search.type === "advocate" ? "advocate" : search.type === "attorney" ? "attorney" : "lawyer"
-                  }${total === 1 ? "" : "s"} found`}
+                : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
           </div>
 

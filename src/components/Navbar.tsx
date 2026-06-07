@@ -38,8 +38,9 @@ export function Navbar() {
 
   const isPlatformAdmin = role === "platform_admin";
 
-  const publicLinks = [
-    { to: "/search", label: "Find a Lawyer" },
+  const publicLinks: Array<{ to: string; label: string; search?: Record<string, string> }> = [
+    { to: "/search", label: "Attorneys", search: { type: "attorney" } },
+    { to: "/search", label: "Advocates", search: { type: "advocate" } },
     { to: "/expert-witnesses", label: "Expert Witnesses" },
     { to: "/mediators", label: "Mediators" },
     { to: "/arbitrators", label: "Arbitrators" },
@@ -55,7 +56,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-8 md:flex">
           {publicLinks.map(l => (
-            <Link key={l.to} to={l.to} className="text-sm font-medium text-cream/80 transition-colors hover:text-gold">
+            <Link key={`${l.to}-${l.label}`} to={l.to} search={l.search as never} className="text-sm font-medium text-cream/80 transition-colors hover:text-gold">
               {l.label}
             </Link>
           ))}
@@ -108,7 +109,7 @@ export function Navbar() {
         <div className="border-t border-cream/10 bg-ink md:hidden">
           <div className="flex flex-col gap-1 px-4 py-4">
             {publicLinks.map(l => (
-              <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm text-cream/90 hover:bg-cream/5">
+              <Link key={`${l.to}-${l.label}`} to={l.to} search={l.search as never} onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm text-cream/90 hover:bg-cream/5">
                 {l.label}
               </Link>
             ))}
