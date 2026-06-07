@@ -317,13 +317,6 @@ function SearchPage() {
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
-                      {l.practice_areas && l.practice_areas[0] && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {l.practice_areas.filter(Boolean).slice(0, 4).map((pa: string) => (
-                            <span key={pa} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pa}</span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                       {caseCount > 0 && (
