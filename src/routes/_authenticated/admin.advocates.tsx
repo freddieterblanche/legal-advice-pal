@@ -430,8 +430,17 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       };
       let advocateId = advocate?.id;
       if (isEdit && advocate) {
-        const { error } = await supabase.from("lawyers").update(payload).eq("id", advocate.id);
+        const { data: updated, error } = await supabase
+          .from("lawyers")
+          .update(payload)
+          .eq("id", advocate.id)
+          .select("id");
         if (error) throw error;
+        if (!updated || updated.length === 0) {
+          throw new Error(
+            "Update was blocked by access rules — you must be signed in as a platform admin to edit this advocate.",
+          );
+        }
       } else {
         const slug = `${slugify(`${payload.first_name}-${payload.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
