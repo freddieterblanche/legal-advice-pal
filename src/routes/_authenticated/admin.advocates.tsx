@@ -213,7 +213,7 @@ function AdminAdvocatesPage() {
                   </td>
                 </tr>
               ))}
-              {!isLoading && filtered.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No advocates yet. Click <strong>Add Advocate</strong> to create one.</td></tr>}
+              {!isLoading && sorted.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No advocates yet. Click <strong>Add Advocate</strong> to create one.</td></tr>}
             </tbody>
           </table>
         </div>
