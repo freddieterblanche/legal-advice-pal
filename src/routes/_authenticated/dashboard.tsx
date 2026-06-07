@@ -321,6 +321,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Designation</th>
+              <th className="px-4 py-3">Roles</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Trial Ends</th>
               <th className="px-4 py-3">Views</th>
@@ -334,6 +335,26 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                 <tr key={l.id}>
                   <td className="px-4 py-3 font-medium text-ink">{l.first_name ?? ""} {l.last_name ?? ""}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.designation}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag.mutate({ id: l.id, field: "is_mediator", value: !l.is_mediator })}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_mediator ? "border-forest bg-forest text-white" : "border-border text-muted-foreground hover:border-forest"}`}
+                        title="Toggle mediator role (+R149/mo when active)"
+                      >
+                        Mediator
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag.mutate({ id: l.id, field: "is_arbitrator", value: !l.is_arbitrator })}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_arbitrator ? "border-gold bg-gold text-white" : "border-border text-muted-foreground hover:border-gold"}`}
+                        title="Toggle arbitrator role (+R199/mo when active)"
+                      >
+                        Arbitrator
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{l.status}</span></td>
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
@@ -356,7 +377,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
               );
             })}
             {(!lawyers || lawyers.length === 0) && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No lawyers yet. Add your first.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">No lawyers yet. Add your first.</td></tr>
             )}
           </tbody>
         </table>
