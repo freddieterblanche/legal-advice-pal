@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; province?: string; town?: string; page?: number };
+type SortField = "name" | "lawyers" | "listed";
+type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -13,6 +15,8 @@ export const Route = createFileRoute("/firms/")({
     province: typeof s.province === "string" ? s.province : undefined,
     town: typeof s.town === "string" ? s.town : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "name" || s.sort === "lawyers" || s.sort === "listed" ? s.sort : "name",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
