@@ -182,8 +182,8 @@ function AdminExpertsPage() {
         <AdminExpertFormModal
           firms={firms ?? []}
           expert={editing}
-          onClose={() => setEditing(null)}
-          onSaved={() => { refresh(); setEditing(null); }}
+          onClose={() => { setEditing(null); clearEditSearch(); }}
+          onSaved={() => { refresh(); setEditing(null); clearEditSearch(); }}
         />
       )}
     </div>
