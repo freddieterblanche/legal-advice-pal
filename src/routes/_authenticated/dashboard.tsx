@@ -400,10 +400,13 @@ function BillingTab({ firmId }: { firmId: string }) {
   );
 }
 
+const EXPERT_NAME_TITLES = ["", "Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Adv", "Rev"] as const;
+
 type ExpertRow = {
   id: string;
   first_name: string;
   last_name: string;
+  name_title: string | null;
   title: string | null;
   slug: string;
   city: string | null;
@@ -424,6 +427,7 @@ type ExpertRow = {
 const expertSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
+  name_title: z.string().trim().max(40).optional(),
   title: z.string().trim().max(120).optional(),
   qualifications: z.string().trim().max(20000).optional(),
   registration_body: z.string().trim().max(200).optional(),
