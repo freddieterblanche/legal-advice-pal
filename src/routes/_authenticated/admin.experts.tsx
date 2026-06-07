@@ -210,7 +210,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("expert_witnesses")
-        .select("qualifications, bio, avatar_url")
+        .select("qualifications, bio, avatar_url, company_name, office_phone, mobile_phone, contact_email")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
@@ -229,11 +229,15 @@ function AdminExpertFormModal({
     avatar_url: "",
     firm_id: expert?.firm_id ?? "",
     status: expert?.status ?? "trial",
+    company_name: "",
+    office_phone: "",
+    mobile_phone: "",
+    contact_email: "",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio/avatar once detail loads (effect, not in-render setState)
+  // Hydrate qualifications/bio/avatar/contact once detail loads (effect, not in-render setState)
   useEffect(() => {
     if (!isEdit || hydrated || !existing) return;
     setForm((f) => ({
@@ -241,9 +245,14 @@ function AdminExpertFormModal({
       qualifications: (existing as any).qualifications ?? "",
       bio: (existing as any).bio ?? "",
       avatar_url: (existing as any).avatar_url ?? "",
+      company_name: (existing as any).company_name ?? "",
+      office_phone: (existing as any).office_phone ?? "",
+      mobile_phone: (existing as any).mobile_phone ?? "",
+      contact_email: (existing as any).contact_email ?? "",
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,6 +274,10 @@ function AdminExpertFormModal({
         avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
         is_independent: !form.firm_id,
+        company_name: form.company_name?.trim() || null,
+        office_phone: form.office_phone?.trim() || null,
+        mobile_phone: form.mobile_phone?.trim() || null,
+        contact_email: form.contact_email?.trim() || null,
       };
       if (isEdit && expert) {
         const { error } = await supabase
@@ -321,6 +334,20 @@ function AdminExpertFormModal({
           </AField>
           <AField label="Title (e.g. Orthopaedic Surgeon)">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
+          <AField label="Company / practice name">
+            <input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} placeholder="e.g. De Kroon Forensic Accounting" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
+          <div className="grid gap-3 md:grid-cols-2">
+            <AField label="Office phone">
+              <input type="tel" value={form.office_phone} onChange={(e) => setForm({ ...form, office_phone: e.target.value })} placeholder="+27 21 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            </AField>
+            <AField label="Mobile phone">
+              <input type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} placeholder="+27 82 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            </AField>
+          </div>
+          <AField label="Contact email">
+            <input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="eric@example.co.za" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Qualifications">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />

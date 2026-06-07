@@ -1227,6 +1227,10 @@ type ExpertRow = {
   registration_body: string | null;
   bio: string | null;
   avatar_url: string | null;
+  company_name: string | null;
+  office_phone: string | null;
+  mobile_phone: string | null;
+  contact_email: string | null;
 };
 
 const expertSchema = z.object({
@@ -1239,6 +1243,10 @@ const expertSchema = z.object({
   province: z.enum(PROVINCES as unknown as [string, ...string[]]).optional(),
   bio: z.string().trim().max(20000).optional(),
   avatar_url: z.string().trim().max(2000).optional(),
+  company_name: z.string().trim().max(200).optional(),
+  office_phone: z.string().trim().max(40).optional(),
+  mobile_phone: z.string().trim().max(40).optional(),
+  contact_email: z.string().trim().max(200).optional(),
 });
 
 function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
@@ -1342,6 +1350,10 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     province: (expert?.province ?? "Gauteng") as string,
     bio: expert?.bio ?? "",
     avatar_url: expert?.avatar_url ?? "",
+    company_name: expert?.company_name ?? "",
+    office_phone: expert?.office_phone ?? "",
+    mobile_phone: expert?.mobile_phone ?? "",
+    contact_email: expert?.contact_email ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -1351,34 +1363,31 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
     setSaving(true);
     try {
+      const payload = {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        title: form.title || null,
+        qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
+        registration_body: form.registration_body || null,
+        city: form.city || null,
+        province: form.province || null,
+        bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+        avatar_url: form.avatar_url?.trim() || null,
+        company_name: form.company_name?.trim() || null,
+        office_phone: form.office_phone?.trim() || null,
+        mobile_phone: form.mobile_phone?.trim() || null,
+        contact_email: form.contact_email?.trim() || null,
+      };
       if (isEdit && expert) {
-        const { error } = await supabase.from("expert_witnesses").update({
-          first_name: form.first_name,
-          last_name: form.last_name,
-          title: form.title || null,
-          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
-          registration_body: form.registration_body || null,
-          city: form.city || null,
-          province: form.province || null,
-          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
-          avatar_url: form.avatar_url?.trim() || null,
-        }).eq("id", expert.id);
+        const { error } = await supabase.from("expert_witnesses").update(payload).eq("id", expert.id);
         if (error) throw error;
       } else {
         const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
         const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
         const { error } = await supabase.from("expert_witnesses").insert({
+          ...payload,
           firm_id: firmId,
           slug,
-          first_name: form.first_name,
-          last_name: form.last_name,
-          title: form.title || null,
-          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
-          registration_body: form.registration_body || null,
-          city: form.city || null,
-          province: form.province || null,
-          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
-          avatar_url: form.avatar_url?.trim() || null,
         });
         if (error) throw error;
       }
@@ -1414,6 +1423,12 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           </div>
           <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Company / practice name"><input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} placeholder="e.g. De Kroon Forensic Accounting" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="Office phone"><input type="tel" value={form.office_phone} onChange={(e) => setForm({ ...form, office_phone: e.target.value })} placeholder="+27 21 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Mobile phone"><input type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} placeholder="+27 82 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          </div>
+          <Field label="Contact email"><input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="expert@example.co.za" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <Field label="Qualifications">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />
           </Field>
