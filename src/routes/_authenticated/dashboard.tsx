@@ -350,7 +350,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                         type="button"
                         onClick={() => toggleFlag.mutate({ id: l.id, field: "is_arbitrator", value: !l.is_arbitrator })}
                         className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_arbitrator ? "border-gold bg-gold text-white" : "border-border text-muted-foreground hover:border-gold"}`}
-                        title="Toggle arbitrator role (+R199/mo when active)"
+                        title="Toggle arbitrator role"
                       >
                         Arbitrator
                       </button>
