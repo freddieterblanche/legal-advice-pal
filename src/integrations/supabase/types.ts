@@ -935,7 +935,7 @@ export type Database = {
           practice_head_area: string | null
           profile_id: string | null
           profile_views: number | null
-          provider_type: string
+          provider_type: string | null
           province: string | null
           qualifications: string | null
           registration_body: string | null
@@ -1003,7 +1003,7 @@ export type Database = {
           practice_head_area?: string | null
           profile_id?: string | null
           profile_views?: number | null
-          provider_type: string
+          provider_type?: string | null
           province?: string | null
           qualifications?: string | null
           registration_body?: string | null
@@ -1071,7 +1071,7 @@ export type Database = {
           practice_head_area?: string | null
           profile_id?: string | null
           profile_views?: number | null
-          provider_type?: string
+          provider_type?: string | null
           province?: string | null
           qualifications?: string | null
           registration_body?: string | null
