@@ -21,6 +21,8 @@ type AdvocateRow = {
   bar_id: string | null;
   chambers_id: string | null;
   is_senior_counsel: boolean;
+  is_mediator: boolean | null;
+  is_arbitrator: boolean | null;
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
