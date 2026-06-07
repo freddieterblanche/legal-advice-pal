@@ -169,12 +169,16 @@ function AdminAdvocatesPage() {
           advocate={editing ?? undefined}
           bars={bars ?? []}
           chambers={chambers ?? []}
-          onClose={() => { setAdding(false); setEditing(null); }}
+          onClose={() => {
+            setAdding(false); setEditing(null);
+            if (search.edit) navigate({ search: { edit: undefined } });
+          }}
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["admin-advocates"] });
             qc.invalidateQueries({ queryKey: ["bars-options"] });
             qc.invalidateQueries({ queryKey: ["chambers-options"] });
             setAdding(false); setEditing(null);
+            if (search.edit) navigate({ search: { edit: undefined } });
           }}
         />
       )}
