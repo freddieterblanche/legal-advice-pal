@@ -116,6 +116,14 @@ function SearchPage() {
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
       // Always filter by type — attorneys and advocates are separate datasets
       filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
+      // Exclude pure mediators/arbitrators (no firm, no advocate/attorney
+      // designation) from the Attorneys tab — they belong on /mediators
+      // and /arbitrators, not the lawyer search.
+      if (search.type === "attorney") {
+        filtered = filtered.filter(
+          (r) => !((r.is_mediator || r.is_arbitrator) && !r.firm_name && !r.designation),
+        );
+      }
       return { rows: filtered, total: filtered.length };
     },
   });
