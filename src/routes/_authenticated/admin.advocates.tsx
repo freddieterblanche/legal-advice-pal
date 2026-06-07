@@ -163,7 +163,8 @@ function AdminAdvocatesPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, bar or chambers…" className="w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sort by</span>
             {(["surname", "experience", "listed"] as const).map((field) => {
               const active = search.sort === field;
               const asc = active && search.dir === "asc";

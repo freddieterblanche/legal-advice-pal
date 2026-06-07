@@ -1,14 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Briefcase, Scale } from "lucide-react";
+import { Briefcase, Scale, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
 type LawyerType = "attorney" | "advocate";
-type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type: LawyerType; page?: number };
+type SortField = "surname" | "experience" | "listed" | "relevance";
+type SortDir = "asc" | "desc";
+type Search = {
+  q?: string;
+  area?: string;
+  province?: string;
+  town?: string;
+  designation?: string;
+  type: LawyerType;
+  page?: number;
+  sort?: SortField;
+  dir?: SortDir;
+};
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -19,6 +31,10 @@ export const Route = createFileRoute("/search")({
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" || s.sort === "relevance"
+      ? s.sort
+      : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -28,6 +44,7 @@ export const Route = createFileRoute("/search")({
   }),
   component: SearchPage,
 });
+
 
 const PAGE_SIZE = 20;
 
@@ -82,8 +99,21 @@ function SearchPage() {
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("case_count", { ascending: false });
-      const { data, count, error } = await query;
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "experience") {
+        // Years of experience = currentYear - year_of_admission, so higher years_of_admission = less experience.
+        // Ascending experience ⇒ year_of_admission DESC.
+        query = query.order("year_of_admission", { ascending: !ascending, nullsFirst: false });
+      } else if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        query = query.order("case_count", { ascending: false });
+      }
+      const { data, error } = await query;
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
@@ -207,13 +237,42 @@ function SearchPage() {
 
         {/* Results */}
         <div>
-          <div className="mb-4 flex items-baseline justify-between">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h1 className="font-heading text-2xl text-ink">
               {isLoading
                 ? "Searching…"
                 : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sort by</span>
+              {([
+                { key: "surname" as const, label: "Surname" },
+                { key: "experience" as const, label: "Years Experience" },
+                { key: "listed" as const, label: "Date Listed" },
+              ]).map((s) => {
+                const active = (search.sort ?? "surname") === s.key;
+                const asc = active && (search.dir ?? "asc") === "asc";
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => {
+                      if (active) {
+                        navigate({ search: (prev: Search) => ({ ...prev, dir: asc ? "desc" : "asc", page: 1 }) });
+                      } else {
+                        navigate({ search: (prev: Search) => ({ ...prev, sort: s.key, dir: "asc", page: 1 }) });
+                      }
+                    }}
+                    className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-card text-ink hover:border-ink"}`}
+                  >
+                    {s.label}
+                    {active ? (asc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
 
           {isLoading ? (
             <div className="space-y-3">
