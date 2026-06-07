@@ -1360,21 +1360,21 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
         </div>
         <form onSubmit={submit} className="space-y-3">
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="input" /></Field>
-            <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="input" /></Field>
+            <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           </div>
-          <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="input" /></Field>
-          <Field label="Qualifications"><textarea rows={2} value={form.qualifications} onChange={(e) => setForm({ ...form, qualifications: e.target.value })} className="input" /></Field>
-          <Field label="Registration body (e.g. HPCSA)"><input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="input" /></Field>
+          <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Qualifications"><textarea rows={2} value={form.qualifications} onChange={(e) => setForm({ ...form, qualifications: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Registration body (e.g. HPCSA)"><input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="City"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="input" /></Field>
+            <Field label="City"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Province">
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="input">
+              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </Field>
           </div>
-          <Field label="Bio / experience"><textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="input" /></Field>
+          <Field label="Bio / experience"><textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
