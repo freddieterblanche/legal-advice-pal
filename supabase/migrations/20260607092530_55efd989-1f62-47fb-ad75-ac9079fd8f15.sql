@@ -1,0 +1,2 @@
+UPDATE public.practice_areas SET name = 'Corporate Law', slug = 'corporate-law' WHERE id = 'd6cfb164-b47e-4d4e-8baa-22d5824bc847';
+INSERT INTO public.practice_areas (name, slug) VALUES ('Mergers and Acquisitions (M&A)', 'mergers-and-acquisitions-ma');
