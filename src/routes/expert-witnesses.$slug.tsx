@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, MapPin, BookOpen, Download, Globe, Briefcase } from "lucide-react";
+import { ExternalLink, MapPin, BookOpen, Download, Globe, Briefcase, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 
