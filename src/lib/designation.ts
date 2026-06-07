@@ -73,7 +73,11 @@ export function formatDesignation(l: StructuredLawyer): string {
     return years !== null ? `${seniority} · ${years} year${years === 1 ? "" : "s"} in practice` : seniority;
   }
   if (l.lawyer_type === "attorney") {
-    return (l.designation_code || l.designation_custom || "Attorney") as string;
+    const designation = (l.designation_code || l.designation_custom || "Attorney") as string;
+    const years = yearsInPractice(l.year_of_admission ?? null);
+    return years !== null
+      ? `${designation} · ${years} year${years === 1 ? "" : "s"} in practice`
+      : `${designation} · Unspecified years in practice`;
   }
   return l.designation ?? "";
 }
