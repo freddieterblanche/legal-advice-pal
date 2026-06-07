@@ -1341,6 +1341,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
     bio: expert?.bio ?? "",
+    avatar_url: expert?.avatar_url ?? "",
   });
   const [saving, setSaving] = useState(false);
 
