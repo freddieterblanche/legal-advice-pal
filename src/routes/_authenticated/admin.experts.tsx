@@ -296,6 +296,14 @@ function AdminExpertFormModal({
           </button>
         </div>
         <form onSubmit={submit} className="space-y-3">
+          <AField label="Photo">
+            <ExpertPhotoField
+              value={form.avatar_url}
+              onChange={(url) => setForm({ ...form, avatar_url: url })}
+              firmId={form.firm_id || null}
+              expertId={expert?.id}
+            />
+          </AField>
           <div className="grid gap-3 md:grid-cols-2">
             <AField label="First name *">
               <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
