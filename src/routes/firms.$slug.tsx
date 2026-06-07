@@ -38,7 +38,7 @@ function FirmProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
+        .select("id, slug, first_name, last_name, is_senior_counsel, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
         .eq("firm_id", firm!.id)
         .in("status", ["trial", "active"]);
       return data ?? [];
@@ -153,7 +153,7 @@ function FirmProfile() {
                 </div>
                 <div className="p-4">
                   <p className="font-heading text-base font-semibold text-ink group-hover:text-gold">
-                    {l.first_name} {l.last_name}
+                    {l.first_name} {l.last_name}{l.is_senior_counsel ? " SC" : ""}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {[l.designation, l.city].filter(Boolean).join(" · ")}

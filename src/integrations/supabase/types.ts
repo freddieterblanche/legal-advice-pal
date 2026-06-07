@@ -967,6 +967,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string | null
+          is_senior_counsel: boolean | null
           last_name: string | null
           practice_area_slugs: string[] | null
           practice_areas: string[] | null

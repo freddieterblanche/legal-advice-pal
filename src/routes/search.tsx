@@ -258,7 +258,7 @@ function SearchPage() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-baseline gap-3">
                       <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
-                        {l.full_name}
+                        {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                       </Link>
                       {l.designation && (
                         <span className={designationBadgeClass(l.designation)}>
