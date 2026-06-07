@@ -161,7 +161,7 @@ export function MediatorArbitratorFormModal({
     // Build payload using ONLY fields this modal owns — never touch
     // advocate-only columns (lawyer_type, bar_id, chambers_id, is_senior_counsel,
     // year_of_admission, designation_*).
-    const payload: Record<string, unknown> = {
+    const payload = {
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
       avatar_url: form.avatar_url.trim() || null,
