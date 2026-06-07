@@ -296,7 +296,8 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
 
   const toggleFlag = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: "is_mediator" | "is_arbitrator"; value: boolean }) => {
-      const { error } = await supabase.from("lawyers").update({ [field]: value }).eq("id", id);
+      const patch = field === "is_mediator" ? { is_mediator: value } : { is_arbitrator: value };
+      const { error } = await supabase.from("lawyers").update(patch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
