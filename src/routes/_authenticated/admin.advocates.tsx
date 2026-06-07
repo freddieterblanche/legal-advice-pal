@@ -462,7 +462,10 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                     <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
                   </label>
                   {form.avatar_url && (
-                    <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                    <>
+                      <button type="button" onClick={openRepositionExisting} className="text-xs text-ink underline hover:text-gold">Reposition</button>
+                      <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                    </>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
