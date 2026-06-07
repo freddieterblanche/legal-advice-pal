@@ -360,6 +360,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         bar_id: form.bar_id,
         chambers_id: form.chambers_id || null,
         is_senior_counsel: form.is_senior_counsel,
+        is_mediator: form.is_mediator,
+        is_arbitrator: form.is_arbitrator,
         year_of_admission: Number.isFinite(year as number) ? year : null,
         avatar_url: form.avatar_url.trim() || null,
         status: form.status,
