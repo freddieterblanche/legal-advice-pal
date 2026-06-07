@@ -14,6 +14,7 @@ import {
   Pickaxe,
   Home,
   ReceiptText,
+  BriefcaseMedical,
   BookOpen,
   type LucideIcon,
 } from "lucide-react";
