@@ -309,7 +309,7 @@ function SearchPage() {
                     <p className="mt-1 text-sm text-muted-foreground">
                       {[
                         l.firm_name ?? l.chambers_name,
-                        kind === "attorney" ? (yearsInPractice !== null ? `${yearsInPractice} years in practice` : "Unspecified years in practice") : null,
+                        kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : "Unspecified years in practice") : null,
                         [l.city, l.province].filter(Boolean).join(", ")
                       ]
                         .filter(Boolean)
