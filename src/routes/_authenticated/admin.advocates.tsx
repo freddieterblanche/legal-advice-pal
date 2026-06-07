@@ -409,10 +409,12 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     }
   };
 
-  // Chambers list narrows to selected Bar (plus unaffiliated)
+  // Chambers list narrows to selected Bar when one is set; otherwise show all
   const chambersOptions = useMemo(() => {
     return chambers
       .filter((c) => !form.bar_id || c.bar_id === form.bar_id || c.bar_id === null)
+      .map((c) => ({ value: c.id, label: c.name }));
+  }, [chambers, form.bar_id]);
       .map((c) => ({ value: c.id, label: c.name }));
   }, [chambers, form.bar_id]);
 
