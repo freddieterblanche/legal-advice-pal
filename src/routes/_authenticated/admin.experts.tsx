@@ -261,6 +261,7 @@ function AdminExpertFormModal({
         city: form.city || null,
         province: form.province || null,
         bio: form.bio ? sanitizeBioHtml(form.bio) : null,
+        avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
         is_independent: !form.firm_id,
       };
