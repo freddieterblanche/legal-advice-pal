@@ -5,8 +5,10 @@ import { ClipboardList, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { ARBITRATION_TYPES, ARBITRATION_ACCREDITATIONS } from "../lib/expert-constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number };
+type SortField = "surname" | "experience" | "listed";
+type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/arbitrators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/arbitrators/")({
     accreditation: typeof s.accreditation === "string" ? s.accreditation : undefined,
     experience: s.experience === "0-5" || s.experience === "5-10" || s.experience === "10+" ? s.experience : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
