@@ -11,6 +11,7 @@ export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     q: typeof s.q === "string" ? s.q : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
+    town: typeof s.town === "string" ? s.town : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
   head: () => ({
