@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; province?: string; town?: string; page?: number };
+type SortField = "name" | "lawyers" | "listed";
+type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -13,6 +15,8 @@ export const Route = createFileRoute("/firms/")({
     province: typeof s.province === "string" ? s.province : undefined,
     town: typeof s.town === "string" ? s.town : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "name" || s.sort === "lawyers" || s.sort === "listed" ? s.sort : "name",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -58,7 +62,7 @@ function FirmsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("firms")
-        .select("id, name, slug, city, province, website, phone, description, logo_url", { count: "exact" })
+        .select("id, name, slug, city, province, website, phone, description, logo_url, created_at", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
       if (search.province) {
@@ -71,7 +75,15 @@ function FirmsIndex() {
       }
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("name");
+      const sort = search.sort ?? "name";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        // "name" — and fall-through for "lawyers" which is re-sorted client-side below
+        query = query.order("name", { ascending });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -105,6 +117,16 @@ function FirmsIndex() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const page = search.page ?? 1;
+  const sortedRows = (() => {
+    const rows = data?.rows ?? [];
+    if ((search.sort ?? "name") !== "lawyers") return rows;
+    const ascending = (search.dir ?? "asc") === "asc";
+    return [...rows].sort((a, b) => {
+      const ac = counts?.[a.id] ?? 0;
+      const bc = counts?.[b.id] ?? 0;
+      return ascending ? ac - bc : bc - ac;
+    });
+  })();
 
   return (
     <div className="bg-cream">
@@ -152,10 +174,20 @@ function FirmsIndex() {
 
         {/* Results */}
         <div>
-          <div className="mb-4 flex items-baseline justify-between">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h1 className="font-heading text-2xl text-ink">
               {isLoading ? "Loading…" : `${total} firm${total === 1 ? "" : "s"} found`}
             </h1>
+            <SortBar
+              options={[
+                { key: "name", label: "Name" },
+                { key: "lawyers", label: "Lawyers" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "name"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
           </div>
 
           {isLoading ? (
@@ -168,7 +200,7 @@ function FirmsIndex() {
             </div>
           ) : (
             <div className="space-y-2">
-              {data?.rows.map((f) => {
+              {sortedRows.map((f) => {
                 const lawyerCount = counts?.[f.id] ?? 0;
                 return (
                   <Link

@@ -1,15 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Briefcase, Scale, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
+import { SortBar, type SortDir } from "../components/SortBar";
 
 type LawyerType = "attorney" | "advocate";
-type SortField = "surname" | "experience" | "listed" | "relevance";
-type SortDir = "asc" | "desc";
+type SortField = "surname" | "experience" | "listed";
 type Search = {
   q?: string;
   area?: string;
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/search")({
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
-    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" || s.sort === "relevance"
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed"
       ? s.sort
       : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
@@ -105,13 +105,9 @@ function SearchPage() {
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
-        // Years of experience = currentYear - year_of_admission, so higher years_of_admission = less experience.
-        // Ascending experience ⇒ year_of_admission DESC.
         query = query.order("year_of_admission", { ascending: !ascending, nullsFirst: false });
-      } else if (sort === "listed") {
-        query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
-        query = query.order("case_count", { ascending: false });
+        query = query.order("created_at", { ascending, nullsFirst: false });
       }
       const { data, error } = await query;
       if (error) throw error;
@@ -243,34 +239,18 @@ function SearchPage() {
                 ? "Searching…"
                 : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sort by</span>
-              {([
-                { key: "surname" as const, label: "Surname" },
-                { key: "experience" as const, label: "Years Experience" },
-                { key: "listed" as const, label: "Date Listed" },
-              ]).map((s) => {
-                const active = (search.sort ?? "surname") === s.key;
-                const asc = active && (search.dir ?? "asc") === "asc";
-                return (
-                  <button
-                    key={s.key}
-                    type="button"
-                    onClick={() => {
-                      if (active) {
-                        navigate({ search: (prev: Search) => ({ ...prev, dir: asc ? "desc" : "asc", page: 1 }) });
-                      } else {
-                        navigate({ search: (prev: Search) => ({ ...prev, sort: s.key, dir: "asc", page: 1 }) });
-                      }
-                    }}
-                    className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-card text-ink hover:border-ink"}`}
-                  >
-                    {s.label}
-                    {active ? (asc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-40" />}
-                  </button>
-                );
-              })}
-            </div>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "experience", label: "Years Experience" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) =>
+                navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
+              }
+            />
           </div>
 
 

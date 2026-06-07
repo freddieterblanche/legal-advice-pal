@@ -5,8 +5,10 @@ import { ClipboardList, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { ARBITRATION_TYPES, ARBITRATION_ACCREDITATIONS } from "../lib/expert-constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number };
+type SortField = "surname" | "experience" | "listed";
+type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/arbitrators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/arbitrators/")({
     accreditation: typeof s.accreditation === "string" ? s.accreditation : undefined,
     experience: s.experience === "0-5" || s.experience === "5-10" || s.experience === "10+" ? s.experience : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -52,7 +56,16 @@ function ArbitratorSearch() {
       if (search.experience === "10+") query = query.gt("arbitrator_experience_years", 10);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("arbitrator_experience_years", { ascending: false, nullsFirst: false });
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "experience") {
+        query = query.order("arbitrator_experience_years", { ascending, nullsFirst: false });
+      } else {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -130,9 +143,21 @@ function ArbitratorSearch() {
         </aside>
 
         <div>
-          <h2 className="mb-4 font-heading text-2xl text-ink">
-            {isLoading ? "Searching…" : `${total} arbitrator${total === 1 ? "" : "s"} found`}
-          </h2>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-heading text-2xl text-ink">
+              {isLoading ? "Searching…" : `${total} arbitrator${total === 1 ? "" : "s"} found`}
+            </h2>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "experience", label: "Years Experience" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
+          </div>
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>
           ) : results?.rows.length === 0 ? (

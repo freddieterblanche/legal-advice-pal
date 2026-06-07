@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Microscope, MapPin, BookOpen } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number };
+type SortField = "surname" | "cases" | "listed";
+type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/expert-witnesses/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -14,6 +16,8 @@ export const Route = createFileRoute("/expert-witnesses/")({
     province: typeof s.province === "string" ? s.province : undefined,
     independent: s.independent === "yes" || s.independent === "no" ? s.independent : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "cases" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -54,7 +58,17 @@ function ExpertWitnessSearch() {
       if (search.independent === "no") query = query.eq("is_independent", false);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("last_name");
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        // cases: defer to client-side sort below
+        query = query.order("last_name", { ascending: true });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       let rows = data ?? [];
@@ -62,6 +76,13 @@ function ExpertWitnessSearch() {
         rows = rows.filter((r: any) =>
           r.expert_witness_disciplines?.some((d: any) => d.expert_disciplines?.slug === search.discipline)
         );
+      }
+      if (sort === "cases") {
+        rows = [...rows].sort((a: any, b: any) => {
+          const ac = a.case_expert_witnesses?.length ?? 0;
+          const bc = b.case_expert_witnesses?.length ?? 0;
+          return ascending ? ac - bc : bc - ac;
+        });
       }
       return { rows, total: search.discipline ? rows.length : (count ?? 0) };
     },
@@ -169,10 +190,20 @@ function ExpertWitnessSearch() {
         </aside>
 
         <div>
-          <div className="mb-4 flex items-baseline justify-between">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-heading text-2xl text-ink">
               {isLoading ? "Searching…" : `${total} expert${total === 1 ? "" : "s"} found`}
             </h2>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "cases", label: "Cases" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
           </div>
 
           {isLoading ? (

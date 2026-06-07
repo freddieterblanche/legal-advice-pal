@@ -5,8 +5,10 @@ import { Handshake, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number };
+type SortField = "surname" | "listed";
+type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/mediators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/mediators/")({
     style: typeof s.style === "string" ? s.style : undefined,
     accreditation: typeof s.accreditation === "string" ? s.accreditation : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -50,7 +54,14 @@ function MediatorSearch() {
       if (search.sector) query = query.contains("mediator_sectors", [search.sector]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("last_name");
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
@@ -124,9 +135,20 @@ function MediatorSearch() {
         </aside>
 
         <div>
-          <h2 className="mb-4 font-heading text-2xl text-ink">
-            {isLoading ? "Searching…" : `${total} mediator${total === 1 ? "" : "s"} found`}
-          </h2>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-heading text-2xl text-ink">
+              {isLoading ? "Searching…" : `${total} mediator${total === 1 ? "" : "s"} found`}
+            </h2>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
+          </div>
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>
           ) : results?.rows.length === 0 ? (
