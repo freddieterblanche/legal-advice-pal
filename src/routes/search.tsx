@@ -105,13 +105,9 @@ function SearchPage() {
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
-        // Years of experience = currentYear - year_of_admission, so higher years_of_admission = less experience.
-        // Ascending experience ⇒ year_of_admission DESC.
         query = query.order("year_of_admission", { ascending: !ascending, nullsFirst: false });
-      } else if (sort === "listed") {
-        query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
-        query = query.order("case_count", { ascending: false });
+        query = query.order("created_at", { ascending, nullsFirst: false });
       }
       const { data, error } = await query;
       if (error) throw error;
