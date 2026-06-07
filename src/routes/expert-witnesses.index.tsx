@@ -239,7 +239,7 @@ function ExpertWitnessSearch() {
                           params={{ slug: e.slug }}
                           className="font-heading text-lg font-semibold text-ink hover:text-gold"
                         >
-                          {e.first_name} {e.last_name}
+                          {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
                         </Link>
                         {e.title && (
                           <span className="text-sm text-muted-foreground">

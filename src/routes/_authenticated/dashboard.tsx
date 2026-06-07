@@ -400,10 +400,13 @@ function BillingTab({ firmId }: { firmId: string }) {
   );
 }
 
+const EXPERT_NAME_TITLES = ["", "Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Adv", "Rev"] as const;
+
 type ExpertRow = {
   id: string;
   first_name: string;
   last_name: string;
+  name_title: string | null;
   title: string | null;
   slug: string;
   city: string | null;
@@ -424,6 +427,7 @@ type ExpertRow = {
 const expertSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
+  name_title: z.string().trim().max(40).optional(),
   title: z.string().trim().max(120).optional(),
   qualifications: z.string().trim().max(20000).optional(),
   registration_body: z.string().trim().max(200).optional(),
@@ -495,7 +499,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
               const daysLeft = e.trial_end_date ? Math.max(0, Math.ceil((new Date(e.trial_end_date).getTime() - Date.now()) / 86400000)) : null;
               return (
                 <tr key={e.id}>
-                  <td className="px-4 py-3 font-medium text-ink">Dr {e.first_name} {e.last_name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
@@ -531,6 +535,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
   const [form, setForm] = useState({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
+    name_title: expert?.name_title ?? "",
     title: expert?.title ?? "",
     qualifications: expert?.qualifications ?? "",
     registration_body: expert?.registration_body ?? "",
@@ -554,6 +559,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
       const payload = {
         first_name: form.first_name,
         last_name: form.last_name,
+        name_title: form.name_title?.trim() || null,
         title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
@@ -606,11 +612,16 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
               expertId={expert?.id}
             />
           </Field>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-[7rem_1fr_1fr]">
+            <Field label="Title">
+              <select value={form.name_title} onChange={(e) => setForm({ ...form, name_title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                {EXPERT_NAME_TITLES.map((t) => <option key={t} value={t}>{t || "— none —"}</option>)}
+              </select>
+            </Field>
             <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           </div>
-          <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Professional title (e.g. Orthopaedic Surgeon, Chartered Accountant)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <Field label="Company / practice name"><input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} placeholder="e.g. De Kroon Forensic Accounting" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Office phone"><input type="tel" value={form.office_phone} onChange={(e) => setForm({ ...form, office_phone: e.target.value })} placeholder="+27 21 555 0100" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>

@@ -92,7 +92,7 @@ function ExpertWitnessProfile() {
             )}
             <div className="flex-1">
               <h1 className="font-heading text-3xl md:text-4xl">
-                {expert.first_name} {expert.last_name}
+                {[expert.name_title, expert.first_name, expert.last_name].filter(Boolean).join(" ")}
               </h1>
               <div className="mt-3 flex flex-wrap gap-2">
                 <TypePill variant="expert">Expert Witness</TypePill>

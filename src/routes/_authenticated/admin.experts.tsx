@@ -18,11 +18,14 @@ export const Route = createFileRoute("/_authenticated/admin/experts")({
   component: AdminExpertsPage,
 });
 
+const NAME_TITLES = ["", "Mr", "Mrs", "Ms", "Miss", "Mx", "Dr", "Prof", "Adv", "Rev"] as const;
+
 type ExpertRow = {
   id: string;
   slug: string;
   first_name: string;
   last_name: string;
+  name_title: string | null;
   title: string | null;
   city: string | null;
   province: string | null;
@@ -60,7 +63,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expert_witnesses")
-        .select("id, slug, first_name, last_name, title, city, province, status, trial_end_date, profile_views, firm_id")
+        .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
@@ -147,7 +150,7 @@ function AdminExpertsPage() {
               )}
               {experts?.map((e) => (
                 <tr key={e.id}>
-                  <td className="px-4 py-3 font-medium text-ink">Dr {e.first_name} {e.last_name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{firmName(e.firm_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
@@ -220,6 +223,7 @@ function AdminExpertFormModal({
   const [form, setForm] = useState({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
+    name_title: expert?.name_title ?? "",
     title: expert?.title ?? "",
     qualifications: "",
     registration_body: "",
@@ -265,6 +269,7 @@ function AdminExpertFormModal({
       const payload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
+        name_title: form.name_title?.trim() || null,
         title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
@@ -318,7 +323,12 @@ function AdminExpertFormModal({
               expertId={expert?.id}
             />
           </AField>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-[7rem_1fr_1fr]">
+            <AField label="Title">
+              <select value={form.name_title} onChange={(e) => setForm({ ...form, name_title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                {NAME_TITLES.map((t) => <option key={t} value={t}>{t || "— none —"}</option>)}
+              </select>
+            </AField>
             <AField label="First name *">
               <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </AField>
@@ -332,7 +342,7 @@ function AdminExpertFormModal({
               {firms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
             </select>
           </AField>
-          <AField label="Title (e.g. Orthopaedic Surgeon)">
+          <AField label="Professional title (e.g. Orthopaedic Surgeon, Chartered Accountant)">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Company / practice name">
