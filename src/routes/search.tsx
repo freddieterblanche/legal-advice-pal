@@ -231,16 +231,15 @@ function SearchPage() {
                 const last = l.last_name ?? "";
                 const kind = designationKind(l.designation);
                 const KindIcon = kind === "advocate" ? Scale : Briefcase;
-                const accentRing = kind === "advocate" ? "ring-forest/30" : "ring-gold/30";
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 return (
-                <article key={l.id} className={`flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm ring-1 ring-inset ${accentRing} transition-shadow hover:shadow-md sm:flex-row`}>
+                <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className={`h-24 w-24 shrink-0 rounded-xl object-cover ring-1 ring-inset ${accentRing}`}
+                      className="h-24 w-24 shrink-0 rounded-xl object-cover"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
