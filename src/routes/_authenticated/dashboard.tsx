@@ -1232,11 +1232,12 @@ const expertSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
   title: z.string().trim().max(120).optional(),
-  qualifications: z.string().trim().max(2000).optional(),
+  qualifications: z.string().trim().max(20000).optional(),
   registration_body: z.string().trim().max(200).optional(),
   city: z.string().trim().max(80).optional(),
   province: z.enum(PROVINCES as unknown as [string, ...string[]]).optional(),
-  bio: z.string().trim().max(5000).optional(),
+  bio: z.string().trim().max(20000).optional(),
+  avatar_url: z.string().trim().max(2000).optional(),
 });
 
 function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
