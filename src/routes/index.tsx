@@ -85,8 +85,8 @@ function HomePage() {
       {/* Intro band */}
       <section className="relative overflow-hidden bg-cream">
         <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-gold/[0.05] to-transparent" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-8 pt-16 sm:px-6 md:pt-20">
-          <div className="mx-auto max-w-3xl text-center">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-8 pt-16 sm:px-6 md:grid-cols-2 md:items-center md:pt-20">
+          <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
               <ShieldCheck className="h-3.5 w-3.5 text-gold" strokeWidth={STROKE} />
               Verified South African legal directory
@@ -94,10 +94,19 @@ function HomePage() {
             <h1 className="mt-6 font-heading text-4xl leading-[1.05] text-ink md:text-6xl">
               The right counsel for your matter.
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
+            <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
               South Africa has a split legal profession. Choose who you need — then search verified
               profiles linked to their reported judgments.
             </p>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-gold/20 to-transparent blur-2xl" aria-hidden />
+            <img
+              src={heroLawyer.url}
+              alt="South African attorney"
+              className="relative aspect-[4/5] w-full rounded-2xl object-cover shadow-xl ring-1 ring-border md:aspect-[5/6]"
+              loading="eager"
+            />
           </div>
         </div>
       </section>
