@@ -140,7 +140,22 @@ export function AdminRoleListPage({ role }: { role: Role }) {
                   <td className="px-4 py-3 text-muted-foreground">{[r.city, r.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status ?? "—"}</span></td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
-                    <Link to={editHref(r)} className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"><Pencil className="h-3 w-3" /> Edit</Link>
+                    {editsInPlace(r) ? (
+                      <button
+                        onClick={() => setEditingId(r.id)}
+                        className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    ) : r.firm_id && r.lawyer_type !== "advocate" ? (
+                      <Link to="/dashboard" className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold">
+                        <Pencil className="h-3 w-3" /> Edit
+                      </Link>
+                    ) : (
+                      <Link to={editAdvocateHref(r.id)} className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold">
+                        <Pencil className="h-3 w-3" /> Edit
+                      </Link>
+                    )}
                     <Link to="/lawyers/$slug" params={{ slug: r.slug }} target="_blank" className="mr-3 text-xs font-medium text-forest hover:text-gold">Open <ExternalLink className="inline h-3 w-3" /></Link>
                     <button
                       onClick={() => {
