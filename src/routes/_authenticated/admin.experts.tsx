@@ -150,7 +150,7 @@ function AdminExpertsPage() {
               )}
               {experts?.map((e) => (
                 <tr key={e.id}>
-                  <td className="px-4 py-3 font-medium text-ink">Dr {e.first_name} {e.last_name}</td>
+                  <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{firmName(e.firm_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
