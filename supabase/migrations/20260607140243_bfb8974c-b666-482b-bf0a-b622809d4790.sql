@@ -1,0 +1,1 @@
+ALTER TABLE public.expert_witnesses ADD COLUMN IF NOT EXISTS name_title text;

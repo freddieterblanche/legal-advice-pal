@@ -365,6 +365,7 @@ export type Database = {
           languages: string[] | null
           last_name: string
           mobile_phone: string | null
+          name_title: string | null
           office_phone: string | null
           profile_id: string | null
           profile_views: number
@@ -397,6 +398,7 @@ export type Database = {
           languages?: string[] | null
           last_name: string
           mobile_phone?: string | null
+          name_title?: string | null
           office_phone?: string | null
           profile_id?: string | null
           profile_views?: number
@@ -429,6 +431,7 @@ export type Database = {
           languages?: string[] | null
           last_name?: string
           mobile_phone?: string | null
+          name_title?: string | null
           office_phone?: string | null
           profile_id?: string | null
           profile_views?: number
