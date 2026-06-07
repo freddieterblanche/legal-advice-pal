@@ -179,13 +179,6 @@ function MediatorSearch() {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
                       </p>
-                      {l.mediator_sectors?.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {l.mediator_sectors.slice(0, 4).map((s: string) => (
-                            <span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                       <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
