@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      bars: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          province: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          province?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          province?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       billing_records: {
         Row: {
           amount_rands: number | null
@@ -111,6 +138,56 @@ export type Database = {
           year?: number | null
         }
         Relationships: []
+      }
+      chambers: {
+        Row: {
+          address: string | null
+          bar_id: string | null
+          city: string | null
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          province: string | null
+          slug: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          bar_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          province?: string | null
+          slug: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          bar_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          province?: string | null
+          slug?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chambers_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       config: {
         Row: {
@@ -551,7 +628,9 @@ export type Database = {
         Row: {
           accolades: string | null
           avatar_url: string | null
+          bar_id: string | null
           bio: string | null
+          chambers_id: string | null
           city: string | null
           created_at: string | null
           designation: string | null
@@ -559,7 +638,7 @@ export type Database = {
           designation_custom: string | null
           education: string | null
           email: string | null
-          firm_id: string
+          firm_id: string | null
           first_name: string
           id: string
           is_claimed: boolean | null
@@ -590,7 +669,9 @@ export type Database = {
         Insert: {
           accolades?: string | null
           avatar_url?: string | null
+          bar_id?: string | null
           bio?: string | null
+          chambers_id?: string | null
           city?: string | null
           created_at?: string | null
           designation?: string | null
@@ -598,7 +679,7 @@ export type Database = {
           designation_custom?: string | null
           education?: string | null
           email?: string | null
-          firm_id: string
+          firm_id?: string | null
           first_name: string
           id?: string
           is_claimed?: boolean | null
@@ -629,7 +710,9 @@ export type Database = {
         Update: {
           accolades?: string | null
           avatar_url?: string | null
+          bar_id?: string | null
           bio?: string | null
+          chambers_id?: string | null
           city?: string | null
           created_at?: string | null
           designation?: string | null
@@ -637,7 +720,7 @@ export type Database = {
           designation_custom?: string | null
           education?: string | null
           email?: string | null
-          firm_id?: string
+          firm_id?: string | null
           first_name?: string
           id?: string
           is_claimed?: boolean | null
@@ -666,6 +749,20 @@ export type Database = {
           year_of_admission?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lawyers_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_chambers_id_fkey"
+            columns: ["chambers_id"]
+            isOneToOne: false
+            referencedRelation: "chambers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lawyers_firm_id_fkey"
             columns: ["firm_id"]
