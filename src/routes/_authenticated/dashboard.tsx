@@ -1401,6 +1401,14 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           </button>
         </div>
         <form onSubmit={submit} className="space-y-3">
+          <Field label="Photo">
+            <ExpertPhotoField
+              value={form.avatar_url}
+              onChange={(url) => setForm({ ...form, avatar_url: url })}
+              firmId={firmId}
+              expertId={expert?.id}
+            />
+          </Field>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
