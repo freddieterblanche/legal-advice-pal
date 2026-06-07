@@ -73,7 +73,7 @@ function SearchPage() {
         // Match by linked province OR fall back to legacy text province for rows without town_id
         const provName = provinces?.find((p) => p.slug === search.province)?.name;
         if (provName) {
-          query = query.or(`province_slug.eq.${search.province},and(town_id.is.null,province.eq.${provName})`);
+          query = query.or(`province_slug.eq.${search.province},and(town_id.is.null,province.eq."${provName}")`);
         } else {
           query = query.eq("province_slug", search.province);
         }
