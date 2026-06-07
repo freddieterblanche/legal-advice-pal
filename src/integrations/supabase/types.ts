@@ -366,6 +366,7 @@ export type Database = {
           last_name: string
           mobile_phone: string | null
           office_phone: string | null
+          profile_id: string | null
           profile_views: number
           province: string | null
           qualifications: string | null
@@ -397,6 +398,7 @@ export type Database = {
           last_name: string
           mobile_phone?: string | null
           office_phone?: string | null
+          profile_id?: string | null
           profile_views?: number
           province?: string | null
           qualifications?: string | null
@@ -428,6 +430,7 @@ export type Database = {
           last_name?: string
           mobile_phone?: string | null
           office_phone?: string | null
+          profile_id?: string | null
           profile_views?: number
           province?: string | null
           qualifications?: string | null
@@ -452,6 +455,13 @@ export type Database = {
             columns: ["firm_id"]
             isOneToOne: false
             referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expert_witnesses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
