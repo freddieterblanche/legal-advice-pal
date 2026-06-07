@@ -415,8 +415,6 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       .filter((c) => !form.bar_id || c.bar_id === form.bar_id || c.bar_id === null)
       .map((c) => ({ value: c.id, label: c.name }));
   }, [chambers, form.bar_id]);
-      .map((c) => ({ value: c.id, label: c.name }));
-  }, [chambers, form.bar_id]);
 
   const createBar = async (name: string): Promise<string | null> => {
     const baseSlug = slugify(name);
