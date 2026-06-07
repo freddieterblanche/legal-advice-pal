@@ -90,11 +90,13 @@ export function AdminRoleListPage({ role }: { role: Role }) {
       || (r.province ?? "").toLowerCase().includes(s);
   });
 
-  const editHref = (r: LawyerRow) => {
-    if (r.lawyer_type === "advocate") return `/admin/advocates?edit=${r.id}`;
-    if (r.firm_id) return `/dashboard`;
-    return `/admin/advocates?edit=${r.id}`;
-  };
+  // Edit routing:
+  //  - Advocates (lawyer_type === "advocate") → existing advocate admin form.
+  //  - Firm attorneys (firm_id set, no advocate type) → firm dashboard.
+  //  - Pure mediators/arbitrators (no firm, no advocate type) → dedicated
+  //    in-place modal so they are NEVER forced through the advocate form.
+  const editAdvocateHref = (id: string) => `/admin/advocates?edit=${id}`;
+  const editsInPlace = (r: LawyerRow) => r.lawyer_type !== "advocate" && !r.firm_id;
 
   return (
     <div className="bg-cream">
