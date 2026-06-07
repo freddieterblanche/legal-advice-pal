@@ -23,6 +23,7 @@ import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
+import { Route as AuthenticatedAdminChambersRouteImport } from './routes/_authenticated/admin.chambers'
 import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -94,6 +95,12 @@ const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
   path: '/admin/firms',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminChambersRoute =
+  AuthenticatedAdminChambersRouteImport.update({
+    id: '/admin/chambers',
+    path: '/admin/chambers',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBarsRoute = AuthenticatedAdminBarsRouteImport.update({
   id: '/admin/bars',
   path: '/admin/bars',
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
+  '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -129,6 +137,7 @@ export interface FileRoutesByTo {
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms': typeof FirmsIndexRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
+  '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -147,6 +156,7 @@ export interface FileRoutesById {
   '/lawyers/$slug': typeof LawyersSlugRoute
   '/firms/': typeof FirmsIndexRoute
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
+  '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/lawyers/$slug'
     | '/firms/'
     | '/admin/bars'
+    | '/admin/chambers'
     | '/admin/firms'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/lawyers/$slug'
     | '/firms'
     | '/admin/bars'
+    | '/admin/chambers'
     | '/admin/firms'
     | '/admin'
   id:
@@ -198,6 +210,7 @@ export interface FileRouteTypes {
     | '/lawyers/$slug'
     | '/firms/'
     | '/_authenticated/admin/bars'
+    | '/_authenticated/admin/chambers'
     | '/_authenticated/admin/firms'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFirmsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/chambers': {
+      id: '/_authenticated/admin/chambers'
+      path: '/admin/chambers'
+      fullPath: '/admin/chambers'
+      preLoaderRoute: typeof AuthenticatedAdminChambersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/bars': {
       id: '/_authenticated/admin/bars'
       path: '/admin/bars'
@@ -329,6 +349,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
+  AuthenticatedAdminChambersRoute: typeof AuthenticatedAdminChambersRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -336,6 +357,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
+  AuthenticatedAdminChambersRoute: AuthenticatedAdminChambersRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
