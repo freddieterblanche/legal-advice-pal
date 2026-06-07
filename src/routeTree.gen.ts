@@ -27,10 +27,12 @@ import { Route as ExpertWitnessesSlugRouteImport } from './routes/expert-witness
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
+import { Route as AuthenticatedAdminMediatorsRouteImport } from './routes/_authenticated/admin.mediators'
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin.experts'
 import { Route as AuthenticatedAdminChambersRouteImport } from './routes/_authenticated/admin.chambers'
 import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
+import { Route as AuthenticatedAdminArbitratorsRouteImport } from './routes/_authenticated/admin.arbitrators'
 import { Route as AuthenticatedAdminAdvocatesRouteImport } from './routes/_authenticated/admin.advocates'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -122,6 +124,12 @@ const AuthenticatedAdminTownsRoute = AuthenticatedAdminTownsRouteImport.update({
   path: '/admin/towns',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminMediatorsRoute =
+  AuthenticatedAdminMediatorsRouteImport.update({
+    id: '/admin/mediators',
+    path: '/admin/mediators',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
   id: '/admin/firms',
   path: '/admin/firms',
@@ -144,6 +152,12 @@ const AuthenticatedAdminBarsRoute = AuthenticatedAdminBarsRouteImport.update({
   path: '/admin/bars',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminArbitratorsRoute =
+  AuthenticatedAdminArbitratorsRouteImport.update({
+    id: '/admin/arbitrators',
+    path: '/admin/arbitrators',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAdvocatesRoute =
   AuthenticatedAdminAdvocatesRouteImport.update({
     id: '/admin/advocates',
@@ -168,10 +182,12 @@ export interface FileRoutesByFullPath {
   '/firms/': typeof FirmsIndexRoute
   '/mediators/': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
+  '/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
   '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -192,10 +208,12 @@ export interface FileRoutesByTo {
   '/firms': typeof FirmsIndexRoute
   '/mediators': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
+  '/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
   '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -218,10 +236,12 @@ export interface FileRoutesById {
   '/firms/': typeof FirmsIndexRoute
   '/mediators/': typeof MediatorsIndexRoute
   '/_authenticated/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
+  '/_authenticated/admin/arbitrators': typeof AuthenticatedAdminArbitratorsRoute
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/_authenticated/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
   '/_authenticated/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -244,10 +264,12 @@ export interface FileRouteTypes {
     | '/firms/'
     | '/mediators/'
     | '/admin/advocates'
+    | '/admin/arbitrators'
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/experts'
     | '/admin/firms'
+    | '/admin/mediators'
     | '/admin/towns'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -268,10 +290,12 @@ export interface FileRouteTypes {
     | '/firms'
     | '/mediators'
     | '/admin/advocates'
+    | '/admin/arbitrators'
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/experts'
     | '/admin/firms'
+    | '/admin/mediators'
     | '/admin/towns'
     | '/admin'
   id:
@@ -293,10 +317,12 @@ export interface FileRouteTypes {
     | '/firms/'
     | '/mediators/'
     | '/_authenticated/admin/advocates'
+    | '/_authenticated/admin/arbitrators'
     | '/_authenticated/admin/bars'
     | '/_authenticated/admin/chambers'
     | '/_authenticated/admin/experts'
     | '/_authenticated/admin/firms'
+    | '/_authenticated/admin/mediators'
     | '/_authenticated/admin/towns'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -447,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTownsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/mediators': {
+      id: '/_authenticated/admin/mediators'
+      path: '/admin/mediators'
+      fullPath: '/admin/mediators'
+      preLoaderRoute: typeof AuthenticatedAdminMediatorsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/firms': {
       id: '/_authenticated/admin/firms'
       path: '/admin/firms'
@@ -475,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBarsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/arbitrators': {
+      id: '/_authenticated/admin/arbitrators'
+      path: '/admin/arbitrators'
+      fullPath: '/admin/arbitrators'
+      preLoaderRoute: typeof AuthenticatedAdminArbitratorsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/advocates': {
       id: '/_authenticated/admin/advocates'
       path: '/admin/advocates'
@@ -488,10 +528,12 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedAdminAdvocatesRoute: typeof AuthenticatedAdminAdvocatesRoute
+  AuthenticatedAdminArbitratorsRoute: typeof AuthenticatedAdminArbitratorsRoute
   AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
   AuthenticatedAdminChambersRoute: typeof AuthenticatedAdminChambersRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
+  AuthenticatedAdminMediatorsRoute: typeof AuthenticatedAdminMediatorsRoute
   AuthenticatedAdminTownsRoute: typeof AuthenticatedAdminTownsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -499,10 +541,12 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedAdminAdvocatesRoute: AuthenticatedAdminAdvocatesRoute,
+  AuthenticatedAdminArbitratorsRoute: AuthenticatedAdminArbitratorsRoute,
   AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
   AuthenticatedAdminChambersRoute: AuthenticatedAdminChambersRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
+  AuthenticatedAdminMediatorsRoute: AuthenticatedAdminMediatorsRoute,
   AuthenticatedAdminTownsRoute: AuthenticatedAdminTownsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
