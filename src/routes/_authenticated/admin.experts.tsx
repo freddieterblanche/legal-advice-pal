@@ -33,8 +33,15 @@ type ExpertRow = {
 
 function AdminExpertsPage() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/admin/experts" });
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<ExpertRow | null>(null);
+
+  const clearEditSearch = () => {
+    if (search.edit) navigate({ search: { edit: undefined } as any });
+  };
+
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["my-profile-role"],
