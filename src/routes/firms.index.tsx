@@ -175,7 +175,7 @@ function FirmsIndex() {
                     key={f.id}
                     to="/firms/$slug"
                     params={{ slug: f.slug }}
-                    className="group flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-all hover:border-gold/50 hover:shadow-sm"
+                    className="group flex items-center gap-3 rounded-lg bg-card px-4 py-3 shadow-sm transition-all hover:shadow-md"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gold/10 text-gold">
                       <Building2 className="h-5 w-5" strokeWidth={1.5} />

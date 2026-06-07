@@ -136,7 +136,7 @@ function MediatorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 ring-1 ring-inset ring-gold/20 sm:flex-row">
+                <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm ring-1 ring-inset ring-gold/20 sm:flex-row">
                   {l.avatar_url ? (
                     <img src={l.avatar_url} alt={l.full_name} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
                   ) : (
