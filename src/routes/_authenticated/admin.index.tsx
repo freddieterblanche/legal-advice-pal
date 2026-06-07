@@ -77,6 +77,13 @@ function AdminHub() {
       count: counts?.advocates,
     },
     {
+      to: "/admin/experts",
+      icon: Stethoscope,
+      title: "Expert Witnesses",
+      desc: "Add and manage expert witnesses (firm-linked or independent).",
+      count: counts?.experts,
+    },
+    {
       to: "/admin/bars",
       icon: Landmark,
       title: "Bars",
