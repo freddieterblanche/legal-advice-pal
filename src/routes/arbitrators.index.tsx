@@ -167,15 +167,15 @@ function ArbitratorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:gap-0 sm:p-0">
+                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
                   {l.avatar_url ? (
-                    <img src={l.avatar_url} alt={l.full_name} className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:object-top" />
+                    <img src={l.avatar_url} alt={l.full_name} className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top" />
                   ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-forest/10 font-heading text-xl text-forest sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:text-3xl">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-forest/10 font-heading text-xl text-forest sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl">
                       {l.first_name?.[0]}{l.last_name?.[0]}
                     </div>
                   )}
-                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-baseline gap-3">
                         <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
@@ -191,13 +191,6 @@ function ArbitratorSearch() {
                       <p className="mt-1 text-sm text-muted-foreground">
                         {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
                       </p>
-                      {l.arbitrator_types?.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {l.arbitrator_types.slice(0, 4).map((s: string) => (
-                            <span key={s} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{s}</span>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                       <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">

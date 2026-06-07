@@ -220,19 +220,19 @@ function ExpertWitnessSearch() {
                 const disciplines: any[] = (e.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_expert_witnesses?.length ?? 0;
                 return (
-                  <article key={e.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-48 sm:gap-0 sm:p-0">
+                  <article key={e.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
                     {e.avatar_url ? (
                       <img
                         src={e.avatar_url}
                         alt={`${e.first_name} ${e.last_name}`}
-                        className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:object-top"
+                        className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top"
                       />
                     ) : (
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gold/10 font-heading text-xl text-gold sm:h-auto sm:w-40 sm:self-stretch sm:rounded-none sm:text-3xl">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gold/10 font-heading text-xl text-gold sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl">
                         {e.first_name?.[0]}{e.last_name?.[0]}
                       </div>
                     )}
-                    <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                    <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-baseline gap-3">
                           <Link
@@ -259,14 +259,6 @@ function ExpertWitnessSearch() {
                             <> · <MapPin className="inline h-3 w-3" /> {[e.city, e.province].filter(Boolean).join(", ")}</>
                           )}
                         </p>
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {e.registration_body && (
-                            <span className="rounded bg-ink/5 px-2 py-0.5 text-xs text-ink">{e.registration_body}</span>
-                          )}
-                          {disciplines.slice(1, 4).map((d) => (
-                            <span key={d.slug} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{d.name}</span>
-                          ))}
-                        </div>
                       </div>
                       <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                         {caseCount > 0 && (
