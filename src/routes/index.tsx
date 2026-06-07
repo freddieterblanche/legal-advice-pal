@@ -128,9 +128,9 @@ function HomePage() {
         <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 px-4 sm:px-6 md:grid-cols-4">
           {[
             { icon: Users, label: "Lawyers Listed", value: stats?.lawyers ?? "—" },
-            { icon: Building2, label: "Firms", value: stats?.firms ?? "—" },
-            { icon: BookOpen, label: "Reported Cases", value: stats?.cases ?? "—" },
-            { icon: MapPin, label: "Provinces Covered", value: stats?.provinces ?? 9 },
+            { icon: Briefcase, label: "Expert Witnesses", value: stats?.experts ?? "—" },
+            { icon: Users, label: "Mediators", value: stats?.mediators ?? "—" },
+            { icon: Gavel, label: "Arbitrators", value: stats?.arbitrators ?? "—" },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-5 text-center">
               <s.icon className="mx-auto h-5 w-5 text-gold" strokeWidth={STROKE} />
