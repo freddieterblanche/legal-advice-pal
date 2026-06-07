@@ -5,6 +5,7 @@ import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES, DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
+import { Combobox } from "../components/Combobox";
 
 type Search = { q?: string; area?: string; province?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
 
@@ -121,46 +122,37 @@ function SearchPage() {
         <aside className="space-y-6">
           <div className="rounded-md border border-border bg-card p-4">
             <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Practice Area</h3>
-            <select
-              value={search.area ?? ""}
-              onChange={(e) => update({ area: e.target.value || undefined })}
-              className="mt-3 w-full rounded border border-border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">All</option>
-              {areas?.map((a) => <option key={a.id} value={a.slug}>{a.name}</option>)}
-            </select>
+            <div className="mt-3">
+              <Combobox
+                value={search.area ?? ""}
+                onChange={(v) => update({ area: v || undefined })}
+                options={(areas ?? []).map((a) => ({ value: a.slug, label: a.name }))}
+                placeholder="Type a practice area…"
+              />
+            </div>
           </div>
 
           <div className="rounded-md border border-border bg-card p-4">
             <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Province</h3>
-            <select
-              value={search.province ?? ""}
-              onChange={(e) => update({ province: e.target.value || undefined })}
-              className="mt-3 w-full rounded border border-border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">All</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <div className="mt-3">
+              <Combobox
+                value={search.province ?? ""}
+                onChange={(v) => update({ province: v || undefined })}
+                options={PROVINCES.map((p) => ({ value: p, label: p }))}
+                placeholder="Type a province…"
+              />
+            </div>
           </div>
 
           <div className="rounded-md border border-border bg-card p-4">
             <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Designation</h3>
-            <div className="mt-3 space-y-2">
-              {DESIGNATIONS.map((d) => (
-                <label key={d} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="designation"
-                    checked={search.designation === d}
-                    onChange={() => update({ designation: d })}
-                    className="accent-gold"
-                  />
-                  {d}
-                </label>
-              ))}
-              <button onClick={() => update({ designation: undefined })} className="text-xs text-muted-foreground hover:text-ink">
-                Clear
-              </button>
+            <div className="mt-3">
+              <Combobox
+                value={search.designation ?? ""}
+                onChange={(v) => update({ designation: v || undefined })}
+                options={DESIGNATIONS.map((d) => ({ value: d, label: d }))}
+                placeholder="Type a designation…"
+              />
             </div>
           </div>
         </aside>
