@@ -44,7 +44,7 @@ function ExpertWitnessProfile() {
       const { data } = await (supabase as any)
         .from("provider_work_samples")
         .select("id, project_name, synopsis, project_date")
-        .eq("expert_id", (expert as any).id)
+        .eq("service_provider_id", (expert as any).id)
         .order("project_date", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
       return (data ?? []) as Array<{ id: string; project_name: string; synopsis: string | null; project_date: string | null }>;

@@ -9,7 +9,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z.object({
-      lawyer_id: z.string().uuid(),
+      service_provider_id: z.string().uuid(),
       email: z.string().trim().email().max(255),
     }).parse(input),
   )
@@ -46,7 +46,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
       .from("provider_invites")
       .upsert(
         {
-          lawyer_id: data.lawyer_id,
+          service_provider_id: data.lawyer_id,
           email: data.email.toLowerCase(),
           invited_by: context.userId,
           sent_at: new Date().toISOString(),

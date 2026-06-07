@@ -226,7 +226,7 @@ export function LawyerFormModal({
       const { data } = await supabase
         .from("provider_branches")
         .select("branch_id")
-        .eq("lawyer_id", lawyer.id);
+        .eq("service_provider_id", lawyer.id);
       setSelectedBranchIds(new Set((data ?? []).map((r) => r.branch_id)));
     })();
   }, [lawyer]);
@@ -309,7 +309,7 @@ export function LawyerFormModal({
       const { data } = await supabase
         .from("provider_practice_areas")
         .select("practice_areas(id, slug, name)")
-        .eq("lawyer_id", lawyer.id);
+        .eq("service_provider_id", lawyer.id);
       const rows = (data ?? [])
         .map((r: { practice_areas: { id: string; slug: string; name: string } | null }) => r.practice_areas)
         .filter((p): p is { id: string; slug: string; name: string } => !!p);
@@ -361,19 +361,19 @@ export function LawyerFormModal({
   };
 
   const syncPracticeAreas = async (lawyerId: string) => {
-    const { error: delErr } = await supabase.from("provider_practice_areas").delete().eq("lawyer_id", lawyerId);
+    const { error: delErr } = await supabase.from("provider_practice_areas").delete().eq("service_provider_id", lawyerId);
     if (delErr) throw delErr;
     if (practiceAreas.length === 0) return;
-    const links = practiceAreas.map((p) => ({ lawyer_id: lawyerId, practice_area_id: p.id }));
+    const links = practiceAreas.map((p) => ({ service_provider_id: lawyerId, practice_area_id: p.id }));
     const { error } = await supabase.from("provider_practice_areas").insert(links);
     if (error) throw error;
   };
 
   const syncBranches = async (lawyerId: string) => {
-    const { error: delErr } = await supabase.from("provider_branches").delete().eq("lawyer_id", lawyerId);
+    const { error: delErr } = await supabase.from("provider_branches").delete().eq("service_provider_id", lawyerId);
     if (delErr) throw delErr;
     if (selectedBranchIds.size === 0) return;
-    const links = Array.from(selectedBranchIds).map((branch_id) => ({ lawyer_id: lawyerId, branch_id }));
+    const links = Array.from(selectedBranchIds).map((branch_id) => ({ service_provider_id: lawyerId, branch_id }));
     const { error } = await supabase.from("provider_branches").insert(links);
     if (error) throw error;
   };
@@ -1027,7 +1027,7 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
       const { data } = await supabase
         .from("provider_articles")
         .select("*")
-        .eq("lawyer_id", lawyerId)
+        .eq("service_provider_id", lawyerId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       return (data ?? []) as Article[];
@@ -1045,7 +1045,7 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
     setSaving(true);
     try {
       const { error } = await supabase.from("provider_articles").insert({
-        lawyer_id: lawyerId,
+        service_provider_id: lawyerId,
         title: draft.title.trim().slice(0, 255),
         publication: draft.publication.trim().slice(0, 255) || null,
         published_date: draft.published_date || null,

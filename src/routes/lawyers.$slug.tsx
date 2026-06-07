@@ -387,7 +387,7 @@ function EnquiryModal({ lawyerId, onClose }: { lawyerId: string; onClose: () => 
   const submit = useMutation({
     mutationFn: async () => {
       const parsed = enquirySchema.parse(form);
-      const { error } = await supabase.from("enquiries").insert({ ...parsed, lawyer_id: lawyerId });
+      const { error } = await supabase.from("enquiries").insert({ ...parsed, service_provider_id: lawyerId });
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Enquiry sent."); onClose(); },

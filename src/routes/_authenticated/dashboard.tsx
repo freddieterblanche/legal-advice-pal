@@ -935,7 +935,7 @@ function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onC
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast.error("Enter a valid email"); return; }
     setSending(true);
     try {
-      const res = await inviteFn({ data: { lawyer_id: lawyer.id, email } });
+      const res = await inviteFn({ data: { service_provider_id: lawyer.id, email } });
       const url = `${window.location.origin}/claim?token=${res.token}`;
       setInviteUrl(url);
       toast.success("Invite created — share the link below.");

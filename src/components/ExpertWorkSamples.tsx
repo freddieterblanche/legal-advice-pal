@@ -6,7 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 
 type Sample = {
   id: string;
-  expert_id: string;
+  service_provider_id: string;
   project_name: string;
   synopsis: string | null;
   project_date: string | null;
@@ -24,7 +24,7 @@ export function ExpertWorkSamples({ expertId }: Props) {
       const { data, error } = await (supabase as any)
         .from("provider_work_samples")
         .select("id, expert_id, project_name, synopsis, project_date")
-        .eq("expert_id", expertId)
+        .eq("service_provider_id", expertId)
         .order("project_date", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -148,7 +148,7 @@ function SampleModal({
         const { error } = await (supabase as any).from("provider_work_samples").update(payload).eq("id", sample.id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase as any).from("provider_work_samples").insert({ ...payload, expert_id: expertId });
+        const { error } = await (supabase as any).from("provider_work_samples").insert({ ...payload, service_provider_id: expertId });
         if (error) throw error;
       }
       toast.success(isEdit ? "Sample updated" : "Sample added");

@@ -337,7 +337,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       const { data } = await supabase
         .from("provider_practice_areas")
         .select("practice_area_id")
-        .eq("lawyer_id", advocate!.id);
+        .eq("service_provider_id", advocate!.id);
       return (data ?? []).map((r: { practice_area_id: string }) => r.practice_area_id);
     },
   });
@@ -506,11 +506,11 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         const { error: delErr } = await supabase
           .from("provider_practice_areas")
           .delete()
-          .eq("lawyer_id", advocateId);
+          .eq("service_provider_id", advocateId);
         if (delErr) throw delErr;
         if (selectedPaIds.size > 0) {
           const rows = Array.from(selectedPaIds).map((pid) => ({
-            lawyer_id: advocateId!,
+            service_provider_id: advocateId!,
             practice_area_id: pid,
           }));
           const { error: insErr } = await supabase.from("provider_practice_areas").insert(rows);
