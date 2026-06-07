@@ -1238,10 +1238,20 @@ const expertSchema = z.object({
   bio: z.string().trim().max(5000).optional(),
 });
 
-function ExpertWitnessesTab({ firmId }: { firmId: string }) {
+function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<ExpertRow | null>(null);
+
+  useEffect(() => {
+    if (editExpertId && !editing) {
+      // fetch on-demand so we can open immediately even if list not loaded
+      supabase.from("expert_witnesses").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
+        if (data) setEditing(data as ExpertRow);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editExpertId]);
 
   const { data: experts } = useQuery({
     queryKey: ["firm-experts-list", firmId],
