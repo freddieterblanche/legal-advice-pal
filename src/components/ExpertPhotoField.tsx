@@ -176,6 +176,17 @@ export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
           </p>
         </div>
       )}
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          busy={uploading}
+          onCancel={() => {
+            if (cropSrc.startsWith("blob:")) URL.revokeObjectURL(cropSrc);
+            setCropSrc(null);
+          }}
+          onConfirm={handleCropped}
+        />
+      )}
     </div>
   );
 }
