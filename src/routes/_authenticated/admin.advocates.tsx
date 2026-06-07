@@ -314,16 +314,39 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
         firm_id: null,
       };
+      let advocateId = advocate?.id;
       if (isEdit && advocate) {
         const { error } = await supabase.from("lawyers").update(payload).eq("id", advocate.id);
         if (error) throw error;
-        toast.success("Advocate updated");
       } else {
         const slug = `${slugify(`${payload.first_name}-${payload.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
-        const { error } = await supabase.from("lawyers").insert({ ...payload, slug, status: "active" });
+        const { data: inserted, error } = await supabase
+          .from("lawyers")
+          .insert({ ...payload, slug, status: "active" })
+          .select("id")
+          .single();
         if (error) throw error;
-        toast.success("Advocate added");
+        advocateId = inserted.id;
       }
+
+      // Sync practice areas
+      if (advocateId) {
+        const { error: delErr } = await supabase
+          .from("lawyer_practice_areas")
+          .delete()
+          .eq("lawyer_id", advocateId);
+        if (delErr) throw delErr;
+        if (selectedPaIds.size > 0) {
+          const rows = Array.from(selectedPaIds).map((pid) => ({
+            lawyer_id: advocateId!,
+            practice_area_id: pid,
+          }));
+          const { error: insErr } = await supabase.from("lawyer_practice_areas").insert(rows);
+          if (insErr) throw insErr;
+        }
+      }
+
+      toast.success(isEdit ? "Advocate updated" : "Advocate added");
       onSaved();
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save");
