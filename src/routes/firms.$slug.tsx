@@ -124,7 +124,7 @@ function FirmProfile() {
         )}
 
         <h2 className="mt-12 font-heading text-2xl text-ink">Our Lawyers</h2>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {lawyers?.map((l: any) => {
             const areas = (l.lawyer_practice_areas ?? [])
               .map((x: any) => x.practice_areas?.name)
