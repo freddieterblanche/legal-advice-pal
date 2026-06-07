@@ -1,37 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, X } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
-import { PROVINCES, slugify } from "../../lib/constants";
-import { ComboboxCreatable } from "../../components/ComboboxCreatable";
-import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
-import { ImageCropModal } from "../../components/ImageCropModal";
-import { ATTORNEY_DESIGNATIONS } from "../../lib/designation";
+import { LawyerFormModal, type LawyerRow } from "../../components/LawyerFormModal";
 
-type AttorneyRow = {
-  id: string;
-  slug: string;
-  first_name: string;
-  last_name: string;
-  email: string | null;
-  phone: string | null;
-  office_phone: string | null;
-  mobile_phone: string | null;
-  city: string | null;
-  province: string | null;
-  firm_id: string | null;
-  designation: string | null;
-  designation_code: string | null;
-  designation_custom: string | null;
-  is_mediator: boolean | null;
-  is_arbitrator: boolean | null;
-  year_of_admission: number | null;
-  status: string | null;
-  avatar_url: string | null;
-  created_at: string | null;
-};
+type AttorneyRow = LawyerRow & { created_at: string | null };
+
 
 export const Route = createFileRoute("/_authenticated/admin/attorneys")({
   validateSearch: (s: Record<string, unknown>) => ({
