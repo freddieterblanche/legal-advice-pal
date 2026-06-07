@@ -183,6 +183,7 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const [tab, setTab] = useState<"existing" | "new">("existing");
   const [q, setQ] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -222,46 +223,156 @@ function AddRoleModal({ role, column, onClose, onSaved }: {
           <h2 className="font-heading text-lg text-ink">Add {role === "mediator" ? "Mediator" : "Arbitrator"}</h2>
           <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-muted"><X className="h-4 w-4" /></button>
         </div>
-        <div className="p-5">
-          <p className="mb-3 text-sm text-muted-foreground">Select an existing attorney or advocate to flag as a {role}.</p>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name…"
-            autoFocus
-            className="mb-4 w-full rounded border border-border bg-background px-3 py-2 text-sm"
-          />
-          <div className="max-h-[50vh] overflow-y-auto rounded border border-border">
-            <table className="w-full text-sm">
-              <tbody className="divide-y divide-border">
-                {(candidates ?? []).map((c) => (
-                  <tr key={c.id}>
-                    <td className="px-3 py-2">
-                      <div className="font-medium text-ink">{c.first_name} {c.last_name}</div>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {c.lawyer_type ?? (c.firm_id ? "attorney" : "—")}
-                        {([c.city, c.province].filter(Boolean).join(", ") && ` · ${[c.city, c.province].filter(Boolean).join(", ")}`)}
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <button
-                        disabled={saving === c.id}
-                        onClick={() => add(c.id, `${c.first_name} ${c.last_name}`)}
-                        className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream hover:bg-ink/90 disabled:opacity-60"
-                      >
-                        {saving === c.id ? "Adding…" : "Add"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {(candidates ?? []).length === 0 && (
-                  <tr><td className="px-3 py-8 text-center text-sm text-muted-foreground">No matching lawyers found.</td></tr>
-                )}
-              </tbody>
-            </table>
+        <div className="border-b border-border px-5">
+          <div className="-mb-px flex gap-1">
+            <button
+              onClick={() => setTab("existing")}
+              className={`border-b-2 px-3 py-2 text-sm font-medium ${tab === "existing" ? "border-ink text-ink" : "border-transparent text-muted-foreground hover:text-ink"}`}
+            >
+              Flag existing lawyer
+            </button>
+            <button
+              onClick={() => setTab("new")}
+              className={`border-b-2 px-3 py-2 text-sm font-medium ${tab === "new" ? "border-ink text-ink" : "border-transparent text-muted-foreground hover:text-ink"}`}
+            >
+              Create new {role}
+            </button>
           </div>
+        </div>
+        <div className="p-5">
+          {tab === "existing" ? (
+            <>
+              <p className="mb-3 text-sm text-muted-foreground">Select an existing attorney or advocate to flag as a {role}.</p>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name…"
+                autoFocus
+                className="mb-4 w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+              <div className="max-h-[50vh] overflow-y-auto rounded border border-border">
+                <table className="w-full text-sm">
+                  <tbody className="divide-y divide-border">
+                    {(candidates ?? []).map((c) => (
+                      <tr key={c.id}>
+                        <td className="px-3 py-2">
+                          <div className="font-medium text-ink">{c.first_name} {c.last_name}</div>
+                          <div className="text-xs capitalize text-muted-foreground">
+                            {c.lawyer_type ?? (c.firm_id ? "attorney" : "—")}
+                            {([c.city, c.province].filter(Boolean).join(", ") && ` · ${[c.city, c.province].filter(Boolean).join(", ")}`)}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            disabled={saving === c.id}
+                            onClick={() => add(c.id, `${c.first_name} ${c.last_name}`)}
+                            className="rounded bg-ink px-3 py-1.5 text-xs font-semibold text-cream hover:bg-ink/90 disabled:opacity-60"
+                          >
+                            {saving === c.id ? "Adding…" : "Add"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {(candidates ?? []).length === 0 && (
+                      <tr><td className="px-3 py-8 text-center text-sm text-muted-foreground">No matching lawyers found.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <CreateNewPersonForm role={role} column={column} onSaved={onSaved} />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function CreateNewPersonForm({ role, column, onSaved }: {
+  role: Role;
+  column: "is_mediator" | "is_arbitrator";
+  onSaved: () => void;
+}) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [background, setBackground] = useState<"retired_advocate" | "retired_attorney" | "other">("retired_advocate");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const slugify = (s: string) =>
+    s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName.trim() || !lastName.trim()) {
+      toast.error("First and last name are required");
+      return;
+    }
+    setSaving(true);
+    const baseSlug = slugify(`${firstName} ${lastName}`);
+    const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
+    const lawyer_type = background === "retired_attorney" ? "attorney" : background === "retired_advocate" ? "advocate" : null;
+    const payload: Record<string, unknown> = {
+      slug,
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      lawyer_type,
+      city: city.trim() || null,
+      province: province.trim() || null,
+      status: "active",
+      is_mediator: column === "is_mediator",
+      is_arbitrator: column === "is_arbitrator",
+    };
+    const { error } = await supabase.from("lawyers").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${firstName} ${lastName} created as ${role}`);
+    onSaved();
+  };
+
+  return (
+    <form onSubmit={submit} className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Create a new {role} who is not already on the platform — e.g. a retired advocate or attorney.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-ink">First name *</span>
+          <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" autoFocus />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-ink">Last name *</span>
+          <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        </label>
+      </div>
+      <label className="block">
+        <span className="mb-1 block text-xs font-medium text-ink">Background</span>
+        <select value={background} onChange={(e) => setBackground(e.target.value as typeof background)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+          <option value="retired_advocate">Retired advocate</option>
+          <option value="retired_attorney">Retired attorney</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-ink">City</span>
+          <input value={city} onChange={(e) => setCity(e.target.value)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-xs font-medium text-ink">Province</span>
+          <input value={province} onChange={(e) => setProvince(e.target.value)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        </label>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        You can fill in bio, qualifications, accolades and other details after creation by clicking <strong>Edit</strong>.
+      </p>
+      <div className="flex justify-end">
+        <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream hover:bg-ink/90 disabled:opacity-60">
+          {saving ? "Creating…" : `Create ${role}`}
+        </button>
+      </div>
+    </form>
   );
 }
