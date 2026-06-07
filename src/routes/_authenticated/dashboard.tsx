@@ -1322,7 +1322,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
       </div>
 
       {showAdd && <ExpertFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
-      {editing && <ExpertFormModal firmId={firmId} expert={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
+      {editing && <ExpertFormModal firmId={firmId} expert={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
     </div>
   );
 }
