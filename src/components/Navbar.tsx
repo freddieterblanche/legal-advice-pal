@@ -109,7 +109,7 @@ export function Navbar() {
         <div className="border-t border-cream/10 bg-ink md:hidden">
           <div className="flex flex-col gap-1 px-4 py-4">
             {publicLinks.map(l => (
-              <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm text-cream/90 hover:bg-cream/5">
+              <Link key={`${l.to}-${l.label}`} to={l.to} search={l.search as never} onClick={() => setOpen(false)} className="rounded px-3 py-2 text-sm text-cream/90 hover:bg-cream/5">
                 {l.label}
               </Link>
             ))}
