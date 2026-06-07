@@ -27,6 +27,7 @@ type AdvocateRow = {
   is_senior_counsel: boolean;
   is_mediator: boolean | null;
   is_arbitrator: boolean | null;
+  exclude_from_lawyer_listing: boolean | null;
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
