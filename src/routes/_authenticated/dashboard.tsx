@@ -220,6 +220,8 @@ const lawyerSchema = z.object({
   email: z.string().trim().max(200).optional(),
   phone: z.string().trim().max(60).optional(),
   linkedin_url: z.string().trim().max(500).optional(),
+  is_mediator: z.boolean().optional(),
+  is_arbitrator: z.boolean().optional(),
 });
 
 type LawyerRow = {
@@ -431,6 +433,8 @@ function LawyerFormModal({
     email: lawyer?.email ?? "",
     phone: lawyer?.phone ?? "",
     linkedin_url: lawyer?.linkedin_url ?? "",
+    is_mediator: !!lawyer?.is_mediator,
+    is_arbitrator: !!lawyer?.is_arbitrator,
   });
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
@@ -916,6 +920,30 @@ function LawyerFormModal({
                 Current legacy value: <span className="font-medium text-ink">{lawyer.designation}</span> — will be replaced when you save.
               </p>
             )}
+
+            <div className="rounded border border-dashed border-border p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Roles</p>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.is_mediator}
+                    onChange={(e) => setForm({ ...form, is_mediator: e.target.checked })}
+                    className="accent-gold"
+                  />
+                  Also acts as Mediator
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.is_arbitrator}
+                    onChange={(e) => setForm({ ...form, is_arbitrator: e.target.checked })}
+                    className="accent-gold"
+                  />
+                  Also acts as Arbitrator
+                </label>
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
