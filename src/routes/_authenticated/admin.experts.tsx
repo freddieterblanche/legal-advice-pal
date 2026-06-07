@@ -382,13 +382,13 @@ function AdminExpertFormModal({
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <div className="grid gap-3 md:grid-cols-2">
-            <AField label="City">
-              <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-            </AField>
             <AField label="Province">
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <ProvinceCityFields
+                province={form.province}
+                city={form.city}
+                onProvince={(v) => setForm({ ...form, province: v })}
+                onCity={(v) => setForm({ ...form, city: v })}
+              />
             </AField>
           </div>
           {isEdit && (
