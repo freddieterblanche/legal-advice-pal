@@ -54,7 +54,14 @@ function MediatorSearch() {
       if (search.sector) query = query.contains("mediator_sectors", [search.sector]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("last_name");
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
