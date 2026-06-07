@@ -8,6 +8,7 @@ import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { ATTORNEY_DESIGNATIONS } from "../../lib/designation";
 
 type AttorneyRow = {
   id: string;
@@ -22,6 +23,8 @@ type AttorneyRow = {
   province: string | null;
   firm_id: string | null;
   designation: string | null;
+  designation_code: string | null;
+  designation_custom: string | null;
   is_mediator: boolean | null;
   is_arbitrator: boolean | null;
   year_of_admission: number | null;
@@ -69,7 +72,7 @@ function AdminAttorneysPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, firm_id, designation, is_mediator, is_arbitrator, year_of_admission, status, avatar_url, created_at")
+        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, firm_id, designation, designation_code, designation_custom, is_mediator, is_arbitrator, year_of_admission, status, avatar_url, created_at")
         .or("lawyer_type.eq.attorney,and(lawyer_type.is.null,firm_id.not.is.null)")
         .order("last_name");
       if (error) throw error;
@@ -250,7 +253,8 @@ function AttorneyFormModal({ attorney, firms, onClose, onSaved }: {
     city: attorney?.city ?? "",
     province: attorney?.province ?? "",
     firm_id: attorney?.firm_id ?? "",
-    designation: attorney?.designation ?? "Attorney",
+    designation_code: attorney?.designation_code ?? (attorney?.designation && (ATTORNEY_DESIGNATIONS as readonly string[]).includes(attorney.designation) ? attorney.designation : ""),
+    designation_custom: attorney?.designation_custom ?? (attorney?.designation && !(ATTORNEY_DESIGNATIONS as readonly string[]).includes(attorney.designation) ? attorney.designation : ""),
     is_mediator: attorney?.is_mediator ?? false,
     is_arbitrator: attorney?.is_arbitrator ?? false,
     year_of_admission: attorney?.year_of_admission ? String(attorney.year_of_admission) : "",
@@ -379,7 +383,9 @@ function AttorneyFormModal({ attorney, firms, onClose, onSaved }: {
         city: form.city.trim() || null,
         province: form.province || null,
         firm_id: form.firm_id,
-        designation: form.designation.trim() || "Attorney",
+        designation_code: form.designation_code || null,
+        designation_custom: form.designation_code ? null : (form.designation_custom.trim() || null),
+        designation: (form.designation_code || form.designation_custom.trim() || "Attorney"),
         is_mediator: form.is_mediator,
         is_arbitrator: form.is_arbitrator,
         year_of_admission: Number.isFinite(year as number) ? year : null,
@@ -475,7 +481,24 @@ function AttorneyFormModal({ attorney, firms, onClose, onSaved }: {
 
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Designation</label>
-            <input placeholder="e.g. Partner, Director, Senior Associate, Attorney" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <select
+              value={form.designation_code}
+              onChange={(e) => setForm({ ...form, designation_code: e.target.value })}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Other (specify below)</option>
+              {ATTORNEY_DESIGNATIONS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            {!form.designation_code && (
+              <input
+                placeholder="Custom designation (e.g. Of Counsel)"
+                value={form.designation_custom}
+                onChange={(e) => setForm({ ...form, designation_custom: e.target.value })}
+                className="mt-2 w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
