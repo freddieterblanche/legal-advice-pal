@@ -419,9 +419,58 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
-            <input type="url" placeholder="https://…" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-            <p className="mt-1 text-xs text-muted-foreground">A photo can be added or updated later.</p>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
+            <div className="flex items-start gap-3">
+              {form.avatar_url ? (
+                <img src={form.avatar_url} alt="" className="h-20 w-20 rounded-md border border-border object-cover" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-border bg-muted text-xs text-muted-foreground">No photo</div>
+              )}
+              <div className="flex-1 space-y-2">
+                <input
+                  type="url"
+                  placeholder="Paste image URL…"
+                  value={form.avatar_url}
+                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <div className="flex items-center gap-2">
+                  <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
+                    {uploading ? "Uploading…" : "Upload image"}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
+                  </label>
+                  {form.avatar_url && (
+                    <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</label>
+            <div className="flex flex-wrap gap-1.5 rounded border border-border bg-background p-2">
+              {(allPracticeAreas ?? []).length === 0 && <span className="text-xs text-muted-foreground">Loading…</span>}
+              {(allPracticeAreas ?? []).map((pa) => {
+                const active = selectedPaIds.has(pa.id);
+                return (
+                  <button
+                    key={pa.id}
+                    type="button"
+                    onClick={() => togglePa(pa.id)}
+                    className={`rounded-full border px-2.5 py-1 text-xs transition ${
+                      active
+                        ? "border-ink bg-ink text-cream"
+                        : "border-border bg-cream text-ink hover:border-ink"
+                    }`}
+                  >
+                    {pa.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">Same list used for lawyers. Click to select / deselect.</p>
           </div>
 
           {isEdit && (
@@ -433,6 +482,13 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 <option value="pending_payment">Pending payment</option>
                 <option value="inactive">Inactive (hidden)</option>
               </select>
+            </div>
+          )}
+
+          {isEdit && advocate && (
+            <div className="border-t border-border pt-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reported cases</label>
+              <ReportedCasesEditor lawyerId={advocate.id} />
             </div>
           )}
         </form>
