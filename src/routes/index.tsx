@@ -92,7 +92,7 @@ function HomePage() {
               Verified South African legal directory
             </span>
             <h1 className="mt-6 font-heading text-4xl leading-[1.05] text-ink md:text-6xl">
-              The right counsel for your matter.
+              Find the right legal expertise in one place.
             </h1>
             <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
               South Africa has a split legal profession. Choose who you need — then search verified
