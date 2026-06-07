@@ -1341,11 +1341,11 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || null,
-          qualifications: form.qualifications || null,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
           registration_body: form.registration_body || null,
           city: form.city || null,
           province: form.province || null,
-          bio: form.bio || null,
+          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         }).eq("id", expert.id);
         if (error) throw error;
       } else {
@@ -1357,11 +1357,11 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || null,
-          qualifications: form.qualifications || null,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
           registration_body: form.registration_body || null,
           city: form.city || null,
           province: form.province || null,
-          bio: form.bio || null,
+          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         });
         if (error) throw error;
       }
