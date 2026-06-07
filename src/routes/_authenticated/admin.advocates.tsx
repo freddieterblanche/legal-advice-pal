@@ -538,7 +538,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bar *</label>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bar (optional)</label>
             <ComboboxCreatable
               value={form.bar_id}
               onChange={(v) => setForm({ ...form, bar_id: v, chambers_id: "" })}
@@ -548,7 +548,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
               onCreate={createBar}
               createLabel="Add Bar"
             />
-            <p className="mt-1 text-xs text-muted-foreground">Pick from the list to avoid duplicates. New Bars are added rarely.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Optional — leave blank for mediators/arbitrators not affiliated with a Bar.</p>
           </div>
 
           <div>
@@ -565,10 +565,9 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 });
               }}
               options={chambersOptions}
-              placeholder={form.bar_id ? "Type or select Chambers…" : "Select a Bar first"}
+              placeholder="Type or select Chambers…"
               emptyLabel="— None —"
-              disabled={!form.bar_id}
-              onCreate={form.bar_id ? createChambers : undefined}
+              onCreate={createChambers}
               createLabel="Add Chambers"
             />
           </div>
