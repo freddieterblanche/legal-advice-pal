@@ -153,7 +153,7 @@ function FirmProfile() {
                 </div>
                 <div className="p-4">
                   <p className="font-heading text-base font-semibold text-ink group-hover:text-gold">
-                    {l.first_name} {l.last_name}
+                    {l.first_name} {l.last_name}{l.is_senior_counsel ? " SC" : ""}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {[l.designation, l.city].filter(Boolean).join(" · ")}
