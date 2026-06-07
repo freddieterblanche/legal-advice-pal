@@ -189,7 +189,7 @@ function ExpertWitnessSearch() {
                 const disciplines: any[] = (e.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_expert_witnesses?.length ?? 0;
                 return (
-                  <article key={e.id} className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 ring-1 ring-inset ring-gold/20 transition-shadow hover:shadow-md sm:flex-row">
+                  <article key={e.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm ring-1 ring-inset ring-gold/20 transition-shadow hover:shadow-md sm:flex-row">
                     <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-gold/10 font-heading text-2xl text-gold">
                       {e.first_name?.[0]}{e.last_name?.[0]}
                     </div>
