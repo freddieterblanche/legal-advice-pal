@@ -234,7 +234,7 @@ function SearchPage() {
                 const accentRing = kind === "advocate" ? "ring-forest/30" : "ring-gold/30";
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 return (
-                <article key={l.id} className={`flex flex-col gap-4 rounded-xl border border-border bg-card p-5 ring-1 ring-inset ${accentRing} transition-shadow hover:shadow-md sm:flex-row`}>
+                <article key={l.id} className={`flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm ring-1 ring-inset ${accentRing} transition-shadow hover:shadow-md sm:flex-row`}>
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
