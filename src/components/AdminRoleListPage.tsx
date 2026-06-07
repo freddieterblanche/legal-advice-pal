@@ -40,6 +40,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile-role"],
