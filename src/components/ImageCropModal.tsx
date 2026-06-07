@@ -37,10 +37,23 @@ export function ImageCropModal({ imageSrc, onCancel, onConfirm, busy }: Props) {
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => setArea(pixels), []);
 
+  const [working, setWorking] = useState(false);
+
   const handleConfirm = async () => {
-    if (!area) return;
-    const blob = await getCroppedBlob(imageSrc, area);
-    onConfirm(blob);
+    if (!area) {
+      toast.error("Adjust the crop first");
+      return;
+    }
+    setWorking(true);
+    try {
+      const blob = await getCroppedBlob(imageSrc, area);
+      await Promise.resolve(onConfirm(blob));
+    } catch (err) {
+      console.error("Crop failed", err);
+      toast.error(err instanceof Error ? err.message : "Could not crop image");
+    } finally {
+      setWorking(false);
+    }
   };
 
   return (
