@@ -192,6 +192,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropSrcIsObjectUrl, setCropSrcIsObjectUrl] = useState(false);
 
   // All practice areas
   const { data: allPracticeAreas } = useQuery({
