@@ -535,6 +535,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
   const [form, setForm] = useState({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
+    name_title: expert?.name_title ?? "",
     title: expert?.title ?? "",
     qualifications: expert?.qualifications ?? "",
     registration_body: expert?.registration_body ?? "",
