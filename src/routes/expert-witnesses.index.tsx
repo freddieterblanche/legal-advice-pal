@@ -58,7 +58,17 @@ function ExpertWitnessSearch() {
       if (search.independent === "no") query = query.eq("is_independent", false);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("last_name");
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        // cases: defer to client-side sort below
+        query = query.order("last_name", { ascending: true });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       let rows = data ?? [];
@@ -66,6 +76,13 @@ function ExpertWitnessSearch() {
         rows = rows.filter((r: any) =>
           r.expert_witness_disciplines?.some((d: any) => d.expert_disciplines?.slug === search.discipline)
         );
+      }
+      if (sort === "cases") {
+        rows = [...rows].sort((a: any, b: any) => {
+          const ac = a.case_expert_witnesses?.length ?? 0;
+          const bc = b.case_expert_witnesses?.length ?? 0;
+          return ascending ? ac - bc : bc - ac;
+        });
       }
       return { rows, total: search.discipline ? rows.length : (count ?? 0) };
     },
