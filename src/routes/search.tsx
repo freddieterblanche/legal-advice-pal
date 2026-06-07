@@ -5,6 +5,7 @@ import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES, DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
+import { Combobox } from "../components/Combobox";
 
 type Search = { q?: string; area?: string; province?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
 
