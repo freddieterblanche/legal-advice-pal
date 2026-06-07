@@ -14,6 +14,7 @@ import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
 import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
+import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 
 type Branch = {
   id: string;
@@ -1341,11 +1342,11 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || null,
-          qualifications: form.qualifications || null,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
           registration_body: form.registration_body || null,
           city: form.city || null,
           province: form.province || null,
-          bio: form.bio || null,
+          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         }).eq("id", expert.id);
         if (error) throw error;
       } else {
@@ -1357,11 +1358,11 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || null,
-          qualifications: form.qualifications || null,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
           registration_body: form.registration_body || null,
           city: form.city || null,
           province: form.province || null,
-          bio: form.bio || null,
+          bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         });
         if (error) throw error;
       }
@@ -1389,7 +1390,9 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           </div>
           <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
-          <Field label="Qualifications"><textarea rows={2} value={form.qualifications} onChange={(e) => setForm({ ...form, qualifications: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Qualifications">
+            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />
+          </Field>
           <Field label="Registration body (e.g. HPCSA)"><input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="City"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
@@ -1399,7 +1402,19 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
               </select>
             </Field>
           </div>
-          <Field label="Bio / experience"><textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Bio / experience">
+            <RichTextEditor value={form.bio} onChange={(html) => setForm({ ...form, bio: html })} placeholder="Background, areas of focus, notable experience…" />
+          </Field>
+          {isEdit && expert && (
+            <Field label="Samples of work">
+              <ExpertWorkSamples expertId={expert.id} />
+            </Field>
+          )}
+          {!isEdit && (
+            <p className="rounded border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              Save the expert first, then re-open to add samples of work.
+            </p>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
