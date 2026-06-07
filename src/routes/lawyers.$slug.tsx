@@ -191,6 +191,63 @@ function LawyerProfile() {
             </section>
           )}
 
+          {lawyer.is_mediator && (
+            <section>
+              <h2 className="font-heading text-xl text-ink">Mediation</h2>
+              <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
+                {lawyer.mediator_accreditation && (
+                  <div><span className="text-muted-foreground">Accreditation: </span><span className="text-ink">{lawyer.mediator_accreditation}</span></div>
+                )}
+                {lawyer.mediator_style && (
+                  <div><span className="text-muted-foreground">Style: </span><span className="text-ink">{lawyer.mediator_style}</span></div>
+                )}
+                {lawyer.mediator_sectors?.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground">Sectors: </span>
+                    <span className="inline-flex flex-wrap gap-1.5">
+                      {lawyer.mediator_sectors.map((s: string) => (
+                        <span key={s} className="rounded bg-gold/10 px-2 py-0.5 text-xs text-ink">{s}</span>
+                      ))}
+                    </span>
+                  </div>
+                )}
+                {lawyer.availability_notes && (
+                  <div className="sm:col-span-2"><span className="text-muted-foreground">Availability: </span><span className="text-ink">{lawyer.availability_notes}</span></div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {lawyer.is_arbitrator && (
+            <section>
+              <h2 className="font-heading text-xl text-ink">Arbitration</h2>
+              <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
+                {lawyer.arbitrator_accreditation && (
+                  <div><span className="text-muted-foreground">Accreditation: </span><span className="text-ink">{lawyer.arbitrator_accreditation}</span></div>
+                )}
+                {typeof lawyer.arbitrator_experience_years === "number" && (
+                  <div><span className="text-muted-foreground">Experience: </span><span className="text-ink">{lawyer.arbitrator_experience_years} years</span></div>
+                )}
+                {lawyer.arbitrator_types?.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground">Types handled: </span>
+                    <span className="inline-flex flex-wrap gap-1.5">
+                      {lawyer.arbitrator_types.map((s: string) => (
+                        <span key={s} className="rounded bg-forest/10 px-2 py-0.5 text-xs text-forest">{s}</span>
+                      ))}
+                    </span>
+                  </div>
+                )}
+                {lawyer.daily_rate_range && (
+                  <div><span className="text-muted-foreground">Daily rate: </span><span className="text-ink">{lawyer.daily_rate_range}</span></div>
+                )}
+                {lawyer.languages?.length > 0 && (
+                  <div><span className="text-muted-foreground">Languages: </span><span className="text-ink">{lawyer.languages.join(", ")}</span></div>
+                )}
+              </div>
+            </section>
+          )}
+
           <section>
             <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
               <BookOpen className="h-5 w-5 text-gold" /> Reported Cases ({totalCases})

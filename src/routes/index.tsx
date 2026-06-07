@@ -46,16 +46,17 @@ function HomePage() {
   const { data: stats } = useQuery({
     queryKey: ["home-stats"],
     queryFn: async () => {
-      const [lawyersRes, firmsRes, casesRes] = await Promise.all([
+      const [lawyersRes, expertsRes, mediatorsRes, arbitratorsRes] = await Promise.all([
         supabase.from("lawyers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
-        supabase.from("firms").select("*", { count: "exact", head: true }).eq("status", "active"),
-        supabase.from("cases").select("*", { count: "exact", head: true }),
+        supabase.from("expert_witnesses").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
+        supabase.from("lawyers").select("*", { count: "exact", head: true }).eq("is_mediator", true).in("status", ["trial", "active"]),
+        supabase.from("lawyers").select("*", { count: "exact", head: true }).eq("is_arbitrator", true).in("status", ["trial", "active"]),
       ]);
       return {
         lawyers: lawyersRes.count ?? 0,
-        firms: firmsRes.count ?? 0,
-        cases: casesRes.count ?? 0,
-        provinces: PROVINCES.length,
+        experts: expertsRes.count ?? 0,
+        mediators: mediatorsRes.count ?? 0,
+        arbitrators: arbitratorsRes.count ?? 0,
       };
     },
   });
@@ -127,9 +128,9 @@ function HomePage() {
         <div className="mx-auto mt-14 grid max-w-5xl grid-cols-2 gap-3 px-4 sm:px-6 md:grid-cols-4">
           {[
             { icon: Users, label: "Lawyers Listed", value: stats?.lawyers ?? "—" },
-            { icon: Building2, label: "Firms", value: stats?.firms ?? "—" },
-            { icon: BookOpen, label: "Reported Cases", value: stats?.cases ?? "—" },
-            { icon: MapPin, label: "Provinces Covered", value: stats?.provinces ?? 9 },
+            { icon: Briefcase, label: "Expert Witnesses", value: stats?.experts ?? "—" },
+            { icon: Users, label: "Mediators", value: stats?.mediators ?? "—" },
+            { icon: Gavel, label: "Arbitrators", value: stats?.arbitrators ?? "—" },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-5 text-center">
               <s.icon className="mx-auto h-5 w-5 text-gold" strokeWidth={STROKE} />

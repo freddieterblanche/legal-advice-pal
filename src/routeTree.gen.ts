@@ -17,9 +17,13 @@ import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MediatorsIndexRouteImport } from './routes/mediators.index'
 import { Route as FirmsIndexRouteImport } from './routes/firms.index'
+import { Route as ExpertWitnessesIndexRouteImport } from './routes/expert-witnesses.index'
+import { Route as ArbitratorsIndexRouteImport } from './routes/arbitrators.index'
 import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
+import { Route as ExpertWitnessesSlugRouteImport } from './routes/expert-witnesses.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
@@ -67,9 +71,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MediatorsIndexRoute = MediatorsIndexRouteImport.update({
+  id: '/mediators/',
+  path: '/mediators/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FirmsIndexRoute = FirmsIndexRouteImport.update({
   id: '/firms/',
   path: '/firms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpertWitnessesIndexRoute = ExpertWitnessesIndexRouteImport.update({
+  id: '/expert-witnesses/',
+  path: '/expert-witnesses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArbitratorsIndexRoute = ArbitratorsIndexRouteImport.update({
+  id: '/arbitrators/',
+  path: '/arbitrators/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LawyersSlugRoute = LawyersSlugRouteImport.update({
@@ -80,6 +99,11 @@ const LawyersSlugRoute = LawyersSlugRouteImport.update({
 const FirmsSlugRoute = FirmsSlugRouteImport.update({
   id: '/firms/$slug',
   path: '/firms/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpertWitnessesSlugRoute = ExpertWitnessesSlugRouteImport.update({
+  id: '/expert-witnesses/$slug',
+  path: '/expert-witnesses/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -129,9 +153,13 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/arbitrators/': typeof ArbitratorsIndexRoute
+  '/expert-witnesses/': typeof ExpertWitnessesIndexRoute
   '/firms/': typeof FirmsIndexRoute
+  '/mediators/': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
@@ -148,9 +176,13 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/arbitrators': typeof ArbitratorsIndexRoute
+  '/expert-witnesses': typeof ExpertWitnessesIndexRoute
   '/firms': typeof FirmsIndexRoute
+  '/mediators': typeof MediatorsIndexRoute
   '/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
@@ -169,9 +201,13 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
+  '/arbitrators/': typeof ArbitratorsIndexRoute
+  '/expert-witnesses/': typeof ExpertWitnessesIndexRoute
   '/firms/': typeof FirmsIndexRoute
+  '/mediators/': typeof MediatorsIndexRoute
   '/_authenticated/admin/advocates': typeof AuthenticatedAdminAdvocatesRoute
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
@@ -190,9 +226,13 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/arbitrators/'
+    | '/expert-witnesses/'
     | '/firms/'
+    | '/mediators/'
     | '/admin/advocates'
     | '/admin/bars'
     | '/admin/chambers'
@@ -209,9 +249,13 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/arbitrators'
+    | '/expert-witnesses'
     | '/firms'
+    | '/mediators'
     | '/admin/advocates'
     | '/admin/bars'
     | '/admin/chambers'
@@ -229,9 +273,13 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/_authenticated/dashboard'
+    | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
+    | '/arbitrators/'
+    | '/expert-witnesses/'
     | '/firms/'
+    | '/mediators/'
     | '/_authenticated/admin/advocates'
     | '/_authenticated/admin/bars'
     | '/_authenticated/admin/chambers'
@@ -249,9 +297,13 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ExpertWitnessesSlugRoute: typeof ExpertWitnessesSlugRoute
   FirmsSlugRoute: typeof FirmsSlugRoute
   LawyersSlugRoute: typeof LawyersSlugRoute
+  ArbitratorsIndexRoute: typeof ArbitratorsIndexRoute
+  ExpertWitnessesIndexRoute: typeof ExpertWitnessesIndexRoute
   FirmsIndexRoute: typeof FirmsIndexRoute
+  MediatorsIndexRoute: typeof MediatorsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,11 +364,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mediators/': {
+      id: '/mediators/'
+      path: '/mediators'
+      fullPath: '/mediators/'
+      preLoaderRoute: typeof MediatorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/firms/': {
       id: '/firms/'
       path: '/firms'
       fullPath: '/firms/'
       preLoaderRoute: typeof FirmsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expert-witnesses/': {
+      id: '/expert-witnesses/'
+      path: '/expert-witnesses'
+      fullPath: '/expert-witnesses/'
+      preLoaderRoute: typeof ExpertWitnessesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/arbitrators/': {
+      id: '/arbitrators/'
+      path: '/arbitrators'
+      fullPath: '/arbitrators/'
+      preLoaderRoute: typeof ArbitratorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lawyers/$slug': {
@@ -331,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/firms/$slug'
       fullPath: '/firms/$slug'
       preLoaderRoute: typeof FirmsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expert-witnesses/$slug': {
+      id: '/expert-witnesses/$slug'
+      path: '/expert-witnesses/$slug'
+      fullPath: '/expert-witnesses/$slug'
+      preLoaderRoute: typeof ExpertWitnessesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -417,20 +497,14 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ExpertWitnessesSlugRoute: ExpertWitnessesSlugRoute,
   FirmsSlugRoute: FirmsSlugRoute,
   LawyersSlugRoute: LawyersSlugRoute,
+  ArbitratorsIndexRoute: ArbitratorsIndexRoute,
+  ExpertWitnessesIndexRoute: ExpertWitnessesIndexRoute,
   FirmsIndexRoute: FirmsIndexRoute,
+  MediatorsIndexRoute: MediatorsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

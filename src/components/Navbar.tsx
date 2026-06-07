@@ -24,8 +24,10 @@ export function Navbar() {
 
   const publicLinks = [
     { to: "/search", label: "Find a Lawyer" },
+    { to: "/expert-witnesses", label: "Expert Witnesses" },
+    { to: "/mediators", label: "Mediators" },
+    { to: "/arbitrators", label: "Arbitrators" },
     { to: "/firms", label: "Law Firms" },
-    { to: "/practice-areas", label: "Practice Areas" },
   ];
 
   return (

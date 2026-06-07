@@ -106,6 +106,48 @@ export type Database = {
           },
         ]
       }
+      case_expert_witnesses: {
+        Row: {
+          case_id: string
+          created_at: string
+          expert_witness_id: string
+          id: string
+          notes: string | null
+          role: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          expert_witness_id: string
+          id?: string
+          notes?: string | null
+          role?: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          expert_witness_id?: string
+          id?: string
+          notes?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_expert_witnesses_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_expert_witnesses_expert_witness_id_fkey"
+            columns: ["expert_witness_id"]
+            isOneToOne: false
+            referencedRelation: "expert_witnesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cases: {
         Row: {
           case_name: string
@@ -242,6 +284,162 @@ export type Database = {
             columns: ["lawyer_id"]
             isOneToOne: false
             referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expert_disciplines: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          parent_category: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          parent_category?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_category?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      expert_witness_disciplines: {
+        Row: {
+          discipline_id: string
+          expert_witness_id: string
+        }
+        Insert: {
+          discipline_id: string
+          expert_witness_id: string
+        }
+        Update: {
+          discipline_id?: string
+          expert_witness_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_witness_disciplines_discipline_id_fkey"
+            columns: ["discipline_id"]
+            isOneToOne: false
+            referencedRelation: "expert_disciplines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expert_witness_disciplines_expert_witness_id_fkey"
+            columns: ["expert_witness_id"]
+            isOneToOne: false
+            referencedRelation: "expert_witnesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expert_witnesses: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          courts_accepted_in: string[] | null
+          created_at: string
+          cv_url: string | null
+          employer: string | null
+          fee_range: string | null
+          firm_id: string | null
+          first_name: string
+          geographic_availability: string | null
+          id: string
+          is_independent: boolean
+          languages: string[] | null
+          last_name: string
+          profile_views: number
+          province: string | null
+          qualifications: string | null
+          registration_body: string | null
+          slug: string
+          status: string
+          title: string | null
+          trial_end_date: string
+          trial_start_date: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          courts_accepted_in?: string[] | null
+          created_at?: string
+          cv_url?: string | null
+          employer?: string | null
+          fee_range?: string | null
+          firm_id?: string | null
+          first_name: string
+          geographic_availability?: string | null
+          id?: string
+          is_independent?: boolean
+          languages?: string[] | null
+          last_name: string
+          profile_views?: number
+          province?: string | null
+          qualifications?: string | null
+          registration_body?: string | null
+          slug: string
+          status?: string
+          title?: string | null
+          trial_end_date?: string
+          trial_start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          courts_accepted_in?: string[] | null
+          created_at?: string
+          cv_url?: string | null
+          employer?: string | null
+          fee_range?: string | null
+          firm_id?: string | null
+          first_name?: string
+          geographic_availability?: string | null
+          id?: string
+          is_independent?: boolean
+          languages?: string[] | null
+          last_name?: string
+          profile_views?: number
+          province?: string | null
+          qualifications?: string | null
+          registration_body?: string | null
+          slug?: string
+          status?: string
+          title?: string | null
+          trial_end_date?: string
+          trial_start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_witnesses_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firm_billing_summary"
+            referencedColumns: ["firm_id"]
+          },
+          {
+            foreignKeyName: "expert_witnesses_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
             referencedColumns: ["id"]
           },
         ]
@@ -637,12 +835,17 @@ export type Database = {
       lawyers: {
         Row: {
           accolades: string | null
+          arbitrator_accreditation: string | null
+          arbitrator_experience_years: number | null
+          arbitrator_types: string[] | null
+          availability_notes: string | null
           avatar_url: string | null
           bar_id: string | null
           bio: string | null
           chambers_id: string | null
           city: string | null
           created_at: string | null
+          daily_rate_range: string | null
           designation: string | null
           designation_code: string | null
           designation_custom: string | null
@@ -651,13 +854,19 @@ export type Database = {
           firm_id: string | null
           first_name: string
           id: string
+          is_arbitrator: boolean
           is_claimed: boolean | null
+          is_mediator: boolean
           is_practice_head: boolean
           is_sector_head: boolean
           is_senior_counsel: boolean
+          languages: string[] | null
           last_name: string
           lawyer_type: string | null
           linkedin_url: string | null
+          mediator_accreditation: string | null
+          mediator_sectors: string[] | null
+          mediator_style: string | null
           noteworthy_matters: string | null
           overview: string | null
           phone: string | null
@@ -679,12 +888,17 @@ export type Database = {
         }
         Insert: {
           accolades?: string | null
+          arbitrator_accreditation?: string | null
+          arbitrator_experience_years?: number | null
+          arbitrator_types?: string[] | null
+          availability_notes?: string | null
           avatar_url?: string | null
           bar_id?: string | null
           bio?: string | null
           chambers_id?: string | null
           city?: string | null
           created_at?: string | null
+          daily_rate_range?: string | null
           designation?: string | null
           designation_code?: string | null
           designation_custom?: string | null
@@ -693,13 +907,19 @@ export type Database = {
           firm_id?: string | null
           first_name: string
           id?: string
+          is_arbitrator?: boolean
           is_claimed?: boolean | null
+          is_mediator?: boolean
           is_practice_head?: boolean
           is_sector_head?: boolean
           is_senior_counsel?: boolean
+          languages?: string[] | null
           last_name: string
           lawyer_type?: string | null
           linkedin_url?: string | null
+          mediator_accreditation?: string | null
+          mediator_sectors?: string[] | null
+          mediator_style?: string | null
           noteworthy_matters?: string | null
           overview?: string | null
           phone?: string | null
@@ -721,12 +941,17 @@ export type Database = {
         }
         Update: {
           accolades?: string | null
+          arbitrator_accreditation?: string | null
+          arbitrator_experience_years?: number | null
+          arbitrator_types?: string[] | null
+          availability_notes?: string | null
           avatar_url?: string | null
           bar_id?: string | null
           bio?: string | null
           chambers_id?: string | null
           city?: string | null
           created_at?: string | null
+          daily_rate_range?: string | null
           designation?: string | null
           designation_code?: string | null
           designation_custom?: string | null
@@ -735,13 +960,19 @@ export type Database = {
           firm_id?: string | null
           first_name?: string
           id?: string
+          is_arbitrator?: boolean
           is_claimed?: boolean | null
+          is_mediator?: boolean
           is_practice_head?: boolean
           is_sector_head?: boolean
           is_senior_counsel?: boolean
+          languages?: string[] | null
           last_name?: string
           lawyer_type?: string | null
           linkedin_url?: string | null
+          mediator_accreditation?: string | null
+          mediator_sectors?: string[] | null
+          mediator_style?: string | null
           noteworthy_matters?: string | null
           overview?: string | null
           phone?: string | null
@@ -958,6 +1189,9 @@ export type Database = {
       }
       lawyer_search_view: {
         Row: {
+          arbitrator_accreditation: string | null
+          arbitrator_experience_years: number | null
+          arbitrator_types: string[] | null
           avatar_url: string | null
           case_count: number | null
           city: string | null
@@ -967,8 +1201,14 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string | null
+          is_arbitrator: boolean | null
+          is_mediator: boolean | null
           is_senior_counsel: boolean | null
+          languages: string[] | null
           last_name: string | null
+          mediator_accreditation: string | null
+          mediator_sectors: string[] | null
+          mediator_style: string | null
           practice_area_slugs: string[] | null
           practice_areas: string[] | null
           profile_views: number | null
