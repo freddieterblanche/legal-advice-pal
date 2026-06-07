@@ -407,7 +407,7 @@ type ExpertRow = {
   first_name: string;
   last_name: string;
   name_title: string | null;
-  title: string | null;
+  job_title: string | null;
   slug: string;
   city: string | null;
   province: string | null;
@@ -500,7 +500,7 @@ function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmI
               return (
                 <tr key={e.id}>
                   <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{e.job_title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
                   <td className="px-4 py-3 text-muted-foreground">{e.status === "trial" ? `${daysLeft} days left` : "—"}</td>
@@ -536,7 +536,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
     name_title: expert?.name_title ?? "",
-    title: expert?.title ?? "",
+    title: expert?.job_title ?? "",
     qualifications: expert?.qualifications ?? "",
     registration_body: expert?.registration_body ?? "",
     city: expert?.city ?? "",
@@ -560,7 +560,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
         first_name: form.first_name,
         last_name: form.last_name,
         name_title: form.name_title?.trim() || null,
-        title: form.title || null,
+        job_title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
         city: form.city || null,

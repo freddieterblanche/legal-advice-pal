@@ -27,7 +27,7 @@ type ExpertRow = {
   first_name: string;
   last_name: string;
   name_title: string | null;
-  title: string | null;
+  job_title: string | null;
   city: string | null;
   province: string | null;
   status: string;
@@ -64,7 +64,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, name_title, title, city, province, status, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
+        .select("id, slug, first_name, last_name, name_title, job_title, city, province, status, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
@@ -152,7 +152,7 @@ function AdminExpertsPage() {
               {experts?.map((e) => (
                 <tr key={e.id}>
                   <td className="px-4 py-3 font-medium text-ink">{[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{e.job_title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{firmName(e.firm_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
@@ -225,7 +225,7 @@ function AdminExpertFormModal({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
     name_title: expert?.name_title ?? "",
-    title: expert?.title ?? "",
+    title: expert?.job_title ?? "",
     qualifications: "",
     registration_body: "",
     city: expert?.city ?? "",
@@ -252,7 +252,7 @@ function AdminExpertFormModal({
       first_name: (e.first_name as string) ?? f.first_name,
       last_name: (e.last_name as string) ?? f.last_name,
       name_title: (e.name_title as string) ?? f.name_title,
-      title: (e.title as string) ?? f.title,
+      title: (e.job_title as string) ?? f.title,
       qualifications: (e.qualifications as string) ?? "",
       registration_body: (e.registration_body as string) ?? "",
       city: (e.city as string) ?? f.city,
@@ -284,7 +284,7 @@ function AdminExpertFormModal({
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         name_title: form.name_title?.trim() || null,
-        title: form.title || null,
+        job_title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
         city: form.city || null,
