@@ -83,13 +83,15 @@ function ExpertWitnessProfile() {
               <img
                 src={expert.avatar_url}
                 alt={`${expert.first_name} ${expert.last_name}`}
-                className="h-32 w-32 shrink-0 rounded-xl object-cover ring-1 ring-gold/30"
+                className="h-64 w-52 shrink-0 object-cover object-top sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-xl bg-gold/20 font-heading text-4xl text-gold">
+              <div className="flex h-64 w-52 shrink-0 items-center justify-center bg-gold/20 font-heading text-5xl text-gold sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
                 {expert.first_name[0]}{expert.last_name[0]}
               </div>
             )}
+
             <div className="flex-1">
               <h1 className="font-heading text-3xl md:text-4xl">
                 {[expert.name_title, expert.first_name, expert.last_name].filter(Boolean).join(" ")}
