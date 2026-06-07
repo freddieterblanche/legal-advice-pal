@@ -108,10 +108,10 @@ export function ImageCropModal({ imageSrc, onCancel, onConfirm, busy }: Props) {
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={busy || !area}
+            disabled={busy || working || !area}
             className="rounded bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Uploading…" : "Save photo"}
+            {busy || working ? "Uploading…" : "Save photo"}
           </button>
         </div>
       </div>
