@@ -192,6 +192,18 @@ export function AdminRoleListPage({ role }: { role: Role }) {
           }}
         />
       )}
+
+      {editingId && (
+        <MediatorArbitratorFormModal
+          id={editingId}
+          role={role}
+          onClose={() => setEditingId(null)}
+          onSaved={() => {
+            qc.invalidateQueries({ queryKey: ["admin-role-list", role] });
+            setEditingId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
