@@ -28,11 +28,15 @@ type AdvocateRow = {
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
+  created_at: string | null;
+  year_of_admission: number | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/advocates")({
   validateSearch: (s: Record<string, unknown>) => ({
     edit: typeof s.edit === "string" ? s.edit : undefined,
+    sort: s.sort === "experience" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({ meta: [{ title: "Admin · Advocates — Lawexpert.co.za" }] }),
   component: AdminAdvocatesPage,
