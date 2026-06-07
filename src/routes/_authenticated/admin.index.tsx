@@ -88,6 +88,13 @@ function AdminHub() {
       desc: "Groups & Chambers — reference data.",
       count: counts?.chambers,
     },
+    {
+      to: "/admin/towns",
+      icon: MapPin,
+      title: "Towns & Cities",
+      desc: "Provinces and towns used for location search.",
+      count: counts?.towns,
+    },
   ] as const;
 
   return (
