@@ -20,10 +20,10 @@ export const Route = createFileRoute("/search")({
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
-  head: ({ match }) => ({
+  head: () => ({
     meta: [
-      { title: match.search.type === "advocate" ? "Find an Advocate — Lawexpert.co.za" : "Find an Attorney — Lawexpert.co.za" },
-      { name: "description", content: "Search South African lawyers by name, practice area, and province." },
+      { title: "Find Attorneys & Advocates — Lawexpert.co.za" },
+      { name: "description", content: "Search South African attorneys and advocates by name, practice area, and province." },
     ],
   }),
   component: SearchPage,
