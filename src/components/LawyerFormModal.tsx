@@ -64,6 +64,13 @@ export const lawyerSchema = z.object({
   linkedin_url: z.string().trim().max(500).optional(),
   is_mediator: z.boolean().optional(),
   is_arbitrator: z.boolean().optional(),
+  mediator_accreditation: z.string().trim().max(120).nullable().optional(),
+  mediator_style: z.string().trim().max(120).nullable().optional(),
+  mediator_sectors: z.array(z.string().trim().max(120)).nullable().optional(),
+  arbitrator_accreditation: z.string().trim().max(120).nullable().optional(),
+  arbitrator_types: z.array(z.string().trim().max(120)).nullable().optional(),
+  arbitrator_experience_years: z.number().int().min(0).max(80).nullable().optional(),
+  availability_notes: z.string().trim().max(1000).nullable().optional(),
 });
 
 export type LawyerRow = {
