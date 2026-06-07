@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PROVINCES } from "../lib/constants";
 import { registerFirmForCurrentUser } from "../lib/firm-registration.functions";
+import { ComboboxCreatable } from "../components/ComboboxCreatable";
+
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -49,6 +52,22 @@ function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [existingUserId, setExistingUserId] = useState<string | null>(null);
   const [firm, setFirm] = useState({ name: "", registration_number: "", province: "", city: "", website: "", phone: "", address: "" });
+
+  const { data: provinces } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: async () => (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
+  });
+  const { data: towns } = useQuery({
+    queryKey: ["towns-all"],
+    queryFn: async () => (await supabase.from("towns").select("name, province_id").order("is_major_city", { ascending: false }).order("name")).data ?? [],
+  });
+  const townOptions = useMemo(() => {
+    if (!towns) return [];
+    const provId = provinces?.find((p) => p.name === firm.province)?.id;
+    const filtered = provId ? towns.filter((t) => t.province_id === provId) : towns;
+    return filtered.map((t) => ({ value: t.name as string, label: t.name as string }));
+  }, [towns, provinces, firm.province]);
+
   const [admin, setAdmin] = useState({ first_name: "", last_name: "", email: "", password: "" });
 
   useEffect(() => {
@@ -134,11 +153,21 @@ function RegisterPage() {
               <h2 className="font-heading text-xl text-ink">Firm Details</h2>
               <Input placeholder="Firm name" value={firm.name} onChange={(v) => setFirm({ ...firm, name: v })} required />
               <Input placeholder="Registration number (optional)" value={firm.registration_number} onChange={(v) => setFirm({ ...firm, registration_number: v })} />
-              <select value={firm.province} onChange={(e) => setFirm({ ...firm, province: e.target.value })} required className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
+              <select value={firm.province} onChange={(e) => setFirm({ ...firm, province: e.target.value, city: "" })} required className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
                 <option value="">Select province</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
-              <Input placeholder="City" value={firm.city} onChange={(v) => setFirm({ ...firm, city: v })} required />
+              <ComboboxCreatable
+                value={firm.city}
+                onChange={(v) => setFirm({ ...firm, city: v })}
+                options={townOptions}
+                placeholder={firm.province ? "Select or type a city/town…" : "Select a province first…"}
+                emptyLabel="—"
+                disabled={!firm.province}
+                onCreate={async (name) => name}
+                createLabel="Use"
+              />
+
               <Input placeholder="Address (optional)" value={firm.address} onChange={(v) => setFirm({ ...firm, address: v })} />
               <Input placeholder="Website (https://…)" value={firm.website} onChange={(v) => setFirm({ ...firm, website: v })} />
               <Input placeholder="Phone (optional)" value={firm.phone} onChange={(v) => setFirm({ ...firm, phone: v })} />
