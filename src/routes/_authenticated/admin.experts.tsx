@@ -233,8 +233,9 @@ function AdminExpertFormModal({
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio/avatar once when editing
-  if (isEdit && existing && !hydrated) {
+  // Hydrate qualifications/bio/avatar once detail loads (effect, not in-render setState)
+  useEffect(() => {
+    if (!isEdit || hydrated || !existing) return;
     setForm((f) => ({
       ...f,
       qualifications: (existing as any).qualifications ?? "",
@@ -242,7 +243,7 @@ function AdminExpertFormModal({
       avatar_url: (existing as any).avatar_url ?? "",
     }));
     setHydrated(true);
-  }
+  }, [existing, isEdit, hydrated]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
