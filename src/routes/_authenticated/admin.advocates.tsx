@@ -271,10 +271,20 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     }
   };
 
-  const openRepositionExisting = () => {
+  const openRepositionExisting = async () => {
     if (!form.avatar_url) return;
-    setCropSrcIsObjectUrl(false);
-    setCropSrc(form.avatar_url);
+    setUploading(true);
+    try {
+      // Route through server fn to avoid CORS-tainted canvas when cropping
+      const { fetchImageAsDataUrl } = await import("../../lib/fetch-image.functions");
+      const { dataUrl } = await fetchImageAsDataUrl({ data: { url: form.avatar_url } });
+      setCropSrcIsObjectUrl(false);
+      setCropSrc(dataUrl);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not load image for repositioning");
+    } finally {
+      setUploading(false);
+    }
   };
 
   // Chambers list narrows to selected Bar (plus unaffiliated)
