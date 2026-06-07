@@ -342,7 +342,7 @@ function AdminExpertFormModal({
               {firms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
             </select>
           </AField>
-          <AField label="Title (e.g. Orthopaedic Surgeon)">
+          <AField label="Professional title (e.g. Orthopaedic Surgeon, Chartered Accountant)">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Company / practice name">
