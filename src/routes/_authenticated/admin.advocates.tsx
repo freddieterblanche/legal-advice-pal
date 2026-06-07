@@ -54,7 +54,7 @@ function AdminAdvocatesPage() {
 
   const { data: chambers } = useQuery({
     queryKey: ["chambers-options"],
-    queryFn: async () => (await supabase.from("chambers").select("id, name, bar_id").order("name")).data ?? [],
+    queryFn: async () => (await supabase.from("chambers").select("id, name, bar_id, city, province").order("name")).data ?? [],
   });
 
   const { data: advocates, isLoading } = useQuery({
