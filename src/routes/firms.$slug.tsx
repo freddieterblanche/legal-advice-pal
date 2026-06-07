@@ -38,10 +38,31 @@ function FirmProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, is_senior_counsel, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
+        .select("id, slug, first_name, last_name, is_senior_counsel, lawyer_type, designation, designation_code, year_of_admission, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
         .eq("firm_id", firm!.id)
         .in("status", ["trial", "active"]);
-      return data ?? [];
+      if (!data) return [];
+      const attorneyOrder = [
+        "Managing Director", "Chairperson", "Chief Executive Officer", "Chief Operating Officer",
+        "Company Secretary", "Managing Partner", "Director", "Partner", "Consultant",
+        "Executive", "Senior Associate", "Associate", "Candidate Legal Practitioner",
+      ];
+      const rank = (l: any): number => {
+        if (l.lawyer_type === "advocate" && l.is_senior_counsel) return 0;
+        const code = l.designation_code || l.designation || "";
+        const idx = attorneyOrder.findIndex(d => code.toLowerCase().includes(d.toLowerCase()));
+        if (idx >= 0) return 10 + idx;
+        if (l.lawyer_type === "advocate") return 50;
+        return 100;
+      };
+      return [...data].sort((a: any, b: any) => {
+        const r = rank(a) - rank(b);
+        if (r !== 0) return r;
+        const ya = a.year_of_admission ?? 9999;
+        const yb = b.year_of_admission ?? 9999;
+        if (ya !== yb) return ya - yb;
+        return `${a.last_name}`.localeCompare(b.last_name);
+      });
     },
   });
 
