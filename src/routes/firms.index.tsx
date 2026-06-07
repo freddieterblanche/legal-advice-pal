@@ -62,7 +62,7 @@ function FirmsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("firms")
-        .select("id, name, slug, city, province, website, phone, description, logo_url", { count: "exact" })
+        .select("id, name, slug, city, province, website, phone, description, logo_url, created_at", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
       if (search.province) {
@@ -75,7 +75,15 @@ function FirmsIndex() {
       }
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("name");
+      const sort = search.sort ?? "name";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        // "name" — and fall-through for "lawyers" which is re-sorted client-side below
+        query = query.order("name", { ascending });
+      }
       const { data, count, error } = await query;
       if (error) throw error;
       return { rows: data ?? [], total: count ?? 0 };
