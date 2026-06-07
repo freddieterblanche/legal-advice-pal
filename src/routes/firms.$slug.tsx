@@ -38,7 +38,7 @@ function FirmProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
+        .select("id, slug, first_name, last_name, is_senior_counsel, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
         .eq("firm_id", firm!.id)
         .in("status", ["trial", "active"]);
       return data ?? [];
