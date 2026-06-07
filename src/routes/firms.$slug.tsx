@@ -38,7 +38,7 @@ function FirmProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, designation, city")
+        .select("id, slug, first_name, last_name, designation, city, avatar_url, lawyer_practice_areas(practice_areas(name))")
         .eq("firm_id", firm!.id)
         .in("status", ["trial", "active"]);
       return data ?? [];
@@ -124,23 +124,53 @@ function FirmProfile() {
         )}
 
         <h2 className="mt-12 font-heading text-2xl text-ink">Our Lawyers</h2>
-        <div className="mt-6 grid gap-3 md:grid-cols-2">
-          {lawyers?.map((l) => (
-            <Link
-              key={l.id}
-              to="/lawyers/$slug"
-              params={{ slug: l.slug }}
-              className="flex items-center gap-4 rounded-md border border-border bg-card p-4 hover:border-gold hover:shadow-md"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink font-heading text-sm text-gold">
-                {l.first_name[0]}{l.last_name[0]}
-              </div>
-              <div>
-                <p className="font-heading text-sm font-semibold text-ink">{l.first_name} {l.last_name}</p>
-                <p className="text-xs text-muted-foreground">{l.designation} · {l.city}</p>
-              </div>
-            </Link>
-          ))}
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {lawyers?.map((l: any) => {
+            const areas = (l.lawyer_practice_areas ?? [])
+              .map((x: any) => x.practice_areas?.name)
+              .filter(Boolean)
+              .slice(0, 3);
+            return (
+              <Link
+                key={l.id}
+                to="/lawyers/$slug"
+                params={{ slug: l.slug }}
+                className="group overflow-hidden rounded-lg border border-border bg-card transition hover:border-gold hover:shadow-lg"
+              >
+                <div className="aspect-[4/5] w-full overflow-hidden bg-ink">
+                  {l.avatar_url ? (
+                    <img
+                      src={l.avatar_url}
+                      alt={`${l.first_name} ${l.last_name}`}
+                      className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-ink font-heading text-5xl text-gold">
+                      {l.first_name[0]}{l.last_name[0]}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <p className="font-heading text-base font-semibold text-ink group-hover:text-gold">
+                    {l.first_name} {l.last_name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {[l.designation, l.city].filter(Boolean).join(" · ")}
+                  </p>
+                  {areas.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {areas.map((a: string) => (
+                        <span key={a} className="rounded bg-ink/5 px-2 py-0.5 text-[11px] text-ink/70">
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
