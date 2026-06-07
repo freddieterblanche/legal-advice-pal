@@ -1,0 +1,1 @@
+UPDATE public.lawyers SET is_senior_counsel = true WHERE id = 'db6a7c90-ad79-4021-aada-53c512f6b55f';
