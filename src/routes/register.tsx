@@ -157,7 +157,17 @@ function RegisterPage() {
                 <option value="">Select province</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
-              <Input placeholder="City" value={firm.city} onChange={(v) => setFirm({ ...firm, city: v })} required />
+              <ComboboxCreatable
+                value={firm.city}
+                onChange={(v) => setFirm({ ...firm, city: v })}
+                options={townOptions}
+                placeholder={firm.province ? "Select or type a city/town…" : "Select a province first…"}
+                emptyLabel="—"
+                disabled={!firm.province}
+                onCreate={async (name) => name}
+                createLabel="Use"
+              />
+
               <Input placeholder="Address (optional)" value={firm.address} onChange={(v) => setFirm({ ...firm, address: v })} />
               <Input placeholder="Website (https://…)" value={firm.website} onChange={(v) => setFirm({ ...firm, website: v })} />
               <Input placeholder="Phone (optional)" value={firm.phone} onChange={(v) => setFirm({ ...firm, phone: v })} />
