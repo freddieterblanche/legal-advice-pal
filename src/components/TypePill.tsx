@@ -7,18 +7,18 @@ type Variant = "attorney" | "advocate" | "expert" | "mediator" | "arbitrator" | 
 
 const STYLES: Record<Variant, string> = {
   // Attorney — cool blue
-  attorney:   "bg-sky-500/15 text-sky-200 ring-sky-400/40",
+  attorney:   "bg-sky-500/25 text-ink ring-sky-500/50",
   // Advocate — emerald
-  advocate:   "bg-emerald-500/15 text-emerald-200 ring-emerald-400/40",
+  advocate:   "bg-emerald-500/25 text-ink ring-emerald-500/50",
   // Expert witness — gold (matches site accent)
-  expert:     "bg-amber-400/15 text-amber-200 ring-amber-300/40",
+  expert:     "bg-amber-400/30 text-ink ring-amber-500/50",
   // Mediator — violet
-  mediator:   "bg-violet-500/15 text-violet-200 ring-violet-400/40",
+  mediator:   "bg-violet-500/25 text-ink ring-violet-500/50",
   // Arbitrator — rose
-  arbitrator: "bg-rose-500/15 text-rose-200 ring-rose-400/40",
+  arbitrator: "bg-rose-500/25 text-ink ring-rose-500/50",
   // Law firm — slate
-  firm:       "bg-slate-400/15 text-slate-100 ring-slate-300/40",
-  neutral:    "bg-cream/10 text-cream ring-cream/30",
+  firm:       "bg-slate-400/25 text-ink ring-slate-500/50",
+  neutral:    "bg-ink/10 text-ink ring-ink/30",
 };
 
 export function TypePill({
