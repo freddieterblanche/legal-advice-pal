@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye, Building2, Trash2, Star, Pencil } from "lucide-react";
+import { Plus, Users, Wallet, FileText, Settings as SettingsIcon, Sparkles, X, Upload, Eye, Building2, Trash2, Star, Pencil, Stethoscope } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,7 +26,7 @@ type Branch = {
   is_head_office: boolean;
 };
 
-type Tab = "overview" | "lawyers" | "billing" | "settings";
+type Tab = "overview" | "lawyers" | "experts" | "billing" | "settings";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Firm Dashboard — Lawexpert.co.za" }] }),
@@ -127,6 +127,7 @@ function Dashboard() {
             {([
               { id: "overview", label: "Overview", icon: FileText },
               { id: "lawyers", label: "Lawyers", icon: Users },
+              { id: "experts", label: "Expert Witnesses", icon: Stethoscope },
               { id: "billing", label: "Billing", icon: Wallet },
               { id: "settings", label: "Settings", icon: SettingsIcon },
             ] as const).map((t) => (
@@ -147,6 +148,7 @@ function Dashboard() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
         {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} onClearEditSearch={clearEditSearch} />}
+        {tab === "experts" && <ExpertWitnessesTab firmId={firm.id} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
@@ -251,6 +253,8 @@ type LawyerRow = {
   profile_views: number | null;
   profile_id?: string | null;
   slug?: string | null;
+  is_mediator?: boolean | null;
+  is_arbitrator?: boolean | null;
 };
 
 
@@ -290,6 +294,16 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
     onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
   });
 
+  const toggleFlag = useMutation({
+    mutationFn: async ({ id, field, value }: { id: string; field: "is_mediator" | "is_arbitrator"; value: boolean }) => {
+      const patch = field === "is_mediator" ? { is_mediator: value } : { is_arbitrator: value };
+      const { error } = await supabase.from("lawyers").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
   const refresh = () => qc.invalidateQueries({ queryKey: ["firm-lawyers-list", firmId] });
 
   return (
@@ -307,6 +321,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Designation</th>
+              <th className="px-4 py-3">Roles</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Trial Ends</th>
               <th className="px-4 py-3">Views</th>
@@ -320,6 +335,26 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
                 <tr key={l.id}>
                   <td className="px-4 py-3 font-medium text-ink">{l.first_name ?? ""} {l.last_name ?? ""}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.designation}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag.mutate({ id: l.id, field: "is_mediator", value: !l.is_mediator })}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_mediator ? "border-forest bg-forest text-white" : "border-border text-muted-foreground hover:border-forest"}`}
+                        title="Toggle mediator role (+R149/mo when active)"
+                      >
+                        Mediator
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag.mutate({ id: l.id, field: "is_arbitrator", value: !l.is_arbitrator })}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${l.is_arbitrator ? "border-gold bg-gold text-white" : "border-border text-muted-foreground hover:border-gold"}`}
+                        title="Toggle arbitrator role (+R199/mo when active)"
+                      >
+                        Arbitrator
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{l.status}</span></td>
                   <td className="px-4 py-3 text-muted-foreground">{l.status === "trial" ? `${daysLeft} days left` : "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{l.profile_views}</td>
@@ -342,7 +377,7 @@ function LawyersTab({ firmId, editLawyerId, onClearEditSearch }: { firmId: strin
               );
             })}
             {(!lawyers || lawyers.length === 0) && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No lawyers yet. Add your first.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">No lawyers yet. Add your first.</td></tr>
             )}
           </tbody>
         </table>
@@ -1078,17 +1113,45 @@ function LawyerFormModal({
 function BillingTab({ firmId }: { firmId: string }) {
   const { data: lawyers } = useQuery({
     queryKey: ["billing-lawyers", firmId],
-    queryFn: async () => (await supabase.from("lawyers").select("first_name, last_name, status, trial_end_date").eq("firm_id", firmId)).data ?? [],
+    queryFn: async () => (await supabase.from("lawyers").select("first_name, last_name, status, trial_end_date, is_mediator, is_arbitrator").eq("firm_id", firmId)).data ?? [],
   });
 
-  const activeCount = lawyers?.filter((l) => l.status === "active").length ?? 0;
+  const { data: experts } = useQuery({
+    queryKey: ["billing-experts", firmId],
+    queryFn: async () => (await supabase.from("expert_witnesses").select("first_name, last_name, status").eq("firm_id", firmId)).data ?? [],
+  });
+
+  const activeLawyers = lawyers?.filter((l) => l.status === "active") ?? [];
+  const mediators = activeLawyers.filter((l) => l.is_mediator).length;
+  const arbitrators = activeLawyers.filter((l) => l.is_arbitrator).length;
+  const activeExperts = experts?.filter((e) => e.status === "active").length ?? 0;
+
+  const baseTotal = activeLawyers.length * 99;
+  const mediatorTotal = mediators * 149;
+  const arbitratorTotal = arbitrators * 199;
+  const expertTotal = activeExperts * 149;
+  const monthlyTotal = baseTotal + mediatorTotal + arbitratorTotal + expertTotal;
+
+  const lines = [
+    { label: `${activeLawyers.length} active lawyer${activeLawyers.length === 1 ? "" : "s"} × R99`, amount: baseTotal },
+    { label: `${mediators} mediator add-on${mediators === 1 ? "" : "s"} × R149`, amount: mediatorTotal },
+    { label: `${arbitrators} arbitrator add-on${arbitrators === 1 ? "" : "s"} × R199`, amount: arbitratorTotal },
+    { label: `${activeExperts} expert witness${activeExperts === 1 ? "" : "es"} × R149`, amount: expertTotal },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="rounded-md border border-border bg-card p-6">
         <h2 className="font-heading text-xl text-ink">Monthly Total</h2>
-        <p className="mt-2 font-heading text-4xl text-gold">R{activeCount * 99}</p>
-        <p className="text-sm text-muted-foreground">{activeCount} active lawyer{activeCount === 1 ? "" : "s"} × R99/month</p>
+        <p className="mt-2 font-heading text-4xl text-gold">R{monthlyTotal}</p>
+        <div className="mt-4 divide-y divide-border border-t border-border">
+          {lines.map((l) => (
+            <div key={l.label} className="flex justify-between py-2 text-sm">
+              <span className="text-muted-foreground">{l.label}</span>
+              <span className="font-medium text-ink">R{l.amount}</span>
+            </div>
+          ))}
+        </div>
         <button className="mt-4 rounded border border-gold bg-transparent px-4 py-2 text-sm font-medium text-gold hover:bg-gold hover:text-white">
           Connect PayFast (coming soon)
         </button>
@@ -1119,6 +1182,217 @@ function BillingTab({ firmId }: { firmId: string }) {
         Invoice history will appear here once PayFast is connected.
       </div>
     </div>
+  );
+}
+
+type ExpertRow = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  title: string | null;
+  slug: string;
+  city: string | null;
+  province: string | null;
+  status: string;
+  trial_end_date: string | null;
+  profile_views: number;
+  qualifications: string | null;
+  registration_body: string | null;
+  bio: string | null;
+};
+
+const expertSchema = z.object({
+  first_name: z.string().trim().min(1).max(80),
+  last_name: z.string().trim().min(1).max(80),
+  title: z.string().trim().max(120).optional(),
+  qualifications: z.string().trim().max(2000).optional(),
+  registration_body: z.string().trim().max(200).optional(),
+  city: z.string().trim().max(80).optional(),
+  province: z.enum(PROVINCES as unknown as [string, ...string[]]).optional(),
+  bio: z.string().trim().max(5000).optional(),
+});
+
+function ExpertWitnessesTab({ firmId }: { firmId: string }) {
+  const qc = useQueryClient();
+  const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<ExpertRow | null>(null);
+
+  const { data: experts } = useQuery({
+    queryKey: ["firm-experts-list", firmId],
+    queryFn: async () => (await supabase.from("expert_witnesses").select("*").eq("firm_id", firmId).order("created_at", { ascending: false })).data ?? [],
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("expert_witnesses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Expert removed"); qc.invalidateQueries({ queryKey: ["firm-experts-list", firmId] }); },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["firm-experts-list", firmId] });
+
+  return (
+    <div>
+      <div className="mb-4 flex justify-between">
+        <h2 className="font-heading text-xl text-ink">Expert Witnesses ({experts?.length ?? 0})</h2>
+        <button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-1.5 rounded bg-ink px-4 py-2 text-sm font-semibold text-cream hover:bg-ink/90">
+          <Plus className="h-4 w-4" /> Add Expert Witness
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-md border border-border bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-cream text-left text-xs uppercase tracking-wider text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Title</th>
+              <th className="px-4 py-3">Location</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Trial Ends</th>
+              <th className="px-4 py-3">Views</th>
+              <th className="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {experts?.map((e) => {
+              const daysLeft = e.trial_end_date ? Math.max(0, Math.ceil((new Date(e.trial_end_date).getTime() - Date.now()) / 86400000)) : null;
+              return (
+                <tr key={e.id}>
+                  <td className="px-4 py-3 font-medium text-ink">Dr {e.first_name} {e.last_name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{e.title ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
+                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
+                  <td className="px-4 py-3 text-muted-foreground">{e.status === "trial" ? `${daysLeft} days left` : "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{e.profile_views}</td>
+                  <td className="px-4 py-3 text-right">
+                    {(e.status === "trial" || e.status === "active") && (
+                      <a href={`/expert-witnesses/${e.slug}`} target="_blank" rel="noopener noreferrer" className="mr-2 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold">
+                        <Eye className="h-3 w-3" /> Preview
+                      </a>
+                    )}
+                    <button onClick={() => setEditing(e as ExpertRow)} className="mr-2 text-xs font-medium text-ink hover:text-gold">Edit</button>
+                    <button onClick={() => { if (confirm("Delete this expert?")) remove.mutate(e.id); }} className="text-xs text-destructive">Delete</button>
+                  </td>
+                </tr>
+              );
+            })}
+            {(!experts || experts.length === 0) && (
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">No expert witnesses yet. Add your first.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {showAdd && <ExpertFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
+      {editing && <ExpertFormModal firmId={firmId} expert={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
+    </div>
+  );
+}
+
+function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string; expert?: ExpertRow; onClose: () => void; onSaved: () => void }) {
+  const isEdit = !!expert;
+  const [form, setForm] = useState({
+    first_name: expert?.first_name ?? "",
+    last_name: expert?.last_name ?? "",
+    title: expert?.title ?? "",
+    qualifications: expert?.qualifications ?? "",
+    registration_body: expert?.registration_body ?? "",
+    city: expert?.city ?? "",
+    province: (expert?.province ?? "Gauteng") as string,
+    bio: expert?.bio ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = expertSchema.safeParse(form);
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Invalid input"); return; }
+    setSaving(true);
+    try {
+      if (isEdit && expert) {
+        const { error } = await supabase.from("expert_witnesses").update({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          title: form.title || null,
+          qualifications: form.qualifications || null,
+          registration_body: form.registration_body || null,
+          city: form.city || null,
+          province: form.province || null,
+          bio: form.bio || null,
+        }).eq("id", expert.id);
+        if (error) throw error;
+      } else {
+        const baseSlug = slugify(`${form.first_name}-${form.last_name}`);
+        const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
+        const { error } = await supabase.from("expert_witnesses").insert({
+          firm_id: firmId,
+          slug,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          title: form.title || null,
+          qualifications: form.qualifications || null,
+          registration_body: form.registration_body || null,
+          city: form.city || null,
+          province: form.province || null,
+          bio: form.bio || null,
+        });
+        if (error) throw error;
+      }
+      toast.success(isEdit ? "Expert updated" : "Expert added");
+      onSaved();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div onClick={(e) => e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit" : "Add"} Expert Witness</h3>
+          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          </div>
+          <Field label="Title (e.g. Orthopaedic Surgeon)"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Qualifications"><textarea rows={2} value={form.qualifications} onChange={(e) => setForm({ ...form, qualifications: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <Field label="Registration body (e.g. HPCSA)"><input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Field label="City"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+            <Field label="Province">
+              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </Field>
+          </div>
+          <Field label="Bio / experience"><textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+              {saving ? "Saving…" : isEdit ? "Save changes" : "Add expert"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block text-sm">
+      <span className="mb-1 block font-medium text-ink">{label}</span>
+      {children}
+    </label>
   );
 }
 
