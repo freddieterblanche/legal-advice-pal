@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X } from "lucide-react";
+import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
