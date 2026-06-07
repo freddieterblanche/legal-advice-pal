@@ -22,6 +22,7 @@ import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
 import { Route as AuthenticatedAdminChambersRouteImport } from './routes/_authenticated/admin.chambers'
 import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
@@ -91,6 +92,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminTownsRoute = AuthenticatedAdminTownsRouteImport.update({
+  id: '/admin/towns',
+  path: '/admin/towns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminFirmsRoute = AuthenticatedAdminFirmsRouteImport.update({
   id: '/admin/firms',
   path: '/admin/firms',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
+  '/_authenticated/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/firms'
+    | '/admin/towns'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/bars'
     | '/admin/chambers'
     | '/admin/firms'
+    | '/admin/towns'
     | '/admin'
   id:
     | '__root__'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/bars'
     | '/_authenticated/admin/chambers'
     | '/_authenticated/admin/firms'
+    | '/_authenticated/admin/towns'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -335,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/towns': {
+      id: '/_authenticated/admin/towns'
+      path: '/admin/towns'
+      fullPath: '/admin/towns'
+      preLoaderRoute: typeof AuthenticatedAdminTownsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/firms': {
       id: '/_authenticated/admin/firms'
       path: '/admin/firms'
@@ -372,6 +391,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
   AuthenticatedAdminChambersRoute: typeof AuthenticatedAdminChambersRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
+  AuthenticatedAdminTownsRoute: typeof AuthenticatedAdminTownsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -381,6 +401,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
   AuthenticatedAdminChambersRoute: AuthenticatedAdminChambersRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
+  AuthenticatedAdminTownsRoute: AuthenticatedAdminTownsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -403,3 +424,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
