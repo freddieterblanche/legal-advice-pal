@@ -114,14 +114,19 @@ function SearchPage() {
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
-      // Always filter by type — attorneys and advocates are separate datasets
-      filtered = filtered.filter((r) => designationKind(r.designation) === search.type);
+      // Always filter by type — attorneys and advocates are separate datasets.
+      // Prefer the structured provider_type column; fall back to legacy designation parsing.
+      const resolveKind = (r: { provider_type?: string | null; designation?: string | null }) =>
+        r.provider_type === "advocate" || r.provider_type === "attorney"
+          ? r.provider_type
+          : designationKind(r.designation);
+      filtered = filtered.filter((r) => resolveKind(r) === search.type);
       // Exclude pure mediators/arbitrators (no firm, no advocate/attorney
       // designation) from the Attorneys tab — they belong on /mediators
       // and /arbitrators, not the lawyer search.
       if (search.type === "attorney") {
         filtered = filtered.filter(
-          (r) => !((r.is_mediator || r.is_arbitrator) && !r.firm_name && !r.designation),
+          (r) => !((r.is_mediator || r.is_arbitrator) && !r.firm_name && !r.designation && !r.provider_type),
         );
       }
       return { rows: filtered, total: filtered.length };
@@ -277,9 +282,14 @@ function SearchPage() {
                 const caseCount = l.case_count ?? 0;
                 const first = l.first_name ?? "";
                 const last = l.last_name ?? "";
-                const kind = designationKind(l.designation);
+                const kind: "advocate" | "attorney" =
+                  l.provider_type === "advocate" || l.provider_type === "attorney"
+                    ? l.provider_type
+                    : designationKind(l.designation);
                 const KindIcon = kind === "advocate" ? Scale : Briefcase;
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
+                const badgeLabel = l.designation
+                  ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
                 <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
@@ -310,12 +320,10 @@ function SearchPage() {
                         <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
                           {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                         </Link>
-                        {l.designation && (
-                          <span className={designationBadgeClass(l.designation)}>
-                            <KindIcon className="h-3 w-3" strokeWidth={2} />
-                            {l.designation}
-                          </span>
-                        )}
+                        <span className={designationBadgeClass(kind === "advocate" ? "advocate" : (l.designation ?? "attorney"))}>
+                          <KindIcon className="h-3 w-3" strokeWidth={2} />
+                          {badgeLabel}
+                        </span>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {[
