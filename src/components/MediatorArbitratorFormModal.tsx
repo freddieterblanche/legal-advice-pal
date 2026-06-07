@@ -250,15 +250,16 @@ export function MediatorArbitratorFormModal({
             </Field>
 
             {/* Location */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="City">
-                <input className={inputCls} value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })} />
-              </Field>
-              <Field label="Province">
-                <input className={inputCls} value={form.province}
-                  onChange={(e) => setForm({ ...form, province: e.target.value })} />
-              </Field>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <ProvinceCityFields
+                  province={form.province}
+                  city={form.city}
+                  onProvince={(v: string) => setForm({ ...form, province: v })}
+                  onCity={(v: string) => setForm({ ...form, city: v })}
+                />
+              </div>
             </div>
 
             {/* Contact */}
