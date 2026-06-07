@@ -5,6 +5,9 @@ import { Plus, X, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../../integrations/supabase/client";
 import { PROVINCES, slugify } from "../../lib/constants";
+import { RichTextEditor } from "../../components/RichTextEditor";
+import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
+import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
