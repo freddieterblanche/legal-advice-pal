@@ -273,13 +273,13 @@ function SearchPage() {
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
+                <article key={l.id} className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:flex-row">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className="h-24 w-24 shrink-0 rounded-xl object-cover"
+                      className="h-48 w-full shrink-0 object-cover object-top sm:h-auto sm:w-40 sm:self-stretch"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
@@ -289,49 +289,51 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-24 w-24 shrink-0 items-center justify-center rounded-xl ${accentBg} font-heading text-2xl`}
+                    className={`flex h-48 w-full shrink-0 items-center justify-center ${accentBg} font-heading text-3xl sm:h-auto sm:w-40 sm:self-stretch`}
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-baseline gap-3">
-                      <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
-                        {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                      </Link>
-                      {l.designation && (
-                        <span className={designationBadgeClass(l.designation)}>
-                          <KindIcon className="h-3 w-3" strokeWidth={2} />
-                          {l.designation}
-                        </span>
+                  <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-baseline gap-3">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                          {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                        </Link>
+                        {l.designation && (
+                          <span className={designationBadgeClass(l.designation)}>
+                            <KindIcon className="h-3 w-3" strokeWidth={2} />
+                            {l.designation}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {[
+                          l.firm_name ?? l.chambers_name,
+                          kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : "Unspecified years in practice") : null,
+                          [l.city, l.province].filter(Boolean).join(", ")
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                      {l.practice_areas && l.practice_areas[0] && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {l.practice_areas.filter(Boolean).slice(0, 4).map((pa: string) => (
+                            <span key={pa} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pa}</span>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {[
-                        l.firm_name ?? l.chambers_name,
-                        kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : "Unspecified years in practice") : null,
-                        [l.city, l.province].filter(Boolean).join(", ")
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                    {l.practice_areas && l.practice_areas[0] && (
-                      <div className="mt-3 flex flex-wrap gap-1.5">
-                        {l.practice_areas.filter(Boolean).slice(0, 4).map((pa: string) => (
-                          <span key={pa} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pa}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col items-end gap-2 sm:w-32">
-                    {caseCount > 0 && (
-                      <span className="rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
-                        {caseCount} case{caseCount === 1 ? "" : "s"}
-                      </span>
-                    )}
-                    <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
-                      View Profile
-                    </Link>
+                    <div className="flex flex-row items-center gap-2 sm:flex-col sm:items-end sm:w-32">
+                      {caseCount > 0 && (
+                        <span className="rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
+                          {caseCount} case{caseCount === 1 ? "" : "s"}
+                        </span>
+                      )}
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                        View Profile
+                      </Link>
+                    </div>
                   </div>
                 </article>
                 );
