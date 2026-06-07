@@ -22,6 +22,8 @@ type AttorneyRow = {
   province: string | null;
   firm_id: string | null;
   designation: string | null;
+  designation_code: string | null;
+  designation_custom: string | null;
   is_mediator: boolean | null;
   is_arbitrator: boolean | null;
   year_of_admission: number | null;
