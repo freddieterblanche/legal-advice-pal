@@ -271,8 +271,7 @@ function SearchPage() {
                 const kind = designationKind(l.designation);
                 const KindIcon = kind === "advocate" ? Scale : Briefcase;
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
-                const currentYear = new Date().getFullYear();
-                const yearsInPractice = l.year_of_admission ? currentYear - l.year_of_admission : null;
+                const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
                 <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
                   {l.avatar_url ? (
