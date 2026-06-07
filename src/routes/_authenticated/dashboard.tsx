@@ -97,7 +97,7 @@ function Dashboard() {
             <span className="text-ink">
               {search.firmId ? <>Platform admin · managing <strong>{firm.name}</strong></> : <>Platform admin</>}
             </span>
-            <Link to="/admin/firms" className="font-medium text-forest hover:text-gold">← All firms</Link>
+            <Link to="/admin" className="font-medium text-forest hover:text-gold">← Admin hub</Link>
           </div>
         </div>
       )}
