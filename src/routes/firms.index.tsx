@@ -39,6 +39,20 @@ function FirmsIndex() {
     queryFn: async () => (await supabase.from("provinces").select("id, name, slug").order("name")).data ?? [],
   });
 
+  const { data: towns } = useQuery({
+    queryKey: ["towns"],
+    queryFn: async () => (await supabase.from("towns").select("id, name, slug, province_id").order("name")).data ?? [],
+  });
+
+  const townOptions = (() => {
+    if (!towns) return [];
+    if (search.province) {
+      const prov = provinces?.find((p) => p.slug === search.province);
+      if (prov) return towns.filter((t) => t.province_id === prov.id);
+    }
+    return towns;
+  })();
+
   const { data, isLoading } = useQuery({
     queryKey: ["firms-index", search],
     queryFn: async () => {
@@ -50,6 +64,10 @@ function FirmsIndex() {
       if (search.province) {
         const provName = provinces?.find((p) => p.slug === search.province)?.name;
         if (provName) query = query.eq("province", provName);
+      }
+      if (search.town) {
+        const townName = towns?.find((t) => t.slug === search.town)?.name;
+        if (townName) query = query.ilike("city", townName);
       }
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
