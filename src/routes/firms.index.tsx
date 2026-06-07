@@ -117,6 +117,16 @@ function FirmsIndex() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const page = search.page ?? 1;
+  const sortedRows = (() => {
+    const rows = data?.rows ?? [];
+    if ((search.sort ?? "name") !== "lawyers") return rows;
+    const ascending = (search.dir ?? "asc") === "asc";
+    return [...rows].sort((a, b) => {
+      const ac = counts?.[a.id] ?? 0;
+      const bc = counts?.[b.id] ?? 0;
+      return ascending ? ac - bc : bc - ac;
+    });
+  })();
 
   return (
     <div className="bg-cream">
