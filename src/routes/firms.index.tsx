@@ -5,7 +5,7 @@ import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; province?: string; page?: number };
+type Search = { q?: string; province?: string; town?: string; page?: number };
 
 export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
