@@ -137,7 +137,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
 
     const bio = data.background ? `<p>${data.background.replace(/</g, "&lt;")}</p>` : null;
 
-    const insertRow: Record<string, unknown> = {
+    const insertRow = {
       slug,
       profile_id: context.userId,
       first_name: data.first_name,
@@ -175,7 +175,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles").select("role").eq("id", context.userId).maybeSingle();
     const keepRole = existingProfile?.role === "firm_admin" || existingProfile?.role === "platform_admin";
-    const profilePatch: Record<string, unknown> = {
+    const profilePatch: { id: string; email?: string; first_name?: string; last_name?: string; role?: string } = {
       id: context.userId,
       email: userData?.user?.email,
       first_name: data.first_name,
@@ -240,7 +240,7 @@ export const registerExpertForCurrentUser = createServerFn({ method: "POST" })
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles").select("role").eq("id", context.userId).maybeSingle();
     const keepRole = existingProfile?.role === "firm_admin" || existingProfile?.role === "platform_admin";
-    const profilePatch: Record<string, unknown> = {
+    const profilePatch: { id: string; email?: string; first_name?: string; last_name?: string; role?: string } = {
       id: context.userId,
       email: userData?.user?.email,
       first_name: data.first_name,
