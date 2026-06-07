@@ -225,7 +225,7 @@ function LawyerProfile() {
             </section>
           )}
 
-          {lawyer.is_mediator && (
+          {lawyer.is_mediator && (lawyer.mediator_accreditation || lawyer.mediator_style || (lawyer.mediator_sectors?.length ?? 0) > 0 || lawyer.availability_notes) && (
             <section>
               <h2 className="font-heading text-xl text-ink">Mediation</h2>
               <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
