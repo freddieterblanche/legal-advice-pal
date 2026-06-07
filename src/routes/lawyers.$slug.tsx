@@ -54,7 +54,11 @@ function LawyerProfile() {
     staleTime: 60_000,
   });
 
-  const contact = lawyer ? { email: lawyer.email as string | null, phone: lawyer.phone as string | null } : null;
+  const contact = lawyer ? {
+    email: lawyer.email as string | null,
+    office_phone: (lawyer.office_phone as string | null) ?? null,
+    mobile_phone: (lawyer.mobile_phone as string | null) ?? (lawyer.phone as string | null) ?? null,
+  } : null;
 
 
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
@@ -123,9 +127,14 @@ function LawyerProfile() {
                     <Mail className="h-4 w-4" /> {contact.email}
                   </a>
                 )}
-                {contact?.phone && (
-                  <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
-                    <Phone className="h-4 w-4" /> {contact.phone}
+                {contact?.office_phone && (
+                  <a href={`tel:${contact.office_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <Phone className="h-4 w-4" /> <span className="text-cream/50">Office</span> {contact.office_phone}
+                  </a>
+                )}
+                {contact?.mobile_phone && (
+                  <a href={`tel:${contact.mobile_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <Phone className="h-4 w-4" /> <span className="text-cream/50">Mobile</span> {contact.mobile_phone}
                   </a>
                 )}
 
