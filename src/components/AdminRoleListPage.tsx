@@ -314,7 +314,7 @@ function CreateNewPersonForm({ role, column, onSaved }: {
     const baseSlug = slugify(`${firstName} ${lastName}`);
     const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
     const lawyer_type = background === "retired_attorney" ? "attorney" : background === "retired_advocate" ? "advocate" : null;
-    const payload: Record<string, unknown> = {
+    const payload = {
       slug,
       first_name: firstName.trim(),
       last_name: lastName.trim(),
