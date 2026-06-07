@@ -66,6 +66,15 @@ function AdminExpertsPage() {
     },
   });
 
+  useEffect(() => {
+    if (search.edit && experts && !editing) {
+      const found = experts.find((e) => e.id === search.edit);
+      if (found) setEditing(found);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.edit, experts]);
+
+
   const { data: firms } = useQuery({
     queryKey: ["admin-firms-list"],
     enabled: profile?.role === "platform_admin",
