@@ -210,7 +210,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("expert_witnesses")
-        .select("qualifications, bio, avatar_url")
+        .select("qualifications, bio, avatar_url, company_name, office_phone, mobile_phone, contact_email")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
@@ -229,11 +229,15 @@ function AdminExpertFormModal({
     avatar_url: "",
     firm_id: expert?.firm_id ?? "",
     status: expert?.status ?? "trial",
+    company_name: "",
+    office_phone: "",
+    mobile_phone: "",
+    contact_email: "",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio/avatar once detail loads (effect, not in-render setState)
+  // Hydrate qualifications/bio/avatar/contact once detail loads (effect, not in-render setState)
   useEffect(() => {
     if (!isEdit || hydrated || !existing) return;
     setForm((f) => ({
@@ -241,9 +245,14 @@ function AdminExpertFormModal({
       qualifications: (existing as any).qualifications ?? "",
       bio: (existing as any).bio ?? "",
       avatar_url: (existing as any).avatar_url ?? "",
+      company_name: (existing as any).company_name ?? "",
+      office_phone: (existing as any).office_phone ?? "",
+      mobile_phone: (existing as any).mobile_phone ?? "",
+      contact_email: (existing as any).contact_email ?? "",
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
