@@ -1,0 +1,1 @@
+ALTER TABLE public.service_providers ALTER COLUMN provider_type DROP NOT NULL;

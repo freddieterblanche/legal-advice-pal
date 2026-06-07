@@ -25,7 +25,7 @@ const registerFirmSchema = z.object({
     .optional(),
 });
 
-async function uniqueSlug(table: "firms" | "lawyers" | "service_providers" | "chambers", base: string) {
+async function uniqueSlug(table: "firms" | "service_providers" | "chambers", base: string) {
   const { supabaseAdmin } = await import("../integrations/supabase/client.server");
   let slug = base;
   const { data: clash } = await supabaseAdmin.from(table).select("id").eq("slug", slug).maybeSingle();
@@ -133,7 +133,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
     }
 
     const baseSlug = slugify(`${data.first_name}-${data.last_name}`);
-    const slug = await uniqueSlug("lawyers", baseSlug);
+    const slug = await uniqueSlug("service_providers", baseSlug);
 
     const bio = data.background ? `<p>${data.background.replace(/</g, "&lt;")}</p>` : null;
 
@@ -220,7 +220,7 @@ export const registerExpertForCurrentUser = createServerFn({ method: "POST" })
         profile_id: context.userId,
         first_name: data.first_name,
         last_name: data.last_name,
-        title: data.title ?? null,
+        job_title: data.title ?? null,
         qualifications: data.qualifications ?? null,
         registration_body: data.registration_body ?? null,
         company_name: data.company_name ?? null,

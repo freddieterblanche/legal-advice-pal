@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "../integrations/supabase/auth-middleware";
 
-// Firm admin / platform admin creates an invite for a lawyer.
+// Firm admin / platform admin creates an invite for a service provider.
 // Returns the token + invite URL. (Email delivery uses Lovable Email when configured.)
 export const createLawyerInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -16,7 +16,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
 
-    // Verify the caller controls this lawyer's firm OR is platform admin
+    // Verify the caller controls this provider's firm OR is platform admin
     const { data: caller } = await supabaseAdmin
       .from("profiles")
       .select("role, firm_id")
@@ -26,7 +26,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
     const { data: lawyer, error: lawyerErr } = await supabaseAdmin
       .from("service_providers")
       .select("id, firm_id, first_name, last_name, profile_id")
-      .eq("id", data.lawyer_id)
+      .eq("id", data.service_provider_id)
       .maybeSingle();
     if (lawyerErr) throw lawyerErr;
     if (!lawyer) throw new Error("Lawyer not found");
@@ -40,13 +40,13 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
       throw new Error("This lawyer has already claimed their profile.");
     }
 
-    // Upsert invite (one per lawyer)
+    // Upsert invite (one per provider)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: invite, error: inviteErr } = await supabaseAdmin
       .from("provider_invites")
       .upsert(
         {
-          service_provider_id: data.lawyer_id,
+          service_provider_id: data.service_provider_id,
           email: data.email.toLowerCase(),
           invited_by: context.userId,
           sent_at: new Date().toISOString(),
@@ -54,7 +54,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
           expires_at: expiresAt,
           token: crypto.randomUUID(),
         },
-        { onConflict: "lawyer_id" },
+        { onConflict: "service_provider_id" },
       )
       .select("token, email, expires_at")
       .single();
@@ -77,7 +77,7 @@ export const lookupLawyerInvite = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
     const { data: invite } = await supabaseAdmin
       .from("provider_invites")
-      .select("lawyer_id, email, accepted_at, expires_at, lawyers(first_name, last_name, firm_id, firms(name))")
+      .select("service_provider_id, email, accepted_at, expires_at, service_providers(first_name, last_name, firm_id, firms(name))")
       .eq("token", data.token)
       .maybeSingle();
     if (!invite) return { ok: false as const, reason: "not_found" as const };
@@ -85,7 +85,7 @@ export const lookupLawyerInvite = createServerFn({ method: "POST" })
     if (new Date(invite.expires_at).getTime() < Date.now())
       return { ok: false as const, reason: "expired" as const };
 
-    const law = invite.lawyers as unknown as
+    const law = invite.service_providers as unknown as
       | { first_name: string | null; last_name: string | null; firms: { name: string | null } | null }
       | null;
     return {
@@ -96,7 +96,7 @@ export const lookupLawyerInvite = createServerFn({ method: "POST" })
     };
   });
 
-// Authenticated user accepts an invite: links the lawyer record to their profile.
+// Authenticated user accepts an invite: links the provider record to their profile.
 export const acceptLawyerInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
@@ -107,7 +107,7 @@ export const acceptLawyerInvite = createServerFn({ method: "POST" })
 
     const { data: invite, error: invErr } = await supabaseAdmin
       .from("provider_invites")
-      .select("id, lawyer_id, email, accepted_at, expires_at")
+      .select("id, service_provider_id, email, accepted_at, expires_at")
       .eq("token", data.token)
       .maybeSingle();
     if (invErr) throw invErr;
@@ -123,11 +123,11 @@ export const acceptLawyerInvite = createServerFn({ method: "POST" })
       throw new Error(`This invite was sent to ${invite.email}. Please sign in with that email.`);
     }
 
-    // Link lawyer to this profile
+    // Link provider to this profile
     const { data: lawyer, error: lErr } = await supabaseAdmin
       .from("service_providers")
       .update({ profile_id: context.userId, is_claimed: true })
-      .eq("id", invite.lawyer_id)
+      .eq("id", invite.service_provider_id)
       .select("slug")
       .single();
     if (lErr) throw lErr;
