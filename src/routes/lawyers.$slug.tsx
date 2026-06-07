@@ -98,6 +98,15 @@ function LawyerProfile() {
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}{lawyer.is_senior_counsel ? " SC" : ""}</h1>
                 {(() => {
+                  const isPureMedArb =
+                    !lawyer.firm_id &&
+                    lawyer.lawyer_type !== "advocate" &&
+                    lawyer.lawyer_type !== "attorney" &&
+                    (lawyer.is_mediator || lawyer.is_arbitrator);
+                  if (isPureMedArb) {
+                    // Pure mediator / arbitrator — do NOT label as Attorney or Advocate.
+                    return null;
+                  }
                   const label = formatDesignation(lawyer);
                   if (!label) return null;
                   const isAdv = designationKind(lawyer.lawyer_type === "advocate" ? "advocate" : lawyer.designation) === "advocate";
@@ -109,6 +118,12 @@ function LawyerProfile() {
                     </span>
                   );
                 })()}
+                {lawyer.is_mediator && (
+                  <span className="inline-flex items-center rounded-full bg-violet-500/25 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-violet-500/50">Mediator</span>
+                )}
+                {lawyer.is_arbitrator && (
+                  <span className="inline-flex items-center rounded-full bg-rose-500/25 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-rose-500/50">Arbitrator</span>
+                )}
                 {headBadges(lawyer).map((b) => (
                   <span key={b} className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-gold/40">
                     {b}

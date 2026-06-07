@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Plus, X, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
+import { MediatorArbitratorFormModal } from "./MediatorArbitratorFormModal";
 
 type Role = "mediator" | "arbitrator";
 
@@ -39,6 +40,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile-role"],
@@ -88,11 +90,13 @@ export function AdminRoleListPage({ role }: { role: Role }) {
       || (r.province ?? "").toLowerCase().includes(s);
   });
 
-  const editHref = (r: LawyerRow) => {
-    if (r.lawyer_type === "advocate") return `/admin/advocates?edit=${r.id}`;
-    if (r.firm_id) return `/dashboard`;
-    return `/admin/advocates?edit=${r.id}`;
-  };
+  // Edit routing:
+  //  - Advocates (lawyer_type === "advocate") → existing advocate admin form.
+  //  - Firm attorneys (firm_id set, no advocate type) → firm dashboard.
+  //  - Pure mediators/arbitrators (no firm, no advocate type) → dedicated
+  //    in-place modal so they are NEVER forced through the advocate form.
+  const editAdvocateHref = (id: string) => `/admin/advocates?edit=${id}`;
+  const editsInPlace = (r: LawyerRow) => r.lawyer_type !== "advocate" && !r.firm_id;
 
   return (
     <div className="bg-cream">
@@ -136,7 +140,22 @@ export function AdminRoleListPage({ role }: { role: Role }) {
                   <td className="px-4 py-3 text-muted-foreground">{[r.city, r.province].filter(Boolean).join(", ") || "—"}</td>
                   <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status ?? "—"}</span></td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
-                    <Link to={editHref(r)} className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"><Pencil className="h-3 w-3" /> Edit</Link>
+                    {editsInPlace(r) ? (
+                      <button
+                        onClick={() => setEditingId(r.id)}
+                        className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    ) : r.firm_id && r.lawyer_type !== "advocate" ? (
+                      <Link to="/dashboard" className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold">
+                        <Pencil className="h-3 w-3" /> Edit
+                      </Link>
+                    ) : (
+                      <Link to={editAdvocateHref(r.id)} className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold">
+                        <Pencil className="h-3 w-3" /> Edit
+                      </Link>
+                    )}
                     <Link to="/lawyers/$slug" params={{ slug: r.slug }} target="_blank" className="mr-3 text-xs font-medium text-forest hover:text-gold">Open <ExternalLink className="inline h-3 w-3" /></Link>
                     <button
                       onClick={() => {
@@ -170,6 +189,18 @@ export function AdminRoleListPage({ role }: { role: Role }) {
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["admin-role-list", role] });
             setAdding(false);
+          }}
+        />
+      )}
+
+      {editingId && (
+        <MediatorArbitratorFormModal
+          id={editingId}
+          role={role}
+          onClose={() => setEditingId(null)}
+          onSaved={() => {
+            qc.invalidateQueries({ queryKey: ["admin-role-list", role] });
+            setEditingId(null);
           }}
         />
       )}

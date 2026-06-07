@@ -1,73 +1,53 @@
-## Goal
+## Problem
 
-Turn `/register` from a firm-only flow into a single entry point that handles five listing types: **Law Firm**, **Advocate**, **Mediator**, **Arbitrator**, and **Expert Witness**. Mediators and arbitrators may be non-lawyers, so they don't require admission or chambers.
+In the admin panel, clicking **Edit** on a mediator or arbitrator currently sends them to `/admin/advocates?edit=<id>` (see `AdminRoleListPage.editHref`). That form was built for advocates — it shows Bar, Chambers, Senior Counsel, Year of Admission — and forces every mediator/arbitrator through an advocate-shaped UX. Pure mediators/arbitrators who are not (and may never have been) attorneys or advocates should not be touched by that form.
 
-## User-facing flow
+The data model already supports this separation:
+- `lawyers.lawyer_type` can be `null` for pure mediators/arbitrators (the constraint fix from the previous turn allows this).
+- Dedicated columns exist: `mediator_accreditation`, `mediator_style`, `mediator_sectors`, `arbitrator_accreditation`, `arbitrator_types`, `arbitrator_experience_years`.
+- The "Create new" form in `AdminRoleListPage` already creates rows with `lawyer_type = null` when background = "Other".
 
-**Step 0 — Choose what you're registering** (new):
-Five `TypePill`-coloured cards. Selecting one routes the rest of the wizard.
+What's missing is a dedicated **edit** path for those rows.
 
-**Step 1 — Listing details** (varies by type):
+## What we'll build
 
-| Type | Step 1 fields |
-|---|---|
-| Law Firm | (unchanged) firm name, reg #, province, city, address, website, phone |
-| Advocate | first/last name, title, year of admission, SC toggle, **bar** (pick), **chambers** (pick or "Create new" — opens chambers sub-form with name + address + city + province), province, city, phone, email |
-| Mediator | first/last name, title (optional), `is_lawyer` toggle → if yes, year of admission + bar; if no, profession/background field; accreditation, style, sectors, province, city, phone, email |
-| Arbitrator | first/last name, title, `is_lawyer` toggle (same branch as mediator), accreditation, types, experience years, province, city, phone, email |
-| Expert | first/last name, title, discipline(s), registration body, employer / company, independent toggle, province, city, phone, email |
+1. **New component `MediatorArbitratorFormModal`** (in `src/components/AdminRoleListPage.tsx` alongside the existing `AddRoleModal`, or a sibling file). Shows only fields that apply:
+   - First name, Last name
+   - Photo (URL + upload + crop, reusing `ImageCropModal` like the advocate modal)
+   - City, Province
+   - Email, Office phone, Mobile
+   - **Description / Bio** — `RichTextEditor`, sanitized with `sanitizeBioHtml` on save (per memory rule)
+   - For mediators: Accreditation, Style, Sectors (multi-select from `MEDIATION_SECTORS`)
+   - For arbitrators: Accreditation, Types (multi-select), Years of experience
+   - Languages, Daily rate range, Availability notes
+   - Optional cross-flag: "Also acts as Arbitrator" (on mediator form) / "Also acts as Mediator" (on arbitrator form)
+   - Status (Active / Trial / Pending payment / Inactive) when editing
+   - Practice areas chips (same picker used elsewhere)
+   - Reported cases editor (existing component)
+   - Hydrates the full row with `select("*")` before allowing edits and gates input on a `hydrated` flag (per memory rule)
+   - Never writes `lawyer_type`, `bar_id`, `chambers_id`, `is_senior_counsel`, `year_of_admission` — these stay untouched
 
-**Step 2 — Account** (unchanged): if not signed in, capture admin first/last/email/password; if signed in, confirm.
+2. **Update `AdminRoleListPage`** so the Edit button behaviour becomes:
+   - If `lawyer_type === "advocate"` → open `/admin/advocates?edit=<id>` (unchanged — they're an advocate first)
+   - Else if `firm_id` is set (attorney at a firm) → `/dashboard` (unchanged)
+   - Else → open the new `MediatorArbitratorFormModal` directly (instead of the current fallback to advocate admin)
 
-**Step 3 — Confirmation**: generic copy ("subscription details to follow per listing type"); on submit, listing is created in `status = 'trial'` and user is redirected to `/dashboard`.
+3. **Public profile separation check**: Confirm `/lawyers/$slug` already renders pure mediators/arbitrators cleanly (it does — `mediators.index.tsx` and `arbitrators.index.tsx` already link there) and that no labels there call them "Advocate" when `lawyer_type` is null. Adjust the type pill / heading on `lawyers.$slug.tsx` so a row with `lawyer_type = null` + `is_mediator/is_arbitrator` uses the Mediator/Arbitrator `TypePill` variant (per the type-pill memory rule) instead of falling through to an Attorney/Advocate label.
 
-## Data model
+4. **Registration flow sanity check** (`src/routes/register.tsx` / `registerLawyerForCurrentUser`): Already supports `kind: "mediator" | "arbitrator"` with `is_lawyer: false`. Verify the public registration UI clearly offers Mediator and Arbitrator as standalone choices that don't require selecting attorney/advocate. Make wording adjustments only if it's currently ambiguous; no schema change needed.
 
-- **Firm**: existing `firms` insert + `profiles.role = 'firm_admin'` (no change).
-- **Advocate / Mediator / Arbitrator (lawyer-flavour)**: insert into `lawyers` with `lawyer_type = 'advocate'` (or null for non-lawyer M/A), `is_mediator` / `is_arbitrator` flags as appropriate, `chambers_id` set for advocates, `firm_id` left null for solo advocates and non-lawyer neutrals. `profile_id` links to the signed-in user.
-- **Expert**: insert into `expert_witnesses` as today; `firm_id` null for independents. Link via a new `expert_witnesses.profile_id` column (currently the table has no owner column — see migration).
-- New `profiles.role` values used: `lawyer_owner` (solo advocate / mediator / arbitrator), `expert_owner`. `firm_admin` unchanged.
+## What we will NOT change
 
-## Migrations needed
+- The `AdvocateFormModal` keeps its Mediator/Arbitrator toggles for advocates who also act in those roles.
+- The dashboard's `LawyerFormModal` keeps its toggles for firm attorneys who also mediate/arbitrate.
+- Database schema — no migration needed; the constraint already allows mediator/arbitrator-only rows.
+- Public listing pages (`/mediators`, `/arbitrators`) — unchanged.
 
-1. Add `lawyers.profile_id uuid references auth.users(id)` (nullable) — already exists; verify and add owner-edit RLS policy:
-   `lawyers can be updated by their profile_id owner`.
-2. Add `expert_witnesses.profile_id uuid references auth.users(id)` (nullable) + owner-update + owner-delete RLS policies mirroring existing firm-admin ones.
-3. Allow authenticated users to insert their own `lawyers` row (with `profile_id = auth.uid()`) and their own `expert_witnesses` row. Today insert is restricted; we need a per-owner insert policy.
-4. Allow authenticated users to insert `chambers` (currently platform-admin only) so an advocate can create theirs during signup. Scope via `WITH CHECK (true)` for authenticated; platform admin keeps full management rights.
+## Technical details
 
-## Server functions
-
-Replace `registerFirmForCurrentUser` with one new file `src/lib/registration.functions.ts` exporting:
-
-- `registerFirmForCurrentUser` (kept, unchanged signature)
-- `registerLawyerForCurrentUser` — Zod input discriminated on `kind: 'advocate' | 'mediator' | 'arbitrator'`; sets `is_mediator`/`is_arbitrator`, `chambers_id` (creates chambers on-the-fly if a new-chambers payload is supplied), `lawyer_type`. Sets `profile_id = userId`. Updates `profiles.role = 'lawyer_owner'` (unless already firm_admin/platform_admin).
-- `registerExpertForCurrentUser` — Zod input mirroring expert form. Creates expert row, sets `profile_id`, updates `profiles.role = 'expert_owner'`.
-
-All use `supabaseAdmin` (imported inside handler) so we don't have to widen anon/auth insert policies for everything.
-
-## UI changes
-
-- `src/routes/register.tsx` becomes a thin shell that owns step state + the new step 0 picker and renders one of:
-  - `RegisterFirmSteps` (existing markup extracted)
-  - `RegisterLawyerSteps` (new — handles advocate/mediator/arbitrator with conditional fields)
-  - `RegisterExpertSteps` (new)
-- Step-0 cards use `TypePill` colours (firm=slate, advocate=emerald, mediator=violet, arbitrator=rose, expert=amber). Each card: icon, type name, one-line description.
-- Page H1 changes to "Register your listing"; existing "Register Your Firm" SEO meta stays as the default but is updated to "Register on Lawexpert.co.za — Firms, Advocates, Mediators, Arbitrators & Experts".
-- Bar + chambers pickers reuse `ComboboxCreatable`; long-text fields (bio if any in step 1) use `RichTextEditor` per the project rule.
-- After successful signup, navigate to `/dashboard` — the dashboard already shows the relevant owner's listing.
-
-## Dashboard impact (light)
-
-`dashboard.tsx` already supports firm admins managing firm + lawyers + experts. For new solo owners we just need the existing per-row owner edit to work, which the new RLS policies enable. No dashboard rewrite in this pass — defer larger "solo lawyer dashboard" tweaks to a follow-up.
-
-## Out of scope (deferred)
-
-- Per-type pricing copy (Step 3 stays generic).
-- Lawyer-invite flow changes.
-- Dashboard sections tailored to solo neutrals/experts beyond what exists.
-
-## Risks
-
-- Widening `chambers` insert to authenticated users opens spammy chambers creation. Mitigated by: only invoked through signup server fn (which we keep admin-elevated), so the RLS widening may not be needed — instead, the server fn creates chambers with `supabaseAdmin` and we leave the client policy locked down. **Recommended**: keep chambers policies as-is, do chambers creation server-side only.
-- `lawyers` insert policy widening: same — do it server-side via `supabaseAdmin`, so no client-side insert policy change needed. Migration #3 is therefore unnecessary; we only need the **owner UPDATE** policies (and matching `expert_witnesses.profile_id` column + UPDATE/DELETE policies) so users can edit their own listing from the dashboard later.
+- File touched: `src/components/AdminRoleListPage.tsx` (add the new modal, change `editHref` into modal-open state) and `src/routes/lawyers.$slug.tsx` (pill/label fallback when `lawyer_type` is null).
+- New modal uses the same `supabase.from("lawyers").select("*").eq("id", id)` hydrate pattern already proven in `AdvocateFormModal`.
+- Save uses `supabase.from("lawyers").update(payload).eq("id", id)` with **only** the fields the modal owns — no destructive overwrite of advocate-only columns.
+- Bio sanitized via `sanitizeBioHtml(form.bio) || null` before update.
+- Photo upload reuses `lawyer-photos` storage bucket and `ImageCropModal`.
+- No new dependencies.
