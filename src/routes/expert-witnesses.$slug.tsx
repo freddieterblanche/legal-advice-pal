@@ -225,13 +225,11 @@ function ExpertWitnessProfile() {
             </section>
           )}
 
-          <section>
-            <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
-              <BookOpen className="h-5 w-5 text-gold" /> Case Appearances ({cases.length})
-            </h2>
-            {cases.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">No linked cases yet.</p>
-            ) : (
+          {cases.length > 0 && (
+            <section>
+              <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
+                <BookOpen className="h-5 w-5 text-gold" /> Case Appearances ({cases.length})
+              </h2>
               <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
                 {cases.map((cew: any, i: number) => (
                   <li key={i} className="p-4">
@@ -244,8 +242,8 @@ function ExpertWitnessProfile() {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </section>
+          )}
         </div>
 
         <aside className="space-y-4">
