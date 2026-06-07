@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Upload, X, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
@@ -14,8 +14,19 @@ type Props = {
 export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [showUrlInput, setShowUrlInput] = useState(false);
+  // Auto-open the URL field when the existing value already looks like a
+  // pasted external link (not one of our storage signed URLs), so admins can
+  // immediately see and edit it on opening the form.
+  const looksExternal = !!value && !value.includes("/storage/v1/object/");
+  const [showUrlInput, setShowUrlInput] = useState(looksExternal);
   const [urlDraft, setUrlDraft] = useState(value ?? "");
+
+  // Keep the local draft in sync with the parent value (e.g. after hydration
+  // from an async fetch).
+  useEffect(() => {
+    setUrlDraft(value ?? "");
+  }, [value]);
+
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
