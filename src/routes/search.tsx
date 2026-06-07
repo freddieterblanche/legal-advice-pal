@@ -211,9 +211,7 @@ function SearchPage() {
             <h1 className="font-heading text-2xl text-ink">
               {isLoading
                 ? "Searching…"
-                : `${total} ${
-                    search.type === "advocate" ? "advocate" : search.type === "attorney" ? "attorney" : "lawyer"
-                  }${total === 1 ? "" : "s"} found`}
+                : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
           </div>
 
