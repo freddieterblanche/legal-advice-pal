@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Upload, X, Link as LinkIcon } from "lucide-react";
+import { Upload, X, Link as LinkIcon, Crop } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "../integrations/supabase/client";
+import { ImageCropModal } from "./ImageCropModal";
+import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
 
 type Props = {
   value: string;
@@ -20,6 +23,9 @@ export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
   const looksExternal = !!value && !value.includes("/storage/v1/object/");
   const [showUrlInput, setShowUrlInput] = useState(looksExternal);
   const [urlDraft, setUrlDraft] = useState(value ?? "");
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [loadingCrop, setLoadingCrop] = useState(false);
+  const fetchImageFn = useServerFn(fetchImageAsDataUrl);
 
   // Keep the local draft in sync with the parent value (e.g. after hydration
   // from an async fetch).
@@ -28,36 +34,64 @@ export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
   }, [value]);
 
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadBlob = async (blob: Blob, ext: string, contentType: string) => {
+    const root = firmId ?? "independent";
+    const path = `${root}/experts/${expertId ?? "new"}/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("lawyer-photos")
+      .upload(path, blob, { contentType, upsert: false });
+    if (upErr) throw upErr;
+    const { data: signed, error: sErr } = await supabase.storage
+      .from("lawyer-photos")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+    return signed.signedUrl;
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+    // Open cropper first so user can reposition before saving.
+    setCropSrc(URL.createObjectURL(file));
+  };
 
+  const handleReposition = async () => {
+    if (!value) { toast.error("Add a photo first"); return; }
+    setLoadingCrop(true);
+    try {
+      // For storage signed URLs we can fetch directly in the browser; for
+      // arbitrary external URLs route through the server fn to avoid CORS.
+      if (value.includes("/storage/v1/object/")) {
+        setCropSrc(value);
+      } else {
+        const { dataUrl } = await fetchImageFn({ data: { url: value } });
+        setCropSrc(dataUrl);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load image for cropping");
+    } finally {
+      setLoadingCrop(false);
+    }
+  };
+
+  const handleCropped = async (blob: Blob) => {
     setUploading(true);
     try {
-      // Storage policy requires the first folder segment to match firm_id
-      // (or platform_admin bypass). Independent experts → "independent".
-      const root = firmId ?? "independent";
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${root}/experts/${expertId ?? "new"}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("lawyer-photos")
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw upErr;
-      const { data: signed, error: sErr } = await supabase.storage
-        .from("lawyer-photos")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
-      onChange(signed.signedUrl);
-      toast.success("Photo uploaded");
+      const url = await uploadBlob(blob, "jpg", "image/jpeg");
+      onChange(url);
+      toast.success("Photo updated");
+      if (cropSrc && cropSrc.startsWith("blob:")) URL.revokeObjectURL(cropSrc);
+      setCropSrc(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }
   };
+
 
   return (
     <div className="space-y-2">
