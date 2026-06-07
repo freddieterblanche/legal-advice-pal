@@ -989,4 +989,3 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
     </div>
   );
 }
-}
