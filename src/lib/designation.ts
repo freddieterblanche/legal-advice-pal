@@ -67,15 +67,20 @@ export type StructuredLawyer = {
  * falling back to the legacy free-text `designation` column when unset.
  */
 export function formatDesignation(l: StructuredLawyer): string {
-  if (l.lawyer_type === "advocate") {
+  const kind: LawyerKind =
+    l.lawyer_type === "advocate" || l.lawyer_type === "attorney"
+      ? l.lawyer_type
+      : designationKind(l.designation);
+  if (kind === "advocate") {
     const seniority = l.is_senior_counsel ? "Senior Counsel" : "Junior Counsel";
     const years = yearsInPractice(l.year_of_admission ?? null);
     return years !== null ? `${seniority} · ${years} year${years === 1 ? "" : "s"} in practice` : seniority;
   }
-  if (l.lawyer_type === "attorney") {
-    return (l.designation_code || l.designation_custom || "Attorney") as string;
-  }
-  return l.designation ?? "";
+  const designation = (l.designation_code || l.designation_custom || l.designation || "Attorney") as string;
+  const years = yearsInPractice(l.year_of_admission ?? null);
+  return years !== null
+    ? `${designation} · ${years} year${years === 1 ? "" : "s"} in practice`
+    : `${designation} · Unspecified years in practice`;
 }
 
 /**

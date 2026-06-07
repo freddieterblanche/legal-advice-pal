@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
-import { designationKind, designationBadgeClass } from "../lib/designation";
+import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 
@@ -271,6 +271,7 @@ function SearchPage() {
                 const kind = designationKind(l.designation);
                 const KindIcon = kind === "advocate" ? Scale : Briefcase;
                 const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
+                const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
                 <article key={l.id} className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-sm transition-shadow hover:shadow-md sm:flex-row">
                   {l.avatar_url ? (
@@ -306,7 +307,11 @@ function SearchPage() {
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {[l.firm_name ?? l.chambers_name, [l.city, l.province].filter(Boolean).join(", ")]
+                      {[
+                        l.firm_name ?? l.chambers_name,
+                        kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : "Unspecified years in practice") : null,
+                        [l.city, l.province].filter(Boolean).join(", ")
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
