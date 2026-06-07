@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 type Props = {
   imageSrc: string;
@@ -36,10 +37,23 @@ export function ImageCropModal({ imageSrc, onCancel, onConfirm, busy }: Props) {
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => setArea(pixels), []);
 
+  const [working, setWorking] = useState(false);
+
   const handleConfirm = async () => {
-    if (!area) return;
-    const blob = await getCroppedBlob(imageSrc, area);
-    onConfirm(blob);
+    if (!area) {
+      toast.error("Adjust the crop first");
+      return;
+    }
+    setWorking(true);
+    try {
+      const blob = await getCroppedBlob(imageSrc, area);
+      await Promise.resolve(onConfirm(blob));
+    } catch (err) {
+      console.error("Crop failed", err);
+      toast.error(err instanceof Error ? err.message : "Could not crop image");
+    } finally {
+      setWorking(false);
+    }
   };
 
   return (
@@ -94,10 +108,10 @@ export function ImageCropModal({ imageSrc, onCancel, onConfirm, busy }: Props) {
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={busy || !area}
+            disabled={busy || working || !area}
             className="rounded bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Uploading…" : "Save photo"}
+            {busy || working ? "Uploading…" : "Save photo"}
           </button>
         </div>
       </div>
