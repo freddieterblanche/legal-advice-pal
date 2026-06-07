@@ -670,6 +670,20 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
             <p className="mt-1 text-xs text-muted-foreground">Same list used for lawyers. Click to select / deselect.</p>
           </div>
 
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description / Bio</label>
+            {isEdit && !hydrated ? (
+              <div className="rounded border border-dashed border-border bg-muted/30 px-3 py-6 text-center text-xs text-muted-foreground">Loading existing description…</div>
+            ) : (
+              <RichTextEditor
+                value={form.bio}
+                onChange={(html) => setForm({ ...form, bio: html })}
+                placeholder="Background, practice focus, mediation/arbitration experience…"
+              />
+            )}
+          </div>
+
+
           {isEdit && (
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
