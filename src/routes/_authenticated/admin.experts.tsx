@@ -223,6 +223,7 @@ function AdminExpertFormModal({
   const [form, setForm] = useState({
     first_name: expert?.first_name ?? "",
     last_name: expert?.last_name ?? "",
+    name_title: expert?.name_title ?? "",
     title: expert?.title ?? "",
     qualifications: "",
     registration_body: "",
