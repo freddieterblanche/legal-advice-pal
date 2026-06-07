@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X } from "lucide-react";
+import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
@@ -28,11 +28,14 @@ type AdvocateRow = {
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
+  created_at: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/advocates")({
   validateSearch: (s: Record<string, unknown>) => ({
     edit: typeof s.edit === "string" ? s.edit : undefined,
+    sort: s.sort === "experience" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({ meta: [{ title: "Admin · Advocates — Lawexpert.co.za" }] }),
   component: AdminAdvocatesPage,
@@ -72,7 +75,7 @@ function AdminAdvocatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url")
+        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url, created_at")
         .eq("lawyer_type", "advocate")
         .order("last_name");
       if (error) throw error;
@@ -111,6 +114,37 @@ function AdminAdvocatesPage() {
       || chambersName(a.chambers_id).toLowerCase().includes(s);
   });
 
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    const dir = search.dir === "desc" ? -1 : 1;
+    const sort = search.sort;
+    if (sort === "experience") {
+      const currentYear = new Date().getFullYear();
+      list.sort((a, b) => {
+        const ya = a.year_of_admission ? currentYear - a.year_of_admission : 0;
+        const yb = b.year_of_admission ? currentYear - b.year_of_admission : 0;
+        return (ya - yb) * dir;
+      });
+    } else if (sort === "listed") {
+      list.sort((a, b) => {
+        const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return (da - db) * dir;
+      });
+    } else {
+      list.sort((a, b) => `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`) * dir);
+    }
+    return list;
+  }, [filtered, search.sort, search.dir]);
+
+  const setSort = (field: "surname" | "experience" | "listed") => {
+    if (search.sort === field) {
+      navigate({ search: (prev: typeof search) => ({ ...prev, dir: search.dir === "asc" ? "desc" : "asc" }) });
+    } else {
+      navigate({ search: (prev: typeof search) => ({ ...prev, sort: field, dir: "asc" }) });
+    }
+  };
+
   return (
     <div className="bg-cream">
       <div className="border-b border-border bg-card">
@@ -127,7 +161,26 @@ function AdminAdvocatesPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, bar or chambers…" className="mb-4 w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, bar or chambers…" className="w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex items-center gap-1.5">
+            {(["surname", "experience", "listed"] as const).map((field) => {
+              const active = search.sort === field;
+              const asc = active && search.dir === "asc";
+              const label = field === "surname" ? "Surname" : field === "experience" ? "Years Experience" : "Date Listed";
+              return (
+                <button
+                  key={field}
+                  onClick={() => setSort(field)}
+                  className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-card text-ink hover:border-ink"}`}
+                >
+                  {label}
+                  {active ? (asc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="overflow-x-auto rounded-md border border-border bg-card">
           <table className="w-full text-sm">
             <thead className="bg-cream text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -141,7 +194,7 @@ function AdminAdvocatesPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Loading…</td></tr>}
-              {filtered.map((a) => (
+              {sorted.map((a) => (
                 <tr key={a.id}>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => setEditing(a)} className="text-left font-medium text-ink hover:text-gold hover:underline">{a.first_name} {a.last_name}</button>
@@ -160,7 +213,7 @@ function AdminAdvocatesPage() {
                   </td>
                 </tr>
               ))}
-              {!isLoading && filtered.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No advocates yet. Click <strong>Add Advocate</strong> to create one.</td></tr>}
+              {!isLoading && sorted.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No advocates yet. Click <strong>Add Advocate</strong> to create one.</td></tr>}
             </tbody>
           </table>
         </div>
