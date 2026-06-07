@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,9 @@ import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   component: AdminExpertsPage,
 });
 
