@@ -213,7 +213,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("expert_witnesses")
-        .select("qualifications, bio, avatar_url, company_name, office_phone, mobile_phone, contact_email")
+        .select("*")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
@@ -241,21 +241,34 @@ function AdminExpertFormModal({
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio/avatar/contact once detail loads (effect, not in-render setState)
+  // Hydrate ALL editable fields from the full row once it loads so the form
+  // never blanks out existing data and saves don't overwrite stored values.
   useEffect(() => {
     if (!isEdit || hydrated || !existing) return;
+    const e = existing as Record<string, unknown>;
     setForm((f) => ({
       ...f,
-      qualifications: (existing as any).qualifications ?? "",
-      bio: (existing as any).bio ?? "",
-      avatar_url: (existing as any).avatar_url ?? "",
-      company_name: (existing as any).company_name ?? "",
-      office_phone: (existing as any).office_phone ?? "",
-      mobile_phone: (existing as any).mobile_phone ?? "",
-      contact_email: (existing as any).contact_email ?? "",
+      first_name: (e.first_name as string) ?? f.first_name,
+      last_name: (e.last_name as string) ?? f.last_name,
+      name_title: (e.name_title as string) ?? f.name_title,
+      title: (e.title as string) ?? f.title,
+      qualifications: (e.qualifications as string) ?? "",
+      registration_body: (e.registration_body as string) ?? "",
+      city: (e.city as string) ?? f.city,
+      province: (e.province as string) ?? f.province,
+      bio: (e.bio as string) ?? "",
+      avatar_url: (e.avatar_url as string) ?? "",
+      firm_id: (e.firm_id as string) ?? f.firm_id,
+      status: (e.status as string) ?? f.status,
+      company_name: (e.company_name as string) ?? "",
+      office_phone: (e.office_phone as string) ?? "",
+      mobile_phone: (e.mobile_phone as string) ?? "",
+      contact_email: (e.contact_email as string) ?? "",
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
+
+
 
 
   const submit = async (e: React.FormEvent) => {
@@ -314,6 +327,9 @@ function AdminExpertFormModal({
             <X className="h-5 w-5" />
           </button>
         </div>
+        {isEdit && !hydrated ? (
+          <div className="py-12 text-center text-sm text-muted-foreground">Loading existing details…</div>
+        ) : (
         <form onSubmit={submit} className="space-y-3">
           <AField label="Photo">
             <ExpertPhotoField
@@ -408,6 +424,7 @@ function AdminExpertFormModal({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
