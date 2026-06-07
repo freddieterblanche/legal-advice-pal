@@ -38,8 +38,9 @@ export function Navbar() {
 
   const isPlatformAdmin = role === "platform_admin";
 
-  const publicLinks = [
-    { to: "/search", label: "Find a Lawyer" },
+  const publicLinks: Array<{ to: string; label: string; search?: Record<string, string> }> = [
+    { to: "/search", label: "Attorneys", search: { type: "attorney" } },
+    { to: "/search", label: "Advocates", search: { type: "advocate" } },
     { to: "/expert-witnesses", label: "Expert Witnesses" },
     { to: "/mediators", label: "Mediators" },
     { to: "/arbitrators", label: "Arbitrators" },
@@ -55,7 +56,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-8 md:flex">
           {publicLinks.map(l => (
-            <Link key={l.to} to={l.to} className="text-sm font-medium text-cream/80 transition-colors hover:text-gold">
+            <Link key={`${l.to}-${l.label}`} to={l.to} search={l.search as never} className="text-sm font-medium text-cream/80 transition-colors hover:text-gold">
               {l.label}
             </Link>
           ))}
