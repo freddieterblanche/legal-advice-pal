@@ -194,7 +194,7 @@ function AdminAdvocatesPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Loading…</td></tr>}
-              {filtered.map((a) => (
+              {sorted.map((a) => (
                 <tr key={a.id}>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => setEditing(a)} className="text-left font-medium text-ink hover:text-gold hover:underline">{a.first_name} {a.last_name}</button>
