@@ -327,6 +327,9 @@ function AdminExpertFormModal({
             <X className="h-5 w-5" />
           </button>
         </div>
+        {isEdit && !hydrated ? (
+          <div className="py-12 text-center text-sm text-muted-foreground">Loading existing details…</div>
+        ) : (
         <form onSubmit={submit} className="space-y-3">
           <AField label="Photo">
             <ExpertPhotoField
