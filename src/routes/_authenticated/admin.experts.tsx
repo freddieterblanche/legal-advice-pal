@@ -8,6 +8,7 @@ import { PROVINCES, slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
+import { ProvinceCityFields } from "../../components/ProvinceCityFields";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
