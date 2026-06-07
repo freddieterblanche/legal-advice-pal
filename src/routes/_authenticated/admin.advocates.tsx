@@ -215,7 +215,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
 
   const [selectedPaIds, setSelectedPaIds] = useState<Set<string>>(new Set());
   // Hydrate selection when existing data arrives
-  useMemo(() => {
+  useEffect(() => {
     if (existingPaIds) setSelectedPaIds(new Set(existingPaIds));
   }, [existingPaIds]);
 
