@@ -694,7 +694,7 @@ function LawyerFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="flex max-h-[90vh] w-[90vw] flex-col overflow-hidden rounded-lg bg-card shadow-xl md:w-[70vw]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
           <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
@@ -1338,7 +1338,7 @@ function BranchFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Branch" : "Add Branch"}</h3>
@@ -1529,7 +1529,7 @@ function InviteLawyerModal({ lawyer, onClose, onSent }: { lawyer: LawyerRow; onC
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-heading text-xl text-ink">Invite {lawyer.first_name} {lawyer.last_name}</h3>

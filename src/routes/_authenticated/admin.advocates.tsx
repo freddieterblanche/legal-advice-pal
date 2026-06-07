@@ -357,7 +357,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Advocate" : "Add Advocate"}</h3>
