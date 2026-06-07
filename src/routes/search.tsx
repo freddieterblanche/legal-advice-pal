@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Briefcase, Scale, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
+import { SortBar, type SortDir } from "../components/SortBar";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed" | "relevance";
