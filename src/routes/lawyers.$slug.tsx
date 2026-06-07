@@ -252,7 +252,7 @@ function LawyerProfile() {
             </section>
           )}
 
-          {lawyer.is_arbitrator && (
+          {lawyer.is_arbitrator && (lawyer.arbitrator_accreditation || typeof lawyer.arbitrator_experience_years === "number" || (lawyer.arbitrator_types?.length ?? 0) > 0 || lawyer.daily_rate_range || (lawyer.languages?.length ?? 0) > 0) && (
             <section>
               <h2 className="font-heading text-xl text-ink">Arbitration</h2>
               <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
