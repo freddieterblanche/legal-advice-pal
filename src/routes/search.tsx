@@ -168,10 +168,26 @@ function SearchPage() {
             <div className="mt-3">
               <Combobox
                 value={search.province ?? ""}
-                onChange={(v) => update({ province: v || undefined })}
-                options={PROVINCES.map((p) => ({ value: p, label: p }))}
+                onChange={(v) => update({ province: v || undefined, town: undefined })}
+                options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
                 placeholder="Type a province…"
               />
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town / City</h3>
+            <div className="mt-3">
+              {search.province ? (
+                <Combobox
+                  value={search.town ?? ""}
+                  onChange={(v) => update({ town: v || undefined })}
+                  options={(towns ?? []).map((t) => ({ value: t.slug, label: t.name }))}
+                  placeholder={towns ? "Type a town…" : "Loading towns…"}
+                />
+              ) : (
+                <p className="text-xs italic text-muted-foreground">Pick a province first</p>
+              )}
             </div>
           </div>
 
