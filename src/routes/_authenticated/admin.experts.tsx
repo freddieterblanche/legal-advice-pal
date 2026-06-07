@@ -381,15 +381,16 @@ function AdminExpertFormModal({
           <AField label="Registration body (e.g. HPCSA)">
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
-          <div className="grid gap-3 md:grid-cols-2">
-            <AField label="Province">
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
+            <div className="grid gap-3 md:grid-cols-2">
               <ProvinceCityFields
                 province={form.province}
                 city={form.city}
-                onProvince={(v) => setForm({ ...form, province: v })}
-                onCity={(v) => setForm({ ...form, city: v })}
+                onProvince={(v: string) => setForm({ ...form, province: v })}
+                onCity={(v: string) => setForm({ ...form, city: v })}
               />
-            </AField>
+            </div>
           </div>
           {isEdit && (
             <AField label="Status">
