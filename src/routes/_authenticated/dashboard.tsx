@@ -1227,6 +1227,10 @@ type ExpertRow = {
   registration_body: string | null;
   bio: string | null;
   avatar_url: string | null;
+  company_name: string | null;
+  office_phone: string | null;
+  mobile_phone: string | null;
+  contact_email: string | null;
 };
 
 const expertSchema = z.object({
@@ -1239,6 +1243,10 @@ const expertSchema = z.object({
   province: z.enum(PROVINCES as unknown as [string, ...string[]]).optional(),
   bio: z.string().trim().max(20000).optional(),
   avatar_url: z.string().trim().max(2000).optional(),
+  company_name: z.string().trim().max(200).optional(),
+  office_phone: z.string().trim().max(40).optional(),
+  mobile_phone: z.string().trim().max(40).optional(),
+  contact_email: z.string().trim().max(200).optional(),
 });
 
 function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
