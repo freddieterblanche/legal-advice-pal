@@ -8,6 +8,7 @@ import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 import { ImageCropModal } from "../../components/ImageCropModal";
+import { ATTORNEY_DESIGNATIONS } from "../../lib/designation";
 
 type AttorneyRow = {
   id: string;
