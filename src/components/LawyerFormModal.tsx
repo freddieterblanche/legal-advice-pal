@@ -441,6 +441,18 @@ export function LawyerFormModal({
         accolades: sanitizeBioHtml(form.accolades),
         noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
         reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+        mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
+        mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
+        mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
+        arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
+        arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
+        arbitrator_experience_years:
+          form.is_arbitrator && form.arbitrator_experience_years
+            ? Number(form.arbitrator_experience_years)
+            : null,
+        availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
+          ? form.availability_notes
+          : null,
       });
       if (isEdit && lawyer) {
         const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
