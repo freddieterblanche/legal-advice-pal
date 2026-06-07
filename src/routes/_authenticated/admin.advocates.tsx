@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
+import { ImageCropModal } from "../../components/ImageCropModal";
 
 type AdvocateRow = {
   id: string;
