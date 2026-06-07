@@ -1,44 +1,84 @@
+## LexSA expansion — Expert Witnesses, Mediators & Arbitrators
 
-# Province / Town Search
+Expand the directory from lawyers-only to four service types, with shared search/profile patterns, new database tables/flags, billing add-ons, and updated navigation/homepage.
 
-Add a normalized location reference (provinces + towns) so users can filter lawyers by Province and then by Town/City, with typeable comboboxes. Existing free-text `city`/`province` on lawyers stays as a fallback.
+### 1. Database (single migration)
 
-## Database (single migration)
+New tables in `public`:
+- `expert_disciplines` — `id, name, slug (unique), parent_category, icon`
+- `expert_witnesses` — all fields per spec + `firm_id uuid null references firms`, `status` enum check, trial dates default `now()` / `now() + 90 days`
+- `expert_witness_disciplines` — composite PK join
+- `case_expert_witnesses` — links expert to `cases`
 
-- `provinces` table — 9 SA provinces seeded: Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo, Mpumalanga, Northern Cape, North West, Western Cape. Fields: `name` (citext, unique), `slug`, `code` (e.g. `GP`, `WC`).
-- `towns` table — ~200 major cities and well-known towns across all 9 provinces. Fields: `name` (citext), `slug`, `province_id` (FK, required), `is_major_city` (bool), with `UNIQUE (province_id, name)`. Seed list curated per province (Joburg, Pretoria, Cape Town, Stellenbosch, Durban, Pietermaritzburg, Bloemfontein, Gqeberha, East London, Polokwane, Nelspruit, Kimberley, Mahikeng, etc., plus the larger towns).
-- `lawyers` — add nullable `town_id` (FK → `towns.id`). Existing free-text `city` and `province` columns kept as fallback (no destructive migration). A future cleanup pass can backfill `town_id` by matching text.
-- `firm_branches` — add nullable `town_id` for consistency (lawyer branch records can also be linked).
-- Indexes on `towns.province_id`, `lawyers.town_id`, `firm_branches.town_id`.
-- RLS: public `SELECT` on `provinces` and `towns` (reference data). Only `platform_admin` may `INSERT/UPDATE/DELETE`. Standard grants for `authenticated`, `service_role`, plus `anon SELECT` on these two reference tables.
+Extend `lawyers` with: `is_mediator, is_arbitrator, mediator_accreditation, mediator_style, mediator_sectors text[], arbitrator_accreditation, arbitrator_types text[], arbitrator_experience_years, languages text[], daily_rate_range, availability_notes`.
 
-## Public search page (`/search`)
+Each new table: `GRANT SELECT TO anon, authenticated` (publicly browsable) + `GRANT ALL TO service_role`; writes restricted by RLS to firm admins / platform admins. `expert_disciplines` public read, admin write.
 
-Replace the current free-text Province textbox with two cascading typeable comboboxes (reusing existing `Combobox`):
+Update view: recreate `lawyer_search_view` (currently includes `is_senior_counsel`) to also expose `is_mediator`, `is_arbitrator`, and the new mediator/arbitrator/languages fields needed by the new search pages.
 
-1. **Province** — typeable select from the 9 provinces.
-2. **Town / City** — typeable select; disabled until a Province is picked; options filtered to that province. Optional ("Any town").
+Config seed: insert `expert_witness_monthly_price_rands=149`, `mediator_monthly_price_rands=149`, `arbitrator_monthly_price_rands=199`.
 
-Both filters are encoded in search params (`province`, `town`). The lawyer query filters on `lawyers.town_id` when town is set, otherwise on any town within the selected province. Falls back to matching the legacy text `province` column for rows without `town_id`, so existing seeded lawyers still appear.
+Seed `expert_disciplines` with the ~50 disciplines grouped by `parent_category` from the spec. Seed Dr Priya Naidoo demo expert witness + link to Orthopaedics & Occupational Medicine.
 
-## Admin
+### 2. Routes (TanStack file-based)
 
-- **Add/Edit Attorney** and **Add/Edit Advocate** forms get a Province + Town combobox pair. Town list filters by Province. Selecting a town also sets the text `city`/`province` columns for backward compatibility.
-- **New `/admin/towns` page** — small CRUD table so platform admin can add missing towns later (typed Province combobox + Town name). Mirrors the Bars/Chambers admin pages. Linked from the Admin Hub alongside Bars and Chambers.
+New route files:
+- `src/routes/expert-witnesses.index.tsx` — search/list
+- `src/routes/expert-witnesses.$slug.tsx` — profile
+- `src/routes/mediators.index.tsx` — search/list (queries `lawyers` where `is_mediator`)
+- `src/routes/arbitrators.index.tsx` — search/list (queries `lawyers` where `is_arbitrator`)
+- Mediator/arbitrator profiles reuse `lawyers.$slug.tsx` with conditional "Mediation" / "Arbitration" sections appended
 
-## Profile + listings
+Each route gets unique `head()` meta (title, description, og:title, og:description).
 
-- Lawyer profile header: prefer joined `town.name, province.name` when `town_id` is set; fall back to text fields.
-- Firm pages: unchanged (firm-level location stays as-is for now).
+### 3. Navigation & homepage
 
-## Out of scope
+`Navbar.tsx` public links → `Find a Lawyer`, `Find an Expert Witness`, `Find a Mediator`, `Find an Arbitrator`. Mobile menu mirrors.
 
-- Backfilling `town_id` on existing lawyer rows (admin can do this manually via edit, or a future migration can attempt fuzzy text match).
-- Suburb-level locations.
-- Self-service town requests by firms/lawyers.
+`routes/index.tsx`:
+- Update hero copy
+- Add tab row above search (Lawyers / Experts / Mediators / Arbitrators) switching the search form & target route
+- Stats bar → 4 counts (lawyers, expert witnesses, mediators, arbitrators)
+- Add four "Find a …" cards above the existing practice area grid (keep practice areas below)
 
-## Technical notes
+### 4. Search pages — shared pattern
 
-- New server fns in `src/lib/locations.functions.ts` (`listProvinces`, `listTowns({ provinceId })`, admin `createTown`, `updateTown`, `deleteTown`). Admin mutations gate on `platform_admin` role via `requireSupabaseAuth` + role check, same pattern as bars/chambers.
-- Search page loads provinces eagerly; towns lazy-loaded on province change via TanStack Query.
-- Seed data for the ~200 towns lives in the migration SQL as one `INSERT ... VALUES` block per province.
+Each search page reuses the visual pattern from existing `search.tsx`:
+- Hero with keyword + primary dropdown + province
+- Left sidebar multi-select filters per spec
+- Result cards per spec
+- Server queries via `supabase` browser client + RLS-safe public reads
+
+### 5. Firm dashboard
+
+Existing `_authenticated/dashboard.tsx` Lawyers tab:
+- Add Mediator / Arbitrator toggle columns per lawyer row
+- Expanding a toggle reveals inline edit fields (accreditation, style/types, sectors, years)
+
+New Expert Witnesses tab in firm dashboard:
+- Table of firm's `expert_witnesses` (filtered by `firm_id = get_my_firm_id()`)
+- "Add Expert Witness" modal form (name, title, disciplines multi-select, qualifications, registration body, city, province, bio)
+- Edit / delete actions
+- Status, trial days remaining, profile views columns
+
+Billing tab: extend to compute `R99 base + R149 (mediator) + R199 (arbitrator) + R149 × expert_witness_count`, with a per-line breakdown.
+
+### 6. RLS
+
+- `expert_witnesses`: public SELECT where `status in ('trial','active')`; firm admin full access where `firm_id = get_my_firm_id()`; platform_admin full access
+- `expert_witness_disciplines`, `case_expert_witnesses`: public SELECT joined to visible experts; firm admin manage own; platform admin all
+- `expert_disciplines`: public SELECT; platform admin write
+- Trigger to prevent non-platform-admins changing `expert_witnesses.status` (mirroring `prevent_firm_admin_status_change` on firms)
+
+### 7. Out of scope (matches spec)
+
+Booking calendar, verified badges, reviews, award uploads — not built.
+
+### Technical notes
+
+- All new server-side reads use the browser supabase client for public pages; firm dashboard writes go via supabase from the authenticated client (RLS scopes by `firm_id`).
+- Slugs generated with existing `slugify` helper in `src/lib/constants.ts`.
+- New constants file `src/lib/expert-constants.ts` for mediation sectors, arbitration types, accreditation lists.
+- Practice-area icon helper extended to map expert discipline slugs → lucide icons.
+- One supabase migration for schema + grants + RLS + triggers; one separate insert for `expert_disciplines` and demo data and config rows (data, not schema).
+- Existing `lawyer_search_view` recreated to include the new mediator/arbitrator/languages columns so search pages can read in one query.
