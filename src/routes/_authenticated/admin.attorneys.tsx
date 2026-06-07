@@ -481,7 +481,24 @@ function AttorneyFormModal({ attorney, firms, onClose, onSaved }: {
 
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Designation</label>
-            <input placeholder="e.g. Partner, Director, Senior Associate, Attorney" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <select
+              value={form.designation_code}
+              onChange={(e) => setForm({ ...form, designation_code: e.target.value })}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Other (specify below)</option>
+              {ATTORNEY_DESIGNATIONS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            {!form.designation_code && (
+              <input
+                placeholder="Custom designation (e.g. Of Counsel)"
+                value={form.designation_custom}
+                onChange={(e) => setForm({ ...form, designation_custom: e.target.value })}
+                className="mt-2 w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
