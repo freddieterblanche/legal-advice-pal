@@ -92,26 +92,48 @@ function ExpertWitnessProfile() {
             )}
             <div className="flex-1">
               <h1 className="font-heading text-3xl md:text-4xl">
-                {expert.title ? `${expert.title} ` : ""}{expert.first_name} {expert.last_name}
+                {expert.first_name} {expert.last_name}
               </h1>
               <div className="mt-3 flex flex-wrap gap-2">
-                {primary && (
-                  <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-gold/40">
-                    {primary.name}
-                  </span>
-                )}
-                <span className="rounded-full bg-cream/10 px-3 py-1 text-xs font-semibold text-cream ring-1 ring-inset ring-cream/30">
-                  {expert.is_independent ? "Independent Practice" : expert.employer ?? "Employed"}
-                </span>
+                <TypePill variant="expert">Expert Witness</TypePill>
+                {expert.title && <TypePill variant="neutral">{expert.title}</TypePill>}
+                {primary && <TypePill variant="neutral">{primary.name}</TypePill>}
+                <TypePill variant="neutral">
+                  {expert.is_independent
+                    ? (expert.company_name ?? "Independent Practice")
+                    : (expert.company_name ?? expert.employer ?? "Employed")}
+                </TypePill>
               </div>
-              <div className="mt-3 flex flex-wrap gap-4 text-sm text-cream/70">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-cream/70">
                 {(expert.city || expert.province) && (
                   <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {[expert.city, expert.province].filter(Boolean).join(", ")}</span>
+                )}
+                {expert.company_name && (
+                  <span className="flex items-center gap-1.5"><Building2 className="h-4 w-4" /> {expert.company_name}</span>
                 )}
                 {expert.registration_body && (
                   <span className="rounded bg-cream/5 px-2 py-0.5">{expert.registration_body}</span>
                 )}
               </div>
+              {(expert.office_phone || expert.mobile_phone || expert.contact_email) && (
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-cream/80">
+                  {expert.office_phone && (
+                    <a href={`tel:${expert.office_phone}`} className="flex items-center gap-1.5 hover:text-gold">
+                      <Phone className="h-4 w-4" /> {expert.office_phone}
+                    </a>
+                  )}
+                  {expert.mobile_phone && (
+                    <a href={`tel:${expert.mobile_phone}`} className="flex items-center gap-1.5 hover:text-gold">
+                      <Smartphone className="h-4 w-4" /> {expert.mobile_phone}
+                    </a>
+                  )}
+                  {expert.contact_email && (
+                    <a href={`mailto:${expert.contact_email}`} className="flex items-center gap-1.5 hover:text-gold">
+                      <Mail className="h-4 w-4" /> {expert.contact_email}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             {(expert.cv_url || canEdit) && (
               <div className="flex flex-col gap-2 self-start">
