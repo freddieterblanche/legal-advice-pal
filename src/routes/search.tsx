@@ -1,14 +1,26 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Briefcase, Scale } from "lucide-react";
+import { Briefcase, Scale, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
 type LawyerType = "attorney" | "advocate";
-type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type: LawyerType; page?: number };
+type SortField = "surname" | "experience" | "listed" | "relevance";
+type SortDir = "asc" | "desc";
+type Search = {
+  q?: string;
+  area?: string;
+  province?: string;
+  town?: string;
+  designation?: string;
+  type: LawyerType;
+  page?: number;
+  sort?: SortField;
+  dir?: SortDir;
+};
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -19,6 +31,10 @@ export const Route = createFileRoute("/search")({
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" || s.sort === "relevance"
+      ? s.sort
+      : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
@@ -28,6 +44,7 @@ export const Route = createFileRoute("/search")({
   }),
   component: SearchPage,
 });
+
 
 const PAGE_SIZE = 20;
 
