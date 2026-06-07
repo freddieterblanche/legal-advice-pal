@@ -257,6 +257,7 @@ export type Database = {
           name: string
           phone: string | null
           province: string | null
+          town_id: string | null
         }
         Insert: {
           address?: string | null
@@ -268,6 +269,7 @@ export type Database = {
           name: string
           phone?: string | null
           province?: string | null
+          town_id?: string | null
         }
         Update: {
           address?: string | null
@@ -279,6 +281,7 @@ export type Database = {
           name?: string
           phone?: string | null
           province?: string | null
+          town_id?: string | null
         }
         Relationships: [
           {
@@ -293,6 +296,13 @@ export type Database = {
             columns: ["firm_id"]
             isOneToOne: false
             referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "firm_branches_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
             referencedColumns: ["id"]
           },
         ]
@@ -662,6 +672,7 @@ export type Database = {
           sector_head_area: string | null
           slug: string
           status: string | null
+          town_id: string | null
           trial_end_date: string | null
           trial_start_date: string | null
           year_of_admission: number | null
@@ -703,6 +714,7 @@ export type Database = {
           sector_head_area?: string | null
           slug: string
           status?: string | null
+          town_id?: string | null
           trial_end_date?: string | null
           trial_start_date?: string | null
           year_of_admission?: number | null
@@ -744,6 +756,7 @@ export type Database = {
           sector_head_area?: string | null
           slug?: string
           status?: string | null
+          town_id?: string | null
           trial_end_date?: string | null
           trial_start_date?: string | null
           year_of_admission?: number | null
@@ -782,6 +795,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
             referencedColumns: ["id"]
           },
         ]
@@ -852,6 +872,75 @@ export type Database = {
           },
         ]
       }
+      provinces: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      towns: {
+        Row: {
+          created_at: string
+          id: string
+          is_major_city: boolean
+          name: string
+          province_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_major_city?: boolean
+          name: string
+          province_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_major_city?: boolean
+          name?: string
+          province_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "towns_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "lawyer_search_view"
+            referencedColumns: ["province_id"]
+          },
+          {
+            foreignKeyName: "towns_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       firm_billing_summary: {
@@ -883,11 +972,25 @@ export type Database = {
           practice_areas: string[] | null
           profile_views: number | null
           province: string | null
+          province_id: string | null
+          province_name: string | null
+          province_slug: string | null
           slug: string | null
           status: string | null
+          town_id: string | null
+          town_name: string | null
+          town_slug: string | null
           trial_end_date: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lawyers_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
