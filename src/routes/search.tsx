@@ -98,11 +98,23 @@ function SearchPage() {
         }
       }
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
-      const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
+      if (search.designation) query = query.eq("designation", search.designation);
+      // Push type filter to SQL so pagination works correctly.
+      // Prefer structured provider_type; fall back to designation parsing for legacy rows.
+      if (search.type === "advocate") {
+        query = query.or(
+          `provider_type.eq.advocate,and(provider_type.is.null,or(designation.ilike.%advocate%,designation.ilike.%senior counsel%,designation.ilike.%junior counsel%,designation.eq.SC))`,
+        );
+      } else {
+        // Attorneys: explicit attorney type, OR null provider_type with a non-advocate designation.
+        query = query
+          .or(`provider_type.eq.attorney,provider_type.is.null`)
+          .not("designation", "ilike", "%advocate%")
+          .not("designation", "ilike", "%senior counsel%")
+          .not("designation", "ilike", "%junior counsel%");
+      }
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
-      query = query.range(from, from + PAGE_SIZE - 1);
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
@@ -110,26 +122,21 @@ function SearchPage() {
       } else {
         query = query.order("created_at", { ascending, nullsFirst: false });
       }
-      const { data, error } = await query;
+      const page = search.page ?? 1;
+      const from = (page - 1) * PAGE_SIZE;
+      query = query.range(from, from + PAGE_SIZE - 1);
+      const { data, error, count } = await query;
       if (error) throw error;
-      let filtered = data ?? [];
-      if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
-      // Always filter by type — attorneys and advocates are separate datasets.
-      // Prefer the structured provider_type column; fall back to legacy designation parsing.
-      const resolveKind = (r: { provider_type?: string | null; designation?: string | null }) =>
-        r.provider_type === "advocate" || r.provider_type === "attorney"
-          ? r.provider_type
-          : designationKind(r.designation);
-      filtered = filtered.filter((r) => resolveKind(r) === search.type);
-      // Exclude pure mediators/arbitrators (no firm, no advocate/attorney
-      // designation) from the Attorneys tab — they belong on /mediators
-      // and /arbitrators, not the lawyer search.
+      let rows = data ?? [];
+      // Final client-side guard: exclude pure mediators/arbitrators (no firm,
+      // no designation, no provider_type) from the Attorneys tab — they
+      // belong on /mediators and /arbitrators.
       if (search.type === "attorney") {
-        filtered = filtered.filter(
+        rows = rows.filter(
           (r) => !((r.is_mediator || r.is_arbitrator) && !r.firm_name && !r.designation && !r.provider_type),
         );
       }
-      return { rows: filtered, total: filtered.length };
+      return { rows, total: count ?? rows.length };
     },
   });
 
