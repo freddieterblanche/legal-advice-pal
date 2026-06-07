@@ -589,7 +589,14 @@ function ExpertWizard() {
             <Input placeholder="Last name" value={form.last_name} onChange={(v) => setForm({ ...form, last_name: v })} required />
           </div>
           <Input placeholder="Title (e.g. Dr., Prof., CA(SA))" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          <Input placeholder="Qualifications (free text)" value={form.qualifications} onChange={(v) => setForm({ ...form, qualifications: v })} />
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Qualifications</p>
+            <RichTextEditor
+              value={form.qualifications}
+              onChange={(html) => setForm({ ...form, qualifications: html })}
+              placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification."
+            />
+          </div>
           <Input placeholder="Registration body (e.g. HPCSA, SAICA)" value={form.registration_body} onChange={(v) => setForm({ ...form, registration_body: v })} />
           <label className="flex items-center gap-2 text-sm text-ink">
             <input type="checkbox" checked={form.is_independent} onChange={(e) => setForm({ ...form, is_independent: e.target.checked })} />
