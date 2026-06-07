@@ -16,6 +16,7 @@ import {
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { getPracticeAreaIcon } from "../lib/practice-area-icons";
+import heroLawyer from "../assets/hero-lawyer.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
