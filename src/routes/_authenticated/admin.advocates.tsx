@@ -270,7 +270,48 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
+    bio: "",
   });
+  // Hydrate the full row (incl. bio + any columns not in the list query) before allowing edit
+  const [hydrated, setHydrated] = useState(!isEdit);
+  useEffect(() => {
+    if (!isEdit || !advocate?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("lawyers")
+        .select("*")
+        .eq("id", advocate.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        toast.error(error?.message ?? "Could not load advocate");
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        first_name: data.first_name ?? f.first_name,
+        last_name: data.last_name ?? f.last_name,
+        email: data.email ?? "",
+        phone: data.phone ?? "",
+        office_phone: data.office_phone ?? "",
+        mobile_phone: data.mobile_phone ?? data.phone ?? "",
+        city: data.city ?? "",
+        province: data.province ?? "",
+        bar_id: data.bar_id ?? "",
+        chambers_id: data.chambers_id ?? "",
+        is_senior_counsel: !!data.is_senior_counsel,
+        is_mediator: !!data.is_mediator,
+        is_arbitrator: !!data.is_arbitrator,
+        year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
+        avatar_url: data.avatar_url ?? "",
+        status: data.status ?? "active",
+        bio: data.bio ?? "",
+      }));
+      setHydrated(true);
+    })();
+    return () => { cancelled = true; };
+  }, [isEdit, advocate?.id]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
