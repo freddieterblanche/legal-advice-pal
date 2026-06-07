@@ -112,14 +112,43 @@ function ExpertWitnessProfile() {
           {expert.qualifications && (
             <section>
               <h2 className="font-heading text-xl text-ink">Qualifications</h2>
-              <p className="mt-3 whitespace-pre-line text-foreground/80">{expert.qualifications}</p>
+              <div
+                className="prose prose-sm mt-3 max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2"
+                dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(expert.qualifications) }}
+              />
             </section>
           )}
 
           {expert.bio && (
             <section>
               <h2 className="font-heading text-xl text-ink">About</h2>
-              <p className="mt-3 leading-relaxed text-foreground/80">{expert.bio}</p>
+              <div
+                className="prose prose-sm mt-3 max-w-none leading-relaxed text-foreground/80 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2"
+                dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(expert.bio) }}
+              />
+            </section>
+          )}
+
+          {samples && samples.length > 0 && (
+            <section>
+              <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
+                <Briefcase className="h-5 w-5 text-gold" /> Samples of Work
+              </h2>
+              <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
+                {samples.map((s) => (
+                  <li key={s.id} className="p-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="font-heading text-sm font-semibold text-ink">{s.project_name}</span>
+                      {s.project_date && (
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(s.project_date).toLocaleDateString("en-ZA", { year: "numeric", month: "short" })}
+                        </span>
+                      )}
+                    </div>
+                    {s.synopsis && <p className="mt-1 text-sm whitespace-pre-line text-foreground/80">{s.synopsis}</p>}
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 
