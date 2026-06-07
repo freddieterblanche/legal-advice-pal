@@ -190,10 +190,20 @@ function ExpertWitnessSearch() {
         </aside>
 
         <div>
-          <div className="mb-4 flex items-baseline justify-between">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-heading text-2xl text-ink">
               {isLoading ? "Searching…" : `${total} expert${total === 1 ? "" : "s"} found`}
             </h2>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "cases", label: "Cases" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
           </div>
 
           {isLoading ? (
