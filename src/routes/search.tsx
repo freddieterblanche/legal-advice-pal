@@ -121,7 +121,6 @@ function SearchPage() {
           {/* Type tabs */}
           <div className="mt-4 inline-flex rounded-full border border-border bg-background p-1">
             {([
-              { key: undefined, label: "Both" },
               { key: "attorney" as const, label: "Attorneys" },
               { key: "advocate" as const, label: "Advocates" },
             ]).map((t) => {
