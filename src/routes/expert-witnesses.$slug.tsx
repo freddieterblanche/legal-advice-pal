@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, MapPin, BookOpen, Download, Globe } from "lucide-react";
+import { ExternalLink, MapPin, BookOpen, Download, Globe, Briefcase } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
+import { sanitizeBioHtml } from "../lib/sanitize";
 
 export const Route = createFileRoute("/expert-witnesses/$slug")({
   head: ({ params }) => ({
@@ -31,6 +32,20 @@ function ExpertWitnessProfile() {
       if (error) throw error;
       if (!data) throw notFound();
       return data as any;
+    },
+  });
+
+  const { data: samples } = useQuery({
+    queryKey: ["expert-work-samples-public", (expert as any)?.id],
+    enabled: !!(expert as any)?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("expert_work_samples")
+        .select("id, project_name, synopsis, project_date")
+        .eq("expert_id", (expert as any).id)
+        .order("project_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      return (data ?? []) as Array<{ id: string; project_name: string; synopsis: string | null; project_date: string | null }>;
     },
   });
 
