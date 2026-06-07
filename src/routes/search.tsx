@@ -31,7 +31,7 @@ export const Route = createFileRoute("/search")({
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
-    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" || s.sort === "relevance"
+    sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed"
       ? s.sort
       : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
