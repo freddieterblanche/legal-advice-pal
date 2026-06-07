@@ -92,7 +92,7 @@ function LawyerProfile() {
 
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}</h1>
+                <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}{lawyer.is_senior_counsel ? " SC" : ""}</h1>
                 {(() => {
                   const label = formatDesignation(lawyer);
                   if (!label) return null;
