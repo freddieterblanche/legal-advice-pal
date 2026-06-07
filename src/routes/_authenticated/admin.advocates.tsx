@@ -29,6 +29,9 @@ type AdvocateRow = {
 };
 
 export const Route = createFileRoute("/_authenticated/admin/advocates")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   head: () => ({ meta: [{ title: "Admin · Advocates — Lawexpert.co.za" }] }),
   component: AdminAdvocatesPage,
 });
