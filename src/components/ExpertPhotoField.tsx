@@ -114,6 +114,17 @@ export function ExpertPhotoField({ value, onChange, firmId, expertId }: Props) {
             <Upload className="h-3.5 w-3.5" />
             {uploading ? "Uploading…" : value ? "Replace photo" : "Upload photo"}
           </button>
+          {value && (
+            <button
+              type="button"
+              onClick={handleReposition}
+              disabled={loadingCrop || uploading}
+              className="inline-flex items-center gap-1.5 rounded border border-border bg-background px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted disabled:opacity-50"
+            >
+              <Crop className="h-3.5 w-3.5" />
+              {loadingCrop ? "Loading…" : "Reposition / Crop"}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => { setUrlDraft(value ?? ""); setShowUrlInput((v) => !v); }}
