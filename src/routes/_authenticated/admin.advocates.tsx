@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Pencil, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
+import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 
 type AdvocateRow = {
   id: string;
@@ -189,6 +190,71 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     status: advocate?.status ?? "active",
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // All practice areas
+  const { data: allPracticeAreas } = useQuery({
+    queryKey: ["practice-areas-all"],
+    queryFn: async () => {
+      const { data } = await supabase.from("practice_areas").select("id, slug, name").order("name");
+      return (data ?? []) as { id: string; slug: string; name: string }[];
+    },
+  });
+
+  // Existing practice area ids for this advocate
+  const { data: existingPaIds } = useQuery({
+    queryKey: ["advocate-practice-areas", advocate?.id],
+    enabled: !!advocate?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lawyer_practice_areas")
+        .select("practice_area_id")
+        .eq("lawyer_id", advocate!.id);
+      return (data ?? []).map((r: { practice_area_id: string }) => r.practice_area_id);
+    },
+  });
+
+  const [selectedPaIds, setSelectedPaIds] = useState<Set<string>>(new Set());
+  // Hydrate selection when existing data arrives
+  useEffect(() => {
+    if (existingPaIds) setSelectedPaIds(new Set(existingPaIds));
+  }, [existingPaIds]);
+
+  const togglePa = (id: string) => {
+    setSelectedPaIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `advocates/${advocate?.id ?? "new"}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+      if (upErr) throw upErr;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("lawyer-photos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
+      toast.success("Photo uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Chambers list narrows to selected Bar (plus unaffiliated)
   const chambersOptions = useMemo(() => {
@@ -249,16 +315,39 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
         firm_id: null,
       };
+      let advocateId = advocate?.id;
       if (isEdit && advocate) {
         const { error } = await supabase.from("lawyers").update(payload).eq("id", advocate.id);
         if (error) throw error;
-        toast.success("Advocate updated");
       } else {
         const slug = `${slugify(`${payload.first_name}-${payload.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
-        const { error } = await supabase.from("lawyers").insert({ ...payload, slug, status: "active" });
+        const { data: inserted, error } = await supabase
+          .from("lawyers")
+          .insert({ ...payload, slug, status: "active" })
+          .select("id")
+          .single();
         if (error) throw error;
-        toast.success("Advocate added");
+        advocateId = inserted.id;
       }
+
+      // Sync practice areas
+      if (advocateId) {
+        const { error: delErr } = await supabase
+          .from("lawyer_practice_areas")
+          .delete()
+          .eq("lawyer_id", advocateId);
+        if (delErr) throw delErr;
+        if (selectedPaIds.size > 0) {
+          const rows = Array.from(selectedPaIds).map((pid) => ({
+            lawyer_id: advocateId!,
+            practice_area_id: pid,
+          }));
+          const { error: insErr } = await supabase.from("lawyer_practice_areas").insert(rows);
+          if (insErr) throw insErr;
+        }
+      }
+
+      toast.success(isEdit ? "Advocate updated" : "Advocate added");
       onSaved();
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save");
@@ -331,9 +420,58 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo URL (optional)</label>
-            <input type="url" placeholder="https://…" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-            <p className="mt-1 text-xs text-muted-foreground">A photo can be added or updated later.</p>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
+            <div className="flex items-start gap-3">
+              {form.avatar_url ? (
+                <img src={form.avatar_url} alt="" className="h-20 w-20 rounded-md border border-border object-cover" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-border bg-muted text-xs text-muted-foreground">No photo</div>
+              )}
+              <div className="flex-1 space-y-2">
+                <input
+                  type="url"
+                  placeholder="Paste image URL…"
+                  value={form.avatar_url}
+                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <div className="flex items-center gap-2">
+                  <label className={`inline-flex cursor-pointer items-center gap-1.5 rounded border border-border bg-cream px-3 py-1.5 text-xs font-medium text-ink hover:bg-muted ${uploading ? "opacity-50" : ""}`}>
+                    {uploading ? "Uploading…" : "Upload image"}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
+                  </label>
+                  {form.avatar_url && (
+                    <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice areas</label>
+            <div className="flex flex-wrap gap-1.5 rounded border border-border bg-background p-2">
+              {(allPracticeAreas ?? []).length === 0 && <span className="text-xs text-muted-foreground">Loading…</span>}
+              {(allPracticeAreas ?? []).map((pa) => {
+                const active = selectedPaIds.has(pa.id);
+                return (
+                  <button
+                    key={pa.id}
+                    type="button"
+                    onClick={() => togglePa(pa.id)}
+                    className={`rounded-full border px-2.5 py-1 text-xs transition ${
+                      active
+                        ? "border-ink bg-ink text-cream"
+                        : "border-border bg-cream text-ink hover:border-ink"
+                    }`}
+                  >
+                    {pa.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">Same list used for lawyers. Click to select / deselect.</p>
           </div>
 
           {isEdit && (
@@ -345,6 +483,13 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 <option value="pending_payment">Pending payment</option>
                 <option value="inactive">Inactive (hidden)</option>
               </select>
+            </div>
+          )}
+
+          {isEdit && advocate && (
+            <div className="border-t border-border pt-4">
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reported cases</label>
+              <ReportedCasesEditor lawyerId={advocate.id} />
             </div>
           )}
         </form>
