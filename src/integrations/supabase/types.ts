@@ -350,6 +350,8 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          company_name: string | null
+          contact_email: string | null
           courts_accepted_in: string[] | null
           created_at: string
           cv_url: string | null
@@ -362,6 +364,8 @@ export type Database = {
           is_independent: boolean
           languages: string[] | null
           last_name: string
+          mobile_phone: string | null
+          office_phone: string | null
           profile_views: number
           province: string | null
           qualifications: string | null
@@ -377,6 +381,8 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          company_name?: string | null
+          contact_email?: string | null
           courts_accepted_in?: string[] | null
           created_at?: string
           cv_url?: string | null
@@ -389,6 +395,8 @@ export type Database = {
           is_independent?: boolean
           languages?: string[] | null
           last_name: string
+          mobile_phone?: string | null
+          office_phone?: string | null
           profile_views?: number
           province?: string | null
           qualifications?: string | null
@@ -404,6 +412,8 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          company_name?: string | null
+          contact_email?: string | null
           courts_accepted_in?: string[] | null
           created_at?: string
           cv_url?: string | null
@@ -416,6 +426,8 @@ export type Database = {
           is_independent?: boolean
           languages?: string[] | null
           last_name?: string
+          mobile_phone?: string | null
+          office_phone?: string | null
           profile_views?: number
           province?: string | null
           qualifications?: string | null
