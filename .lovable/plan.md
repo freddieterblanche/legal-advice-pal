@@ -1,37 +1,40 @@
-## Change
+## Problem
 
-In `src/routes/search.tsx`, restructure each result card (lines ~276–336) so the profile photo fills the entire **left edge** of the card from top to bottom, flush with the card's rounded corners — instead of a small `h-24 w-24` thumbnail sitting in the padded interior.
+On mobile the current cards render the profile photo as a full-width 192px banner (`h-48`) above the text. Two issues:
 
-### Card layout (desktop, `sm:` and up)
+1. Each card eats too much vertical space — bad for a directory where users scan many results.
+2. `object-top` was chosen so portraits aren't cut at the forehead on desktop's tall left column, but on a wide mobile banner it crops the photo at the chest/shoulders, showing "half faces".
 
-```text
-┌──────────┬───────────────────────────────────────────┐
-│          │  Name  [Partner]                          │
-│          │  Firm · Years · Location                  │
-│  PHOTO   │  [tag] [tag] [tag] [tag]                  │
-│          │                                           │
-│          │                          [View Profile]   │
-└──────────┴───────────────────────────────────────────┘
-```
+## Plan
 
-- `<article>`: keep `rounded-xl bg-card shadow-sm`, **remove `p-5`**, add `overflow-hidden` so the image's corners are clipped by the card.
-- Photo column: fixed width `w-32 sm:w-40`, stretched to card height via the parent `flex` (`self-stretch` on the image, no fixed `h-24`). Image uses `h-full w-full object-cover object-top`, no `rounded-xl` (the card's `overflow-hidden` handles the left corners).
-- Fallback initials block: same dimensions, same accent background, no internal rounding.
-- Content column: wrap the existing name/meta/practice-areas block in a new `flex-1 p-5` container so padding stays only on the text side.
-- Right-side action column (`View Profile` + case count): move inside the padded content area, right-aligned, kept vertically centered with `sm:items-center`.
+Split the layout cleanly by breakpoint instead of trying to make one photo element work for both.
 
-### Card layout (mobile, below `sm:`)
+### Mobile (default, below `sm:`)
+- Compact row: small rounded photo on the left, text on the right — similar to the original pre-change layout.
+- Photo: `h-16 w-16 rounded-lg object-cover` (face centered, no `object-top`).
+- Card keeps `p-4` padding on mobile only.
+- "View Profile" button + case count drop below the text (stacked), so the row stays short.
+- No forced card height on mobile — card height is content-driven and compact.
 
-The card already stacks (`flex-col sm:flex-row`). On mobile the photo becomes a full-width banner across the top of the card:
+### Desktop (`sm:` and up) — unchanged behavior
+- Keep the full-height side photo: `sm:h-48 sm:w-40 sm:self-stretch object-cover object-top`.
+- Card keeps `sm:h-48` fixed height and `sm:flex-row`.
+- Padding moves to the content side only (`sm:p-5`, no padding on card itself).
 
-- Photo column on mobile: `w-full h-48` (banner), `object-cover object-top`, no rounding (card clips).
-- Content column on mobile: keeps `p-5`.
-
-This is achieved with responsive classes on the photo wrapper: `w-full h-48 sm:h-auto sm:w-40 sm:self-stretch`.
+### Files to update (same pattern in each)
+- `src/routes/search.tsx` — attorneys/advocates results
+- `src/routes/mediators.index.tsx`
+- `src/routes/arbitrators.index.tsx`
+- `src/routes/expert-witnesses.index.tsx`
 
 ### Technical notes
+- Article: remove the mobile `overflow-hidden` requirement by keeping `rounded-xl overflow-hidden` only effective where the photo touches the edge (desktop). On mobile the photo is inset with padding so `overflow-hidden` is harmless — keep it.
+- Class shape for the photo element:
+  - `h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:rounded-none sm:self-stretch sm:object-top`
+- Card outer:
+  - `flex gap-4 p-4 rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:gap-0 sm:p-0 sm:h-48 sm:flex-row overflow-hidden`
+- Content wrapper:
+  - `flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5`
+- Actions column stays right-aligned on desktop, becomes a normal stacked block on mobile.
 
-- The card has three current direct children: img/fallback, content `<div>`, action `<div>`. I'll regroup into two children: photo column, then a single padded content column that internally lays out text (flex-1) and the actions (right) using `flex sm:items-center justify-between gap-4`.
-- Keep the existing `onError` fallback swap logic between `<img>` and the initials `<div>`; only the className/dimensions change.
-- No other files need to change. No DB / no public profile changes.
-- Listing-type pills and other badges remain as-is (out of scope).
+No data, query, or business-logic changes — purely Tailwind class adjustments in the four route files.
