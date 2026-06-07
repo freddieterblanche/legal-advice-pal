@@ -16,6 +16,8 @@ type AdvocateRow = {
   last_name: string;
   email: string | null;
   phone: string | null;
+  office_phone: string | null;
+  mobile_phone: string | null;
   city: string | null;
   province: string | null;
   bar_id: string | null;
@@ -70,7 +72,7 @@ function AdminAdvocatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url")
+        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url")
         .eq("lawyer_type", "advocate")
         .order("last_name");
       if (error) throw error;
@@ -200,6 +202,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     last_name: advocate?.last_name ?? "",
     email: advocate?.email ?? "",
     phone: advocate?.phone ?? "",
+    office_phone: advocate?.office_phone ?? "",
+    mobile_phone: advocate?.mobile_phone ?? advocate?.phone ?? "",
     city: advocate?.city ?? "",
     province: advocate?.province ?? "",
     bar_id: advocate?.bar_id ?? "",
@@ -354,7 +358,9 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim() || null,
-        phone: form.phone.trim() || null,
+        phone: form.mobile_phone.trim() || form.phone.trim() || null,
+        office_phone: form.office_phone.trim() || null,
+        mobile_phone: form.mobile_phone.trim() || null,
         city: form.city.trim() || null,
         province: form.province || null,
         bar_id: form.bar_id,
@@ -462,7 +468,11 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
 
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+            <input placeholder="Office / landline" type="tel" value={form.office_phone} onChange={(e) => setForm({ ...form, office_phone: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <input placeholder="Mobile" type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+            <div />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -218,6 +218,8 @@ const lawyerSchema = z.object({
   avatar_url: z.string().trim().max(2000).optional(),
   email: z.string().trim().max(200).optional(),
   phone: z.string().trim().max(60).optional(),
+  office_phone: z.string().trim().max(60).optional(),
+  mobile_phone: z.string().trim().max(60).optional(),
   linkedin_url: z.string().trim().max(500).optional(),
   is_mediator: z.boolean().optional(),
   is_arbitrator: z.boolean().optional(),
@@ -248,6 +250,8 @@ type LawyerRow = {
   avatar_url: string | null;
   email: string | null;
   phone: string | null;
+  office_phone: string | null;
+  mobile_phone: string | null;
   linkedin_url: string | null;
   status: string | null;
   trial_end_date: string | null;
@@ -431,6 +435,8 @@ function LawyerFormModal({
     avatar_url: lawyer?.avatar_url ?? "",
     email: lawyer?.email ?? "",
     phone: lawyer?.phone ?? "",
+    office_phone: lawyer?.office_phone ?? "",
+    mobile_phone: lawyer?.mobile_phone ?? lawyer?.phone ?? "",
     linkedin_url: lawyer?.linkedin_url ?? "",
     is_mediator: !!lawyer?.is_mediator,
     is_arbitrator: !!lawyer?.is_arbitrator,
@@ -598,6 +604,7 @@ function LawyerFormModal({
         avatar_url: res.avatar_url || f.avatar_url,
         email: res.email || f.email,
         phone: res.phone || f.phone,
+        mobile_phone: res.phone || f.mobile_phone,
         linkedin_url: res.linkedin_url || f.linkedin_url,
       }));
       // If imported designation_custom is set, switch the "Other" toggle on
@@ -1070,11 +1077,21 @@ function LawyerFormModal({
             />
             <input
               type="tel"
-              placeholder="Phone (optional)"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="Office / landline (optional)"
+              value={form.office_phone}
+              onChange={(e) => setForm({ ...form, office_phone: e.target.value })}
               className="rounded border border-border bg-background px-3 py-2 text-sm"
             />
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <input
+              type="tel"
+              placeholder="Mobile (optional)"
+              value={form.mobile_phone}
+              onChange={(e) => setForm({ ...form, mobile_phone: e.target.value, phone: e.target.value })}
+              className="rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+            <div />
           </div>
           <input
             type="url"

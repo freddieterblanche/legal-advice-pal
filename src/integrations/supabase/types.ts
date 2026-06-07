@@ -927,7 +927,9 @@ export type Database = {
           mediator_accreditation: string | null
           mediator_sectors: string[] | null
           mediator_style: string | null
+          mobile_phone: string | null
           noteworthy_matters: string | null
+          office_phone: string | null
           overview: string | null
           phone: string | null
           practice_head_area: string | null
@@ -980,7 +982,9 @@ export type Database = {
           mediator_accreditation?: string | null
           mediator_sectors?: string[] | null
           mediator_style?: string | null
+          mobile_phone?: string | null
           noteworthy_matters?: string | null
+          office_phone?: string | null
           overview?: string | null
           phone?: string | null
           practice_head_area?: string | null
@@ -1033,7 +1037,9 @@ export type Database = {
           mediator_accreditation?: string | null
           mediator_sectors?: string[] | null
           mediator_style?: string | null
+          mobile_phone?: string | null
           noteworthy_matters?: string | null
+          office_phone?: string | null
           overview?: string | null
           phone?: string | null
           practice_head_area?: string | null
