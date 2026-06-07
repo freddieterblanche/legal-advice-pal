@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Users, Scale, Landmark, Briefcase, MapPin, Stethoscope } from "lucide-react";
+import { Building2, Users, Scale, Landmark, Briefcase, MapPin, Stethoscope, Handshake, Gavel } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -23,11 +23,13 @@ function AdminHub() {
     queryKey: ["admin-counts"],
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
-      const [firms, attorneys, advocates, experts, bars, chambers, towns] = await Promise.all([
+      const [firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns] = await Promise.all([
         supabase.from("firms").select("id", { count: "exact", head: true }),
         supabase.from("lawyers").select("id", { count: "exact", head: true }).not("firm_id", "is", null),
         supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("lawyer_type", "advocate"),
         supabase.from("expert_witnesses").select("id", { count: "exact", head: true }),
+        supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("is_mediator", true),
+        supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("is_arbitrator", true),
         supabase.from("bars").select("id", { count: "exact", head: true }),
         supabase.from("chambers").select("id", { count: "exact", head: true }),
         supabase.from("towns").select("id", { count: "exact", head: true }),
@@ -37,6 +39,8 @@ function AdminHub() {
         attorneys: attorneys.count ?? 0,
         advocates: advocates.count ?? 0,
         experts: experts.count ?? 0,
+        mediators: mediators.count ?? 0,
+        arbitrators: arbitrators.count ?? 0,
         bars: bars.count ?? 0,
         chambers: chambers.count ?? 0,
         towns: towns.count ?? 0,
@@ -82,6 +86,20 @@ function AdminHub() {
       title: "Expert Witnesses",
       desc: "Add and manage expert witnesses (firm-linked or independent).",
       count: counts?.experts,
+    },
+    {
+      to: "/admin/mediators",
+      icon: Handshake,
+      title: "Mediators",
+      desc: "Lawyers flagged as mediators.",
+      count: counts?.mediators,
+    },
+    {
+      to: "/admin/arbitrators",
+      icon: Gavel,
+      title: "Arbitrators",
+      desc: "Lawyers flagged as arbitrators.",
+      count: counts?.arbitrators,
     },
     {
       to: "/admin/bars",
