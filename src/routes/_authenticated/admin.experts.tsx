@@ -210,7 +210,7 @@ function AdminExpertFormModal({
     queryFn: async () => {
       const { data } = await supabase
         .from("expert_witnesses")
-        .select("qualifications, bio")
+        .select("qualifications, bio, avatar_url")
         .eq("id", expert!.id)
         .maybeSingle();
       return data;
