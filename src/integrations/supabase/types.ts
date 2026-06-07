@@ -914,6 +914,7 @@ export type Database = {
           designation_custom: string | null
           education: string | null
           email: string | null
+          exclude_from_lawyer_listing: boolean
           firm_id: string | null
           first_name: string
           id: string
@@ -969,6 +970,7 @@ export type Database = {
           designation_custom?: string | null
           education?: string | null
           email?: string | null
+          exclude_from_lawyer_listing?: boolean
           firm_id?: string | null
           first_name: string
           id?: string
@@ -1024,6 +1026,7 @@ export type Database = {
           designation_custom?: string | null
           education?: string | null
           email?: string | null
+          exclude_from_lawyer_listing?: boolean
           firm_id?: string | null
           first_name?: string
           id?: string
