@@ -14,6 +14,7 @@ import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { ImageCropModal } from "../../components/ImageCropModal";
 import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
+import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 
 type Branch = {
   id: string;
