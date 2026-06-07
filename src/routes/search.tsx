@@ -14,6 +14,7 @@ export const Route = createFileRoute("/search")({
     q: typeof s.q === "string" ? s.q : undefined,
     area: typeof s.area === "string" ? s.area : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
+    town: typeof s.town === "string" ? s.town : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "attorney" || s.type === "advocate" ? s.type : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
