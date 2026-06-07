@@ -200,7 +200,7 @@ function FirmsIndex() {
             </div>
           ) : (
             <div className="space-y-2">
-              {data?.rows.map((f) => {
+              {sortedRows.map((f) => {
                 const lawyerCount = counts?.[f.id] ?? 0;
                 return (
                   <Link
