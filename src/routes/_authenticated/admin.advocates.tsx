@@ -447,7 +447,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.first_name.trim() || !form.last_name.trim()) { toast.error("First and last name required"); return; }
-    if (!form.bar_id) { toast.error("Bar is required for advocates"); return; }
+    if (isEdit && !hydrated) { toast.error("Still loading — please wait a moment"); return; }
     setSaving(true);
     try {
       const year = form.year_of_admission ? parseInt(form.year_of_admission, 10) : null;
@@ -460,7 +460,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         mobile_phone: form.mobile_phone.trim() || null,
         city: form.city.trim() || null,
         province: form.province || null,
-        bar_id: form.bar_id,
+        bar_id: form.bar_id || null,
         chambers_id: form.chambers_id || null,
         is_senior_counsel: form.is_senior_counsel,
         is_mediator: form.is_mediator,
@@ -470,6 +470,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         status: form.status,
         lawyer_type: "advocate" as const,
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
+        bio: sanitizeBioHtml(form.bio) || null,
         firm_id: null,
       };
       let advocateId = advocate?.id;
