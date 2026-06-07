@@ -49,8 +49,24 @@ function ExpertWitnessProfile() {
     },
   });
 
+  const { data: viewer } = useQuery({
+    queryKey: ["viewer-profile-expert"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
+      return data;
+    },
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!expert) return null;
+
+  const isPlatformAdmin = viewer?.role === "platform_admin";
+  const canEdit = isPlatformAdmin || (!!viewer?.firm_id && expert.firm_id === viewer.firm_id);
+  const editSearch = expert.firm_id
+    ? ({ tab: "experts" as const, edit: expert.id, ...(isPlatformAdmin ? { firmId: expert.firm_id } : {}) })
+    : null;
 
   const disciplines: any[] = (expert.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
   const cases: any[] = (expert.case_expert_witnesses ?? []).filter((x: any) => x.cases);
