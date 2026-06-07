@@ -21,18 +21,25 @@ type AdvocateRow = {
   bar_id: string | null;
   chambers_id: string | null;
   is_senior_counsel: boolean;
+  is_mediator: boolean | null;
+  is_arbitrator: boolean | null;
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/advocates")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   head: () => ({ meta: [{ title: "Admin · Advocates — Lawexpert.co.za" }] }),
   component: AdminAdvocatesPage,
 });
 
 function AdminAdvocatesPage() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [editing, setEditing] = useState<AdvocateRow | null>(null);
   const [adding, setAdding] = useState(false);
   const [q, setQ] = useState("");
@@ -63,13 +70,21 @@ function AdminAdvocatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, city, province, bar_id, chambers_id, is_senior_counsel, year_of_admission, status, avatar_url")
+        .select("id, slug, first_name, last_name, email, phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url")
         .eq("lawyer_type", "advocate")
         .order("last_name");
       if (error) throw error;
       return (data ?? []) as AdvocateRow[];
     },
   });
+
+  // Auto-open edit modal when arriving with ?edit=<id>
+  useEffect(() => {
+    if (!search.edit || !advocates) return;
+    const found = advocates.find((a) => a.id === search.edit);
+    if (found && (!editing || editing.id !== found.id)) setEditing(found);
+  }, [search.edit, advocates, editing]);
+
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
@@ -154,12 +169,16 @@ function AdminAdvocatesPage() {
           advocate={editing ?? undefined}
           bars={bars ?? []}
           chambers={chambers ?? []}
-          onClose={() => { setAdding(false); setEditing(null); }}
+          onClose={() => {
+            setAdding(false); setEditing(null);
+            if (search.edit) navigate({ search: { edit: undefined } });
+          }}
           onSaved={() => {
             qc.invalidateQueries({ queryKey: ["admin-advocates"] });
             qc.invalidateQueries({ queryKey: ["bars-options"] });
             qc.invalidateQueries({ queryKey: ["chambers-options"] });
             setAdding(false); setEditing(null);
+            if (search.edit) navigate({ search: { edit: undefined } });
           }}
         />
       )}
@@ -186,6 +205,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     bar_id: advocate?.bar_id ?? "",
     chambers_id: advocate?.chambers_id ?? "",
     is_senior_counsel: advocate?.is_senior_counsel ?? false,
+    is_mediator: advocate?.is_mediator ?? false,
+    is_arbitrator: advocate?.is_arbitrator ?? false,
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
@@ -339,6 +360,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         bar_id: form.bar_id,
         chambers_id: form.chambers_id || null,
         is_senior_counsel: form.is_senior_counsel,
+        is_mediator: form.is_mediator,
+        is_arbitrator: form.is_arbitrator,
         year_of_admission: Number.isFinite(year as number) ? year : null,
         avatar_url: form.avatar_url.trim() || null,
         status: form.status,
@@ -457,6 +480,21 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
               Senior Counsel (SC)
             </label>
           </div>
+
+          <div className="rounded border border-dashed border-border p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Roles</p>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_mediator} onChange={(e) => setForm({ ...form, is_mediator: e.target.checked })} className="accent-gold" />
+                Also acts as Mediator
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_arbitrator} onChange={(e) => setForm({ ...form, is_arbitrator: e.target.checked })} className="accent-gold" />
+                Also acts as Arbitrator
+              </label>
+            </div>
+          </div>
+
 
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
