@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Microscope, MapPin, BookOpen } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
+import { SortBar, type SortDir } from "../components/SortBar";
 
-type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number };
+type SortField = "surname" | "cases" | "listed";
+type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir };
 
 export const Route = createFileRoute("/expert-witnesses/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -14,6 +16,8 @@ export const Route = createFileRoute("/expert-witnesses/")({
     province: typeof s.province === "string" ? s.province : undefined,
     independent: s.independent === "yes" || s.independent === "no" ? s.independent : undefined,
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
+    sort: s.sort === "surname" || s.sort === "cases" || s.sort === "listed" ? s.sort : "surname",
+    dir: s.dir === "desc" ? "desc" : "asc",
   }),
   head: () => ({
     meta: [
