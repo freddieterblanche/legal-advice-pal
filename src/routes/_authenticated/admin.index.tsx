@@ -23,12 +23,13 @@ function AdminHub() {
     queryKey: ["admin-counts"],
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
-      const [firms, attorneys, advocates, bars, chambers] = await Promise.all([
+      const [firms, attorneys, advocates, bars, chambers, towns] = await Promise.all([
         supabase.from("firms").select("id", { count: "exact", head: true }),
         supabase.from("lawyers").select("id", { count: "exact", head: true }).not("firm_id", "is", null),
         supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("lawyer_type", "advocate"),
         supabase.from("bars").select("id", { count: "exact", head: true }),
         supabase.from("chambers").select("id", { count: "exact", head: true }),
+        supabase.from("towns").select("id", { count: "exact", head: true }),
       ]);
       return {
         firms: firms.count ?? 0,
@@ -36,6 +37,7 @@ function AdminHub() {
         advocates: advocates.count ?? 0,
         bars: bars.count ?? 0,
         chambers: chambers.count ?? 0,
+        towns: towns.count ?? 0,
       };
     },
   });
