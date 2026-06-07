@@ -1,6 +1,7 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
