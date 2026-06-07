@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Users, Scale, Landmark, Briefcase } from "lucide-react";
+import { Building2, Users, Scale, Landmark, Briefcase, MapPin } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
