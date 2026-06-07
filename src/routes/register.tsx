@@ -559,7 +559,7 @@ function ExpertWizard() {
           first_name: form.first_name,
           last_name: form.last_name,
           title: form.title || undefined,
-          qualifications: form.qualifications || undefined,
+          qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : undefined,
           registration_body: form.registration_body || undefined,
           company_name: form.company_name || undefined,
           employer: form.employer || undefined,
