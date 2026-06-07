@@ -99,8 +99,20 @@ function SearchPage() {
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
       const page = search.page ?? 1;
       const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1).order("case_count", { ascending: false });
-      const { data, count, error } = await query;
+      const sort = search.sort ?? "surname";
+      const ascending = (search.dir ?? "asc") === "asc";
+      query = query.range(from, from + PAGE_SIZE - 1);
+      if (sort === "surname") {
+        query = query.order("last_name", { ascending }).order("first_name", { ascending });
+      } else if (sort === "experience") {
+        // Years of experience = currentYear - year_of_admission, so higher years_of_admission = less experience.
+        // Ascending experience ⇒ year_of_admission DESC.
+        query = query.order("year_of_admission", { ascending: !ascending, nullsFirst: false });
+      } else if (sort === "listed") {
+        query = query.order("created_at", { ascending, nullsFirst: false });
+      } else {
+        query = query.order("case_count", { ascending: false });
+      }
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
