@@ -1,40 +1,44 @@
 ## Problem
 
-On mobile the current cards render the profile photo as a full-width 192px banner (`h-48`) above the text. Two issues:
+Alan Nelson is in the DB as `lawyer_type = 'advocate'` with `is_mediator = true`, so he shows up on both the **Advocates** search listing and the **Mediators** directory. He no longer accepts advocate briefs and should appear only as a Mediator. The "SC" appended to his last name also reinforces the advocate identity.
 
-1. Each card eats too much vertical space — bad for a directory where users scan many results.
-2. `object-top` was chosen so portraits aren't cut at the forehead on desktop's tall left column, but on a wide mobile banner it crops the photo at the chest/shoulders, showing "half faces".
+Today the schema forces `lawyer_type` to be `'advocate'` or `'attorney'`, so there is no clean way to mark a person as mediator-/arbitrator-only. We need a small mechanism so this distinction works for Alan now and for anyone similar later.
 
-## Plan
+## Approach
 
-Split the layout cleanly by breakpoint instead of trying to make one photo element work for both.
+Add a per-lawyer flag that hides someone from the attorney/advocate search listings without removing their profile or their mediator/arbitrator entries.
 
-### Mobile (default, below `sm:`)
-- Compact row: small rounded photo on the left, text on the right — similar to the original pre-change layout.
-- Photo: `h-16 w-16 rounded-lg object-cover` (face centered, no `object-top`).
-- Card keeps `p-4` padding on mobile only.
-- "View Profile" button + case count drop below the text (stacked), so the row stays short.
-- No forced card height on mobile — card height is content-driven and compact.
+### 1. Schema (migration)
+- Add `lawyers.exclude_from_lawyer_listing boolean not null default false`.
+- No constraint changes — keep `lawyer_type` as-is to avoid touching every existing query.
 
-### Desktop (`sm:` and up) — unchanged behavior
-- Keep the full-height side photo: `sm:h-48 sm:w-40 sm:self-stretch object-cover object-top`.
-- Card keeps `sm:h-48` fixed height and `sm:flex-row`.
-- Padding moves to the content side only (`sm:p-5`, no padding on card itself).
+### 2. Data update
+- For `Alan Nelson`:
+  - Set `exclude_from_lawyer_listing = true`.
+  - Rename `last_name` from `"Nelson SC"` to `"Nelson"`.
+  - Set `is_senior_counsel = false`.
+  - Leave `is_mediator = true` so he continues to appear on `/mediators`.
 
-### Files to update (same pattern in each)
-- `src/routes/search.tsx` — attorneys/advocates results
-- `src/routes/mediators.index.tsx`
-- `src/routes/arbitrators.index.tsx`
-- `src/routes/expert-witnesses.index.tsx`
+### 3. Search listing filter (`src/routes/search.tsx`)
+- Where the query filters by `lawyer_type` (attorney/advocate), also add `.eq("exclude_from_lawyer_listing", false)` so excluded profiles never appear in the Attorneys or Advocates results.
 
-### Technical notes
-- Article: remove the mobile `overflow-hidden` requirement by keeping `rounded-xl overflow-hidden` only effective where the photo touches the edge (desktop). On mobile the photo is inset with padding so `overflow-hidden` is harmless — keep it.
-- Class shape for the photo element:
-  - `h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-40 sm:rounded-none sm:self-stretch sm:object-top`
-- Card outer:
-  - `flex gap-4 p-4 rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:gap-0 sm:p-0 sm:h-48 sm:flex-row overflow-hidden`
-- Content wrapper:
-  - `flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:p-5`
-- Actions column stays right-aligned on desktop, becomes a normal stacked block on mobile.
+### 4. Admin edit forms (advocate + attorney)
+- In `src/routes/_authenticated/admin.advocates.tsx` and `admin.attorneys.tsx` edit modals, add a checkbox **"Hide from Advocate/Attorney directory (mediator/arbitrator only)"** bound to `exclude_from_lawyer_listing`. Hydrate it with the rest of the row (per the project's "edit forms hydrate full record" rule).
 
-No data, query, or business-logic changes — purely Tailwind class adjustments in the four route files.
+### 5. No changes to
+- `/mediators` and `/arbitrators` pages — they already filter purely by `is_mediator` / `is_arbitrator`.
+- Firm pages — Alan's firm-level listing (if any) is independent of this flag.
+- Profile page `/lawyers/[slug]` — still reachable directly.
+
+## Files touched
+
+- `supabase/migrations/<new>.sql` — add column
+- data update for Alan Nelson (via insert tool)
+- `src/routes/search.tsx`
+- `src/routes/_authenticated/admin.advocates.tsx`
+- `src/routes/_authenticated/admin.attorneys.tsx`
+
+## Out of scope
+
+- Changing the `lawyer_type` check constraint or adding `'mediator'`/`'arbitrator'` as types.
+- Reworking the mediators/arbitrators directories.

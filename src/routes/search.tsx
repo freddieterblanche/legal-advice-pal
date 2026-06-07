@@ -84,6 +84,7 @@ function SearchPage() {
     queryKey: ["search", search],
     queryFn: async () => {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
+      query = query.eq("exclude_from_lawyer_listing", false);
       if (search.q) query = query.ilike("full_name", `%${search.q}%`);
       if (search.town) {
         query = query.eq("town_slug", search.town);

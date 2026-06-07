@@ -1,0 +1,1 @@
+ALTER TABLE public.lawyers ADD COLUMN IF NOT EXISTS exclude_from_lawyer_listing boolean NOT NULL DEFAULT false;

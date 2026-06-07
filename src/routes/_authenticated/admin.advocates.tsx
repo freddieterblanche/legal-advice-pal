@@ -27,6 +27,7 @@ type AdvocateRow = {
   is_senior_counsel: boolean;
   is_mediator: boolean | null;
   is_arbitrator: boolean | null;
+  exclude_from_lawyer_listing: boolean | null;
   year_of_admission: number | null;
   status: string | null;
   avatar_url: string | null;
@@ -77,7 +78,7 @@ function AdminAdvocatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, year_of_admission, status, avatar_url, created_at")
+        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, exclude_from_lawyer_listing, year_of_admission, status, avatar_url, created_at")
         .eq("lawyer_type", "advocate")
         .order("last_name");
       if (error) throw error;
@@ -267,6 +268,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     is_senior_counsel: advocate?.is_senior_counsel ?? false,
     is_mediator: advocate?.is_mediator ?? false,
     is_arbitrator: advocate?.is_arbitrator ?? false,
+    exclude_from_lawyer_listing: advocate?.exclude_from_lawyer_listing ?? false,
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
@@ -303,6 +305,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         is_senior_counsel: !!data.is_senior_counsel,
         is_mediator: !!data.is_mediator,
         is_arbitrator: !!data.is_arbitrator,
+        exclude_from_lawyer_listing: !!data.exclude_from_lawyer_listing,
         year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
         avatar_url: data.avatar_url ?? "",
         status: data.status ?? "active",
@@ -465,6 +468,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         is_senior_counsel: form.is_senior_counsel,
         is_mediator: form.is_mediator,
         is_arbitrator: form.is_arbitrator,
+        exclude_from_lawyer_listing: form.exclude_from_lawyer_listing,
         year_of_admission: Number.isFinite(year as number) ? year : null,
         avatar_url: form.avatar_url.trim() || null,
         status: form.status,
@@ -609,6 +613,13 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                 Also acts as Arbitrator
               </label>
             </div>
+            <label className="mt-3 flex items-start gap-2 text-sm">
+              <input type="checkbox" checked={form.exclude_from_lawyer_listing} onChange={(e) => setForm({ ...form, exclude_from_lawyer_listing: e.target.checked })} className="mt-0.5 accent-gold" />
+              <span>
+                Hide from Advocate directory
+                <span className="block text-xs text-muted-foreground">Use when this person no longer takes advocate briefs and should appear only as a Mediator/Arbitrator.</span>
+              </span>
+            </label>
           </div>
 
 
