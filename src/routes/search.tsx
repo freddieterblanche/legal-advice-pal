@@ -326,7 +326,9 @@ function SearchPage() {
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {l.firm_name} · {l.city}, {l.province}
+                      {[l.firm_name ?? l.chambers_name, [l.city, l.province].filter(Boolean).join(", ")]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                     {l.practice_areas && l.practice_areas[0] && (
                       <div className="mt-3 flex flex-wrap gap-1.5">

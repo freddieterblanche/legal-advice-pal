@@ -1260,6 +1260,8 @@ export type Database = {
           arbitrator_types: string[] | null
           avatar_url: string | null
           case_count: number | null
+          chambers_name: string | null
+          chambers_slug: string | null
           city: string | null
           created_at: string | null
           designation: string | null
