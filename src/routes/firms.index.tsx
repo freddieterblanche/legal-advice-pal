@@ -137,6 +137,17 @@ function FirmsIndex() {
               />
             </div>
           </div>
+          <div className="rounded-md border border-border bg-card p-4">
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town</h3>
+            <div className="mt-3">
+              <Combobox
+                value={search.town ?? ""}
+                onChange={(v) => update({ town: v || undefined })}
+                options={townOptions.map((t) => ({ value: t.slug, label: t.name }))}
+                placeholder={search.province ? "Type a town…" : "Select a province first…"}
+              />
+            </div>
+          </div>
         </aside>
 
         {/* Results */}
