@@ -170,7 +170,7 @@ function AdminAdvocatesPage() {
 function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   advocate?: AdvocateRow;
   bars: { id: string; name: string }[];
-  chambers: { id: string; name: string; bar_id: string | null }[];
+  chambers: { id: string; name: string; bar_id: string | null; city: string | null; province: string | null }[];
   onClose: () => void;
   onSaved: () => void;
 }) {
