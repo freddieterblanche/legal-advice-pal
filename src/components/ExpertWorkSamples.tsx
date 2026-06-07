@@ -22,7 +22,7 @@ export function ExpertWorkSamples({ expertId }: Props) {
     queryKey: ["expert-work-samples", expertId],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
-        .from("expert_work_samples")
+        .from("provider_work_samples")
         .select("id, expert_id, project_name, synopsis, project_date")
         .eq("expert_id", expertId)
         .order("project_date", { ascending: false, nullsFirst: false })
@@ -34,7 +34,7 @@ export function ExpertWorkSamples({ expertId }: Props) {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any).from("expert_work_samples").delete().eq("id", id);
+      const { error } = await (supabase as any).from("provider_work_samples").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -145,10 +145,10 @@ function SampleModal({
         project_date: form.project_date || null,
       };
       if (isEdit && sample) {
-        const { error } = await (supabase as any).from("expert_work_samples").update(payload).eq("id", sample.id);
+        const { error } = await (supabase as any).from("provider_work_samples").update(payload).eq("id", sample.id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase as any).from("expert_work_samples").insert({ ...payload, expert_id: expertId });
+        const { error } = await (supabase as any).from("provider_work_samples").insert({ ...payload, expert_id: expertId });
         if (error) throw error;
       }
       toast.success(isEdit ? "Sample updated" : "Sample added");

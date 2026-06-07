@@ -39,7 +39,7 @@ export const lawyerSchema = z.object({
   first_name: z.string().trim().min(1).max(80),
   last_name: z.string().trim().min(1).max(80),
   designation: z.string().trim().max(120).optional(),
-  lawyer_type: z.enum(["advocate", "attorney"]).nullable().optional(),
+  provider_type: z.enum(["advocate", "attorney"]).nullable().optional(),
   year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().optional(),
   is_senior_counsel: z.boolean().optional(),
   designation_code: z.string().trim().max(80).nullable().optional(),
@@ -78,7 +78,7 @@ export type LawyerRow = {
   first_name: string | null;
   last_name: string | null;
   designation: string | null;
-  lawyer_type: string | null;
+  provider_type: string | null;
   year_of_admission: number | null;
   is_senior_counsel: boolean | null;
   designation_code: string | null;
@@ -140,7 +140,7 @@ export function LawyerFormModal({
     first_name: lawyer?.first_name ?? "",
     last_name: lawyer?.last_name ?? "",
     designation: lawyer?.designation ?? "",
-    lawyer_type: (lawyer?.lawyer_type as "advocate" | "attorney" | null) ?? "attorney",
+    provider_type: (lawyer?.provider_type as "advocate" | "attorney" | null) ?? "attorney",
     year_of_admission: lawyer?.year_of_admission ?? null,
     is_senior_counsel: !!lawyer?.is_senior_counsel,
     designation_code: initialOtherCode ? "" : (lawyer?.designation_code ?? ""),
@@ -224,7 +224,7 @@ export function LawyerFormModal({
     if (!lawyer) return;
     (async () => {
       const { data } = await supabase
-        .from("lawyer_branches")
+        .from("provider_branches")
         .select("branch_id")
         .eq("lawyer_id", lawyer.id);
       setSelectedBranchIds(new Set((data ?? []).map((r) => r.branch_id)));
@@ -307,7 +307,7 @@ export function LawyerFormModal({
     if (!lawyer) return;
     (async () => {
       const { data } = await supabase
-        .from("lawyer_practice_areas")
+        .from("provider_practice_areas")
         .select("practice_areas(id, slug, name)")
         .eq("lawyer_id", lawyer.id);
       const rows = (data ?? [])
@@ -327,8 +327,8 @@ export function LawyerFormModal({
         ...f,
         first_name: res.first_name || f.first_name,
         last_name: res.last_name || f.last_name,
-        lawyer_type: (res.lawyer_type as "advocate" | "attorney") || f.lawyer_type,
-        is_senior_counsel: res.lawyer_type === "advocate" ? !!res.is_senior_counsel : f.is_senior_counsel,
+        provider_type: (res.provider_type as "advocate" | "attorney") || f.provider_type,
+        is_senior_counsel: res.provider_type === "advocate" ? !!res.is_senior_counsel : f.is_senior_counsel,
         year_of_admission: res.year_of_admission ?? f.year_of_admission,
         designation_code: res.designation_code || f.designation_code,
         designation_custom: res.designation_custom || f.designation_custom,
@@ -361,20 +361,20 @@ export function LawyerFormModal({
   };
 
   const syncPracticeAreas = async (lawyerId: string) => {
-    const { error: delErr } = await supabase.from("lawyer_practice_areas").delete().eq("lawyer_id", lawyerId);
+    const { error: delErr } = await supabase.from("provider_practice_areas").delete().eq("lawyer_id", lawyerId);
     if (delErr) throw delErr;
     if (practiceAreas.length === 0) return;
     const links = practiceAreas.map((p) => ({ lawyer_id: lawyerId, practice_area_id: p.id }));
-    const { error } = await supabase.from("lawyer_practice_areas").insert(links);
+    const { error } = await supabase.from("provider_practice_areas").insert(links);
     if (error) throw error;
   };
 
   const syncBranches = async (lawyerId: string) => {
-    const { error: delErr } = await supabase.from("lawyer_branches").delete().eq("lawyer_id", lawyerId);
+    const { error: delErr } = await supabase.from("provider_branches").delete().eq("lawyer_id", lawyerId);
     if (delErr) throw delErr;
     if (selectedBranchIds.size === 0) return;
     const links = Array.from(selectedBranchIds).map((branch_id) => ({ lawyer_id: lawyerId, branch_id }));
-    const { error } = await supabase.from("lawyer_branches").insert(links);
+    const { error } = await supabase.from("provider_branches").insert(links);
     if (error) throw error;
   };
 
@@ -416,7 +416,7 @@ export function LawyerFormModal({
       }
 
       // Normalise structured designation fields by type
-      const isAdvocate = form.lawyer_type === "advocate";
+      const isAdvocate = form.provider_type === "advocate";
       const normalised = {
         ...form,
         designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
@@ -455,7 +455,7 @@ export function LawyerFormModal({
           : null,
       });
       if (isEdit && lawyer) {
-        const { error } = await supabase.from("lawyers").update(parsed).eq("id", lawyer.id);
+        const { error } = await supabase.from("service_providers").update(parsed).eq("id", lawyer.id);
         if (error) throw error;
         await syncPracticeAreas(lawyer.id);
         await syncBranches(lawyer.id);
@@ -463,7 +463,7 @@ export function LawyerFormModal({
       } else {
         const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
-          .from("lawyers")
+          .from("service_providers")
           .insert({ ...parsed, firm_id: firmId, slug, status: "trial" })
           .select("id")
           .single();
@@ -545,9 +545,9 @@ export function LawyerFormModal({
                   <button
                     type="button"
                     key={t}
-                    onClick={() => setForm({ ...form, lawyer_type: t })}
+                    onClick={() => setForm({ ...form, provider_type: t })}
                     className={`flex-1 rounded border px-3 py-2 text-sm capitalize transition-colors ${
-                      form.lawyer_type === t ? "border-gold bg-gold/15 text-ink" : "border-border bg-card text-muted-foreground hover:text-ink"
+                      form.provider_type === t ? "border-gold bg-gold/15 text-ink" : "border-border bg-card text-muted-foreground hover:text-ink"
                     }`}
                   >
                     {t}
@@ -556,7 +556,7 @@ export function LawyerFormModal({
               </div>
             </div>
 
-            {form.lawyer_type === "advocate" ? (
+            {form.provider_type === "advocate" ? (
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm">
                   <input
@@ -1025,7 +1025,7 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
     queryKey: ["lawyer-articles", lawyerId],
     queryFn: async () => {
       const { data } = await supabase
-        .from("lawyer_articles")
+        .from("provider_articles")
         .select("*")
         .eq("lawyer_id", lawyerId)
         .order("sort_order", { ascending: true })
@@ -1044,7 +1044,7 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
     if (draft.url && !/^https?:\/\//i.test(draft.url.trim())) { toast.error("URL must start with http:// or https://"); return; }
     setSaving(true);
     try {
-      const { error } = await supabase.from("lawyer_articles").insert({
+      const { error } = await supabase.from("provider_articles").insert({
         lawyer_id: lawyerId,
         title: draft.title.trim().slice(0, 255),
         publication: draft.publication.trim().slice(0, 255) || null,
@@ -1064,7 +1064,7 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
 
   const remove = async (id: string) => {
     if (!confirm("Remove this article?")) return;
-    const { error } = await supabase.from("lawyer_articles").delete().eq("id", id);
+    const { error } = await supabase.from("provider_articles").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     refresh();
   };

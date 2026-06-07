@@ -50,7 +50,7 @@ export function yearsInPractice(yearOfAdmission?: number | null): number | null 
 }
 
 export type StructuredLawyer = {
-  lawyer_type?: string | null;
+  provider_type?: string | null;
   year_of_admission?: number | null;
   is_senior_counsel?: boolean | null;
   designation_code?: string | null;
@@ -68,8 +68,8 @@ export type StructuredLawyer = {
  */
 export function formatDesignation(l: StructuredLawyer): string {
   const kind: LawyerKind =
-    l.lawyer_type === "advocate" || l.lawyer_type === "attorney"
-      ? l.lawyer_type
+    l.provider_type === "advocate" || l.provider_type === "attorney"
+      ? l.provider_type
       : designationKind(l.designation);
   if (kind === "advocate") {
     const seniority = l.is_senior_counsel ? "Senior Counsel" : "Junior Counsel";

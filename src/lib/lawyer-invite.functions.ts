@@ -24,7 +24,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const { data: lawyer, error: lawyerErr } = await supabaseAdmin
-      .from("lawyers")
+      .from("service_providers")
       .select("id, firm_id, first_name, last_name, profile_id")
       .eq("id", data.lawyer_id)
       .maybeSingle();
@@ -43,7 +43,7 @@ export const createLawyerInvite = createServerFn({ method: "POST" })
     // Upsert invite (one per lawyer)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: invite, error: inviteErr } = await supabaseAdmin
-      .from("lawyer_invites")
+      .from("provider_invites")
       .upsert(
         {
           lawyer_id: data.lawyer_id,
@@ -76,7 +76,7 @@ export const lookupLawyerInvite = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
     const { data: invite } = await supabaseAdmin
-      .from("lawyer_invites")
+      .from("provider_invites")
       .select("lawyer_id, email, accepted_at, expires_at, lawyers(first_name, last_name, firm_id, firms(name))")
       .eq("token", data.token)
       .maybeSingle();
@@ -106,7 +106,7 @@ export const acceptLawyerInvite = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("../integrations/supabase/client.server");
 
     const { data: invite, error: invErr } = await supabaseAdmin
-      .from("lawyer_invites")
+      .from("provider_invites")
       .select("id, lawyer_id, email, accepted_at, expires_at")
       .eq("token", data.token)
       .maybeSingle();
@@ -125,7 +125,7 @@ export const acceptLawyerInvite = createServerFn({ method: "POST" })
 
     // Link lawyer to this profile
     const { data: lawyer, error: lErr } = await supabaseAdmin
-      .from("lawyers")
+      .from("service_providers")
       .update({ profile_id: context.userId, is_claimed: true })
       .eq("id", invite.lawyer_id)
       .select("slug")
@@ -142,7 +142,7 @@ export const acceptLawyerInvite = createServerFn({ method: "POST" })
 
     // Mark invite accepted
     await supabaseAdmin
-      .from("lawyer_invites")
+      .from("provider_invites")
       .update({ accepted_at: new Date().toISOString() })
       .eq("id", invite.id);
 

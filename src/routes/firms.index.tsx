@@ -94,7 +94,7 @@ function FirmsIndex() {
   const { data: counts } = useQuery({
     queryKey: ["firm-lawyer-counts"],
     queryFn: async () => {
-      const { data } = await supabase.from("lawyers").select("firm_id").in("status", ["trial", "active"]);
+      const { data } = await supabase.from("service_providers").select("firm_id").in("status", ["trial", "active"]);
       const map: Record<string, number> = {};
       data?.forEach((r) => { if (r.firm_id) map[r.firm_id] = (map[r.firm_id] ?? 0) + 1; });
       return map;

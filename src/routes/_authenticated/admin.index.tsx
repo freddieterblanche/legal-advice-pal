@@ -25,11 +25,11 @@ function AdminHub() {
     queryFn: async () => {
       const [firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns] = await Promise.all([
         supabase.from("firms").select("id", { count: "exact", head: true }),
-        supabase.from("lawyers").select("id", { count: "exact", head: true }).not("firm_id", "is", null),
-        supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("lawyer_type", "advocate"),
+        supabase.from("service_providers").select("id", { count: "exact", head: true }).not("firm_id", "is", null),
+        supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "advocate"),
         supabase.from("expert_witnesses").select("id", { count: "exact", head: true }),
-        supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("is_mediator", true),
-        supabase.from("lawyers").select("id", { count: "exact", head: true }).eq("is_arbitrator", true),
+        supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("is_mediator", true),
+        supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("is_arbitrator", true),
         supabase.from("bars").select("id", { count: "exact", head: true }),
         supabase.from("chambers").select("id", { count: "exact", head: true }),
         supabase.from("towns").select("id", { count: "exact", head: true }),

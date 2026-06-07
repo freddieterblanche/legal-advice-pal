@@ -77,9 +77,9 @@ function AdminAdvocatesPage() {
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lawyers")
+        .from("service_providers")
         .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, exclude_from_lawyer_listing, year_of_admission, status, avatar_url, created_at")
-        .eq("lawyer_type", "advocate")
+        .eq("provider_type", "advocate")
         .order("last_name");
       if (error) throw error;
       return (data ?? []) as AdvocateRow[];
@@ -96,7 +96,7 @@ function AdminAdvocatesPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("lawyers").delete().eq("id", id);
+      const { error } = await supabase.from("service_providers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Advocate deleted"); qc.invalidateQueries({ queryKey: ["admin-advocates"] }); },
@@ -281,7 +281,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase
-        .from("lawyers")
+        .from("service_providers")
         .select("*")
         .eq("id", advocate.id)
         .maybeSingle();
@@ -335,7 +335,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     enabled: !!advocate?.id,
     queryFn: async () => {
       const { data } = await supabase
-        .from("lawyer_practice_areas")
+        .from("provider_practice_areas")
         .select("practice_area_id")
         .eq("lawyer_id", advocate!.id);
       return (data ?? []).map((r: { practice_area_id: string }) => r.practice_area_id);
@@ -472,7 +472,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         year_of_admission: Number.isFinite(year as number) ? year : null,
         avatar_url: form.avatar_url.trim() || null,
         status: form.status,
-        lawyer_type: "advocate" as const,
+        provider_type: "advocate" as const,
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
         bio: sanitizeBioHtml(form.bio) || null,
         firm_id: null,
@@ -480,7 +480,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       let advocateId = advocate?.id;
       if (isEdit && advocate) {
         const { data: updated, error } = await supabase
-          .from("lawyers")
+          .from("service_providers")
           .update(payload)
           .eq("id", advocate.id)
           .select("id");
@@ -493,7 +493,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       } else {
         const slug = `${slugify(`${payload.first_name}-${payload.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
-          .from("lawyers")
+          .from("service_providers")
           .insert({ ...payload, slug, status: "active" })
           .select("id")
           .single();
@@ -504,7 +504,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
       // Sync practice areas
       if (advocateId) {
         const { error: delErr } = await supabase
-          .from("lawyer_practice_areas")
+          .from("provider_practice_areas")
           .delete()
           .eq("lawyer_id", advocateId);
         if (delErr) throw delErr;
@@ -513,7 +513,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
             lawyer_id: advocateId!,
             practice_area_id: pid,
           }));
-          const { error: insErr } = await supabase.from("lawyer_practice_areas").insert(rows);
+          const { error: insErr } = await supabase.from("provider_practice_areas").insert(rows);
           if (insErr) throw insErr;
         }
       }

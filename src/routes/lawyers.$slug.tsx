@@ -32,8 +32,8 @@ function LawyerProfile() {
     queryKey: ["lawyer", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lawyers")
-        .select(`*, firms(name, slug, city, province), lawyer_practice_areas(practice_areas(name, slug)), lawyer_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), lawyer_reported_cases(id, case_name, citation, court, year, url, sort_order), lawyer_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
+        .from("service_providers")
+        .select(`*, firms(name, slug, city, province), provider_practice_areas(practice_areas(name, slug)), provider_cases(role, outcome, cases(case_name, citation, court, year, saflii_url)), provider_reported_cases(id, case_name, citation, court, year, url, sort_order), provider_branches(firm_branches(id, name, address, city, province, phone, is_head_office))`)
         .eq("slug", slug)
         .in("status", ["trial", "active"])
         .maybeSingle();
@@ -67,11 +67,11 @@ function LawyerProfile() {
   const isPlatformAdmin = viewer?.role === "platform_admin";
   const canEdit = isPlatformAdmin || (!!viewer?.firm_id && lawyer.firm_id === viewer.firm_id);
 
-  const areas = lawyer.lawyer_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
-  const cases = (lawyer.lawyer_cases ?? []).slice().sort((a: any, b: any) => (b.cases?.year ?? 0) - (a.cases?.year ?? 0));
-  const reportedCases = (lawyer.lawyer_reported_cases ?? []).slice().sort((a: any, b: any) => (b.year ?? 0) - (a.year ?? 0));
+  const areas = lawyer.provider_practice_areas?.map((x: any) => x.practice_areas).filter(Boolean) ?? [];
+  const cases = (lawyer.provider_cases ?? []).slice().sort((a: any, b: any) => (b.cases?.year ?? 0) - (a.cases?.year ?? 0));
+  const reportedCases = (lawyer.provider_reported_cases ?? []).slice().sort((a: any, b: any) => (b.year ?? 0) - (a.year ?? 0));
   const totalCases = cases.length + reportedCases.length;
-  const branches = (lawyer.lawyer_branches ?? [])
+  const branches = (lawyer.provider_branches ?? [])
     .map((x: any) => x.firm_branches)
     .filter(Boolean);
 
@@ -100,8 +100,8 @@ function LawyerProfile() {
                 {(() => {
                   const isPureMedArb =
                     !lawyer.firm_id &&
-                    lawyer.lawyer_type !== "advocate" &&
-                    lawyer.lawyer_type !== "attorney" &&
+                    lawyer.provider_type !== "advocate" &&
+                    lawyer.provider_type !== "attorney" &&
                     (lawyer.is_mediator || lawyer.is_arbitrator);
                   if (isPureMedArb) {
                     // Pure mediator / arbitrator — do NOT label as Attorney or Advocate.
@@ -109,7 +109,7 @@ function LawyerProfile() {
                   }
                   const label = formatDesignation(lawyer);
                   if (!label) return null;
-                  const isAdv = designationKind(lawyer.lawyer_type === "advocate" ? "advocate" : lawyer.designation) === "advocate";
+                  const isAdv = designationKind(lawyer.provider_type === "advocate" ? "advocate" : lawyer.designation) === "advocate";
                   return (
                     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${
                       isAdv ? "bg-white/10 text-white ring-white/30" : "bg-gold/20 text-white ring-gold/40"
@@ -162,7 +162,7 @@ function LawyerProfile() {
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               {canEdit && (
-                lawyer.lawyer_type === "advocate" && !lawyer.firm_id && isPlatformAdmin ? (
+                lawyer.provider_type === "advocate" && !lawyer.firm_id && isPlatformAdmin ? (
                   <Link
                     to="/admin/advocates"
                     search={{ edit: lawyer.id }}

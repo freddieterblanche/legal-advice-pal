@@ -25,8 +25,8 @@ function ExpertWitnessProfile() {
       const { data, error } = await supabase
         .from("expert_witnesses")
         .select(`*,
-          expert_witness_disciplines(expert_disciplines(name, slug, parent_category)),
-          case_expert_witnesses(role, notes, cases(case_name, citation, court, year, saflii_url))
+          provider_disciplines(expert_disciplines(name, slug, parent_category)),
+          case_service_providers(role, notes, cases(case_name, citation, court, year, saflii_url))
         `)
         .eq("slug", slug)
         .in("status", ["trial", "active"])
@@ -42,7 +42,7 @@ function ExpertWitnessProfile() {
     enabled: !!(expert as any)?.id,
     queryFn: async () => {
       const { data } = await (supabase as any)
-        .from("expert_work_samples")
+        .from("provider_work_samples")
         .select("id, project_name, synopsis, project_date")
         .eq("expert_id", (expert as any).id)
         .order("project_date", { ascending: false, nullsFirst: false })
@@ -70,8 +70,8 @@ function ExpertWitnessProfile() {
     ? ({ tab: "experts" as const, edit: expert.id, ...(isPlatformAdmin ? { firmId: expert.firm_id } : {}) })
     : null;
 
-  const disciplines: any[] = (expert.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
-  const cases: any[] = (expert.case_expert_witnesses ?? []).filter((x: any) => x.cases);
+  const disciplines: any[] = (expert.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
+  const cases: any[] = (expert.case_service_providers ?? []).filter((x: any) => x.cases);
   const primary = disciplines[0];
 
   return (

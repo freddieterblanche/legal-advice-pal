@@ -147,7 +147,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
       province: data.province ?? null,
       city: data.city ?? null,
       status: "trial",
-      lawyer_type: data.is_lawyer ? (data.kind === "advocate" ? "advocate" : "attorney") : null,
+      provider_type: data.is_lawyer ? (data.kind === "advocate" ? "advocate" : "attorney") : null,
       designation: data.title ?? null,
       is_senior_counsel: data.kind === "advocate" ? !!data.is_senior_counsel : false,
       year_of_admission: data.is_lawyer ? data.year_of_admission ?? null : null,
@@ -165,7 +165,7 @@ export const registerLawyerForCurrentUser = createServerFn({ method: "POST" })
     };
 
     const { data: lawyerRow, error: lawyerErr } = await supabaseAdmin
-      .from("lawyers")
+      .from("service_providers")
       .insert(insertRow)
       .select("id, slug").single();
     if (lawyerErr) throw lawyerErr;
