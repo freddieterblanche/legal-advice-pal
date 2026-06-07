@@ -153,7 +153,7 @@ function RegisterPage() {
               <h2 className="font-heading text-xl text-ink">Firm Details</h2>
               <Input placeholder="Firm name" value={firm.name} onChange={(v) => setFirm({ ...firm, name: v })} required />
               <Input placeholder="Registration number (optional)" value={firm.registration_number} onChange={(v) => setFirm({ ...firm, registration_number: v })} />
-              <select value={firm.province} onChange={(e) => setFirm({ ...firm, province: e.target.value })} required className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
+              <select value={firm.province} onChange={(e) => setFirm({ ...firm, province: e.target.value, city: "" })} required className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
                 <option value="">Select province</option>
                 {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
