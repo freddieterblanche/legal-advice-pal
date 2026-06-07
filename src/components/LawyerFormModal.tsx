@@ -864,6 +864,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
+}
 
 type Article = {
   id: string;
