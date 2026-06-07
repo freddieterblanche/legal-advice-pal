@@ -189,6 +189,71 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     status: advocate?.status ?? "active",
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // All practice areas
+  const { data: allPracticeAreas } = useQuery({
+    queryKey: ["practice-areas-all"],
+    queryFn: async () => {
+      const { data } = await supabase.from("practice_areas").select("id, slug, name").order("name");
+      return (data ?? []) as { id: string; slug: string; name: string }[];
+    },
+  });
+
+  // Existing practice area ids for this advocate
+  const { data: existingPaIds } = useQuery({
+    queryKey: ["advocate-practice-areas", advocate?.id],
+    enabled: !!advocate?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lawyer_practice_areas")
+        .select("practice_area_id")
+        .eq("lawyer_id", advocate!.id);
+      return (data ?? []).map((r: { practice_area_id: string }) => r.practice_area_id);
+    },
+  });
+
+  const [selectedPaIds, setSelectedPaIds] = useState<Set<string>>(new Set());
+  // Hydrate selection when existing data arrives
+  useMemo(() => {
+    if (existingPaIds) setSelectedPaIds(new Set(existingPaIds));
+  }, [existingPaIds]);
+
+  const togglePa = (id: string) => {
+    setSelectedPaIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `advocates/${advocate?.id ?? "new"}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: false,
+      });
+      if (upErr) throw upErr;
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("lawyer-photos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
+      toast.success("Photo uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Chambers list narrows to selected Bar (plus unaffiliated)
   const chambersOptions = useMemo(() => {
