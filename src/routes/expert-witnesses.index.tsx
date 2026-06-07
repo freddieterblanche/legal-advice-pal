@@ -208,8 +208,13 @@ function ExpertWitnessSearch() {
                           params={{ slug: e.slug }}
                           className="font-heading text-lg font-semibold text-ink hover:text-gold"
                         >
-                          {e.title ? `${e.title} ` : ""}{e.first_name} {e.last_name}
+                          {e.first_name} {e.last_name}
                         </Link>
+                        {e.title && (
+                          <span className="text-sm text-muted-foreground">
+                            <span aria-hidden className="mr-2">•</span>{e.title}
+                          </span>
+                        )}
                         {disciplines[0] && (
                           <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">
                             {disciplines[0].name}
