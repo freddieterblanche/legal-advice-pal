@@ -207,7 +207,11 @@ function SearchPage() {
         <div>
           <div className="mb-4 flex items-baseline justify-between">
             <h1 className="font-heading text-2xl text-ink">
-              {isLoading ? "Searching…" : `${total} lawyer${total === 1 ? "" : "s"} found`}
+              {isLoading
+                ? "Searching…"
+                : `${total} ${
+                    search.type === "advocate" ? "advocate" : search.type === "attorney" ? "attorney" : "lawyer"
+                  }${total === 1 ? "" : "s"} found`}
             </h1>
           </div>
 
