@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, slugify } from "../lib/constants";
+import { ProvinceCityFields } from "./ProvinceCityFields";
 import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../lib/designation";
 import { importLawyerProfile } from "../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
