@@ -90,7 +90,11 @@ function FirmsIndex() {
   });
 
   const update = (patch: Partial<Search>) => {
-    navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
+    const next: Search = { ...search, ...patch, page: 1 };
+    if (patch.province !== undefined && patch.province !== search.province) {
+      next.town = undefined;
+    }
+    navigate({ search: next });
   };
 
   const onSubmit = (e: React.FormEvent) => {
