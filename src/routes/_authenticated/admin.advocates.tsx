@@ -139,9 +139,9 @@ function AdminAdvocatesPage() {
 
   const setSort = (field: "surname" | "experience" | "listed") => {
     if (search.sort === field) {
-      navigate({ search: (prev) => ({ ...prev, dir: search.dir === "asc" ? "desc" : "asc" }) });
+      navigate({ search: (prev: typeof search) => ({ ...prev, dir: search.dir === "asc" ? "desc" : "asc" }) });
     } else {
-      navigate({ search: (prev) => ({ ...prev, sort: field, dir: "asc" }) });
+      navigate({ search: (prev: typeof search) => ({ ...prev, sort: field, dir: "asc" }) });
     }
   };
 
