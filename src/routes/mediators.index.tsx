@@ -135,9 +135,20 @@ function MediatorSearch() {
         </aside>
 
         <div>
-          <h2 className="mb-4 font-heading text-2xl text-ink">
-            {isLoading ? "Searching…" : `${total} mediator${total === 1 ? "" : "s"} found`}
-          </h2>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-heading text-2xl text-ink">
+              {isLoading ? "Searching…" : `${total} mediator${total === 1 ? "" : "s"} found`}
+            </h2>
+            <SortBar
+              options={[
+                { key: "surname", label: "Surname" },
+                { key: "listed", label: "Date Listed" },
+              ]}
+              sort={search.sort ?? "surname"}
+              dir={search.dir ?? "asc"}
+              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+            />
+          </div>
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>
           ) : results?.rows.length === 0 ? (
