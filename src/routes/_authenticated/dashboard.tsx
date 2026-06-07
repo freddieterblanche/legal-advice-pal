@@ -253,6 +253,8 @@ type LawyerRow = {
   profile_views: number | null;
   profile_id?: string | null;
   slug?: string | null;
+  is_mediator?: boolean | null;
+  is_arbitrator?: boolean | null;
 };
 
 
