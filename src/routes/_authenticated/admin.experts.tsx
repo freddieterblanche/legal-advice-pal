@@ -269,6 +269,7 @@ function AdminExpertFormModal({
       const payload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
+        name_title: form.name_title?.trim() || null,
         title: form.title || null,
         qualifications: form.qualifications ? sanitizeBioHtml(form.qualifications) : null,
         registration_body: form.registration_body || null,
