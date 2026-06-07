@@ -226,18 +226,20 @@ function AdminExpertFormModal({
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
     bio: "",
+    avatar_url: "",
     firm_id: expert?.firm_id ?? "",
     status: expert?.status ?? "trial",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
 
-  // Hydrate qualifications/bio once when editing
+  // Hydrate qualifications/bio/avatar once when editing
   if (isEdit && existing && !hydrated) {
     setForm((f) => ({
       ...f,
       qualifications: (existing as any).qualifications ?? "",
       bio: (existing as any).bio ?? "",
+      avatar_url: (existing as any).avatar_url ?? "",
     }));
     setHydrated(true);
   }
