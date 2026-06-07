@@ -247,7 +247,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 p-2 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/60 p-2 sm:p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div
         onClick={(e) => e.stopPropagation()}
         className={`flex max-h-full w-full ${isEdit ? "max-w-[1400px]" : "max-w-2xl"} flex-col overflow-hidden rounded-lg bg-card shadow-xl`}

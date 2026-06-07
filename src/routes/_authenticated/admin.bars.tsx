@@ -138,7 +138,7 @@ function BarFormModal({ bar, onClose, onSaved }: { bar?: BarRow; onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
         <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Bar" : "Add Bar"}</h3>
         <form onSubmit={submit} className="mt-4 space-y-3">
