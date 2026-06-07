@@ -305,6 +305,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         is_senior_counsel: !!data.is_senior_counsel,
         is_mediator: !!data.is_mediator,
         is_arbitrator: !!data.is_arbitrator,
+        exclude_from_lawyer_listing: !!data.exclude_from_lawyer_listing,
         year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
         avatar_url: data.avatar_url ?? "",
         status: data.status ?? "active",
