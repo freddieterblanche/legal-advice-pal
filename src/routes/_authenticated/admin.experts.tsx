@@ -274,6 +274,10 @@ function AdminExpertFormModal({
         avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
         is_independent: !form.firm_id,
+        company_name: form.company_name?.trim() || null,
+        office_phone: form.office_phone?.trim() || null,
+        mobile_phone: form.mobile_phone?.trim() || null,
+        contact_email: form.contact_email?.trim() || null,
       };
       if (isEdit && expert) {
         const { error } = await supabase
