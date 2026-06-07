@@ -113,6 +113,7 @@ function SearchPage() {
       } else {
         query = query.order("case_count", { ascending: false });
       }
+      const { data, error } = await query;
       if (error) throw error;
       let filtered = data ?? [];
       if (search.designation) filtered = filtered.filter((r) => r.designation === search.designation);
