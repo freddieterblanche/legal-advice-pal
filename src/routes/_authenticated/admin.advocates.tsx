@@ -481,6 +481,21 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
             </label>
           </div>
 
+          <div className="rounded border border-dashed border-border p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Roles</p>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_mediator} onChange={(e) => setForm({ ...form, is_mediator: e.target.checked })} className="accent-gold" />
+                Also acts as Mediator
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={form.is_arbitrator} onChange={(e) => setForm({ ...form, is_arbitrator: e.target.checked })} className="accent-gold" />
+                Also acts as Arbitrator
+              </label>
+            </div>
+          </div>
+
+
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
             <div className="flex items-start gap-3">
