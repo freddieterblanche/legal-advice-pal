@@ -1,0 +1,2 @@
+ALTER TABLE public.lawyers ADD COLUMN IF NOT EXISTS office_phone text, ADD COLUMN IF NOT EXISTS mobile_phone text;
+UPDATE public.lawyers SET mobile_phone = phone WHERE mobile_phone IS NULL AND phone IS NOT NULL;
