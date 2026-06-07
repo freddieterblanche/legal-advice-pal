@@ -444,6 +444,44 @@ export type Database = {
           },
         ]
       }
+      expert_work_samples: {
+        Row: {
+          created_at: string
+          expert_id: string
+          id: string
+          project_date: string | null
+          project_name: string
+          synopsis: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expert_id: string
+          id?: string
+          project_date?: string | null
+          project_name: string
+          synopsis?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expert_id?: string
+          id?: string
+          project_date?: string | null
+          project_name?: string
+          synopsis?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_work_samples_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "expert_witnesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firm_branches: {
         Row: {
           address: string | null
