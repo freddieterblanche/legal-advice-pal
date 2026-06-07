@@ -72,7 +72,7 @@ function AdminAttorneysPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("lawyers")
-        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, firm_id, designation, designation_code, designation_custom, is_mediator, is_arbitrator, year_of_admission, status, avatar_url, created_at")
+        .select("*")
         .or("lawyer_type.eq.attorney,and(lawyer_type.is.null,firm_id.not.is.null)")
         .order("last_name");
       if (error) throw error;
