@@ -25,7 +25,7 @@ const registerFirmSchema = z.object({
     .optional(),
 });
 
-async function uniqueSlug(table: "firms" | "lawyers" | "service_providers" | "chambers", base: string) {
+async function uniqueSlug(table: "firms" | "service_providers" | "chambers", base: string) {
   const { supabaseAdmin } = await import("../integrations/supabase/client.server");
   let slug = base;
   const { data: clash } = await supabaseAdmin.from(table).select("id").eq("slug", slug).maybeSingle();
