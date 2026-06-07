@@ -95,7 +95,7 @@ export type LawyerRow = {
   is_arbitrator?: boolean | null;
 };
 
-const CURRENT_YEAR = new Date().getFullYear();
+
 
 export function LawyerFormModal({
   firmId,
