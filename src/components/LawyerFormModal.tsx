@@ -165,7 +165,21 @@ export function LawyerFormModal({
     linkedin_url: lawyer?.linkedin_url ?? "",
     is_mediator: !!lawyer?.is_mediator,
     is_arbitrator: !!lawyer?.is_arbitrator,
+    mediator_accreditation: lawyer?.mediator_accreditation ?? "",
+    mediator_style: lawyer?.mediator_style ?? "",
+    mediator_sectors: (lawyer?.mediator_sectors ?? []) as string[],
+    arbitrator_accreditation: lawyer?.arbitrator_accreditation ?? "",
+    arbitrator_types: (lawyer?.arbitrator_types ?? []) as string[],
+    arbitrator_experience_years:
+      lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
+    availability_notes: lawyer?.availability_notes ?? "",
   });
+
+  const toggleArr = (key: "mediator_sectors" | "arbitrator_types", v: string) =>
+    setForm((f) => ({
+      ...f,
+      [key]: f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v],
+    }));
 
   const [practiceAreas, setPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
   const [allPracticeAreas, setAllPracticeAreas] = useState<{ id: string; slug: string; name: string }[]>([]);
