@@ -85,11 +85,16 @@ function Toolbar({ editor }: { editor: Editor }) {
   const btn =
     "inline-flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-ink disabled:opacity-40";
   const active = "bg-muted text-ink";
+  // preventDefault on mousedown so clicking the toolbar does NOT blur the
+  // editor before the command runs (otherwise toggleBulletList etc. become
+  // no-ops because the editor has no selection at click time).
+  const stopBlur = (e: React.MouseEvent) => e.preventDefault();
   return (
     <div className="flex flex-wrap items-center gap-1 px-2 py-1.5">
       <button
         type="button"
         title="Paragraph"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().setParagraph().run()}
         className={`${btn} ${editor.isActive("paragraph") ? active : ""}`}
       >
@@ -98,6 +103,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Heading 2"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={`${btn} ${editor.isActive("heading", { level: 2 }) ? active : ""}`}
       >
@@ -106,6 +112,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Heading 3"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         className={`${btn} ${editor.isActive("heading", { level: 3 }) ? active : ""}`}
       >
@@ -115,6 +122,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Bold"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={`${btn} ${editor.isActive("bold") ? active : ""}`}
       >
@@ -123,6 +131,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Italic"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={`${btn} ${editor.isActive("italic") ? active : ""}`}
       >
@@ -132,6 +141,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Bullet list"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={`${btn} ${editor.isActive("bulletList") ? active : ""}`}
       >
@@ -140,6 +150,7 @@ function Toolbar({ editor }: { editor: Editor }) {
       <button
         type="button"
         title="Numbered list"
+        onMouseDown={stopBlur}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={`${btn} ${editor.isActive("orderedList") ? active : ""}`}
       >
@@ -149,6 +160,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <button
           type="button"
           title="Undo"
+          onMouseDown={stopBlur}
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
           className={btn}
@@ -158,6 +170,7 @@ function Toolbar({ editor }: { editor: Editor }) {
         <button
           type="button"
           title="Redo"
+          onMouseDown={stopBlur}
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
           className={btn}
@@ -168,3 +181,4 @@ function Toolbar({ editor }: { editor: Editor }) {
     </div>
   );
 }
+
