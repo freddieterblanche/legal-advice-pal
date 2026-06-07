@@ -52,6 +52,22 @@ function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [existingUserId, setExistingUserId] = useState<string | null>(null);
   const [firm, setFirm] = useState({ name: "", registration_number: "", province: "", city: "", website: "", phone: "", address: "" });
+
+  const { data: provinces } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: async () => (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
+  });
+  const { data: towns } = useQuery({
+    queryKey: ["towns-all"],
+    queryFn: async () => (await supabase.from("towns").select("name, province_id").order("is_major_city", { ascending: false }).order("name")).data ?? [],
+  });
+  const townOptions = useMemo(() => {
+    if (!towns) return [];
+    const provId = provinces?.find((p) => p.name === firm.province)?.id;
+    const filtered = provId ? towns.filter((t) => t.province_id === provId) : towns;
+    return filtered.map((t) => ({ value: t.name as string, label: t.name as string }));
+  }, [towns, provinces, firm.province]);
+
   const [admin, setAdmin] = useState({ first_name: "", last_name: "", email: "", password: "" });
 
   useEffect(() => {
