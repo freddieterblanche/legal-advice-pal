@@ -1226,6 +1226,7 @@ type ExpertRow = {
   qualifications: string | null;
   registration_body: string | null;
   bio: string | null;
+  avatar_url: string | null;
 };
 
 const expertSchema = z.object({
