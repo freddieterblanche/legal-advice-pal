@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,9 @@ import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: typeof s.edit === "string" ? s.edit : undefined,
+  }),
   component: AdminExpertsPage,
 });
 
@@ -30,8 +33,15 @@ type ExpertRow = {
 
 function AdminExpertsPage() {
   const qc = useQueryClient();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/admin/experts" });
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<ExpertRow | null>(null);
+
+  const clearEditSearch = () => {
+    if (search.edit) navigate({ search: { edit: undefined } as any });
+  };
+
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["my-profile-role"],
@@ -55,6 +65,15 @@ function AdminExpertsPage() {
       return (data ?? []) as ExpertRow[];
     },
   });
+
+  useEffect(() => {
+    if (search.edit && experts && !editing) {
+      const found = experts.find((e) => e.id === search.edit);
+      if (found) setEditing(found);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.edit, experts]);
+
 
   const { data: firms } = useQuery({
     queryKey: ["admin-firms-list"],
@@ -163,8 +182,8 @@ function AdminExpertsPage() {
         <AdminExpertFormModal
           firms={firms ?? []}
           expert={editing}
-          onClose={() => setEditing(null)}
-          onSaved={() => { refresh(); setEditing(null); }}
+          onClose={() => { setEditing(null); clearEditSearch(); }}
+          onSaved={() => { refresh(); setEditing(null); clearEditSearch(); }}
         />
       )}
     </div>

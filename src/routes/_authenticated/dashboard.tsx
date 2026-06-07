@@ -146,7 +146,7 @@ function Dashboard() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {tab === "overview" && <Overview firmId={firm.id} />}
         {tab === "lawyers" && <LawyersTab firmId={firm.id} editLawyerId={search.edit} onClearEditSearch={clearEditSearch} />}
-        {tab === "experts" && <ExpertWitnessesTab firmId={firm.id} />}
+        {tab === "experts" && <ExpertWitnessesTab firmId={firm.id} editExpertId={search.edit} onClearEditSearch={clearEditSearch} />}
         {tab === "billing" && <BillingTab firmId={firm.id} />}
         {tab === "settings" && <SettingsTab firm={firm} />}
       </div>
@@ -1238,10 +1238,20 @@ const expertSchema = z.object({
   bio: z.string().trim().max(5000).optional(),
 });
 
-function ExpertWitnessesTab({ firmId }: { firmId: string }) {
+function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
   const qc = useQueryClient();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<ExpertRow | null>(null);
+
+  useEffect(() => {
+    if (editExpertId && !editing) {
+      // fetch on-demand so we can open immediately even if list not loaded
+      supabase.from("expert_witnesses").select("*").eq("id", editExpertId).maybeSingle().then(({ data }) => {
+        if (data) setEditing(data as ExpertRow);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editExpertId]);
 
   const { data: experts } = useQuery({
     queryKey: ["firm-experts-list", firmId],
@@ -1312,7 +1322,7 @@ function ExpertWitnessesTab({ firmId }: { firmId: string }) {
       </div>
 
       {showAdd && <ExpertFormModal firmId={firmId} onClose={() => setShowAdd(false)} onSaved={() => { refresh(); setShowAdd(false); }} />}
-      {editing && <ExpertFormModal firmId={firmId} expert={editing} onClose={() => setEditing(null)} onSaved={() => { refresh(); setEditing(null); }} />}
+      {editing && <ExpertFormModal firmId={firmId} expert={editing} onClose={() => { setEditing(null); onClearEditSearch?.(); }} onSaved={() => { refresh(); setEditing(null); onClearEditSearch?.(); }} />}
     </div>
   );
 }

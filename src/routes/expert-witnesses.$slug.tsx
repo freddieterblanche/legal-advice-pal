@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, MapPin, BookOpen, Download, Globe, Briefcase } from "lucide-react";
+import { ExternalLink, MapPin, BookOpen, Download, Globe, Briefcase, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 
@@ -49,8 +49,24 @@ function ExpertWitnessProfile() {
     },
   });
 
+  const { data: viewer } = useQuery({
+    queryKey: ["viewer-profile-expert"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
+      return data;
+    },
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!expert) return null;
+
+  const isPlatformAdmin = viewer?.role === "platform_admin";
+  const canEdit = isPlatformAdmin || (!!viewer?.firm_id && expert.firm_id === viewer.firm_id);
+  const editSearch = expert.firm_id
+    ? ({ tab: "experts" as const, edit: expert.id, ...(isPlatformAdmin ? { firmId: expert.firm_id } : {}) })
+    : null;
 
   const disciplines: any[] = (expert.expert_witness_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
   const cases: any[] = (expert.case_expert_witnesses ?? []).filter((x: any) => x.cases);
@@ -87,14 +103,28 @@ function ExpertWitnessProfile() {
                 )}
               </div>
             </div>
-            {expert.cv_url && (
-              <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="self-start rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
-                <Download className="mr-2 inline h-4 w-4" /> Download CV
-              </a>
+            {(expert.cv_url || canEdit) && (
+              <div className="flex flex-col gap-2 self-start">
+                {canEdit && (editSearch ? (
+                  <Link to="/dashboard" search={editSearch} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                    <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
+                  </Link>
+                ) : isPlatformAdmin ? (
+                  <Link to="/admin/experts" search={{ edit: expert.id }} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                    <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
+                  </Link>
+                ) : null)}
+                {expert.cv_url && (
+                  <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
+                    <Download className="mr-2 inline h-4 w-4" /> Download CV
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
       </section>
+
 
       <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">

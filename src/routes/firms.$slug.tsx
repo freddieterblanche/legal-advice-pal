@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Globe, Phone, Building2, Star } from "lucide-react";
+import { MapPin, Globe, Phone, Building2, Star, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 
@@ -80,8 +80,21 @@ function FirmProfile() {
     },
   });
 
+  const { data: viewer } = useQuery({
+    queryKey: ["viewer-profile-firm"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from("profiles").select("firm_id, role").eq("id", user.id).maybeSingle();
+      return data;
+    },
+  });
+
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
   if (!firm) return null;
+
+  const isPlatformAdmin = viewer?.role === "platform_admin";
+  const canEdit = isPlatformAdmin || (!!viewer?.firm_id && viewer.firm_id === firm.id);
 
   return (
     <div className="bg-cream">
@@ -94,6 +107,15 @@ function FirmProfile() {
               {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
               {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
             </div>
+            {canEdit && (
+              <Link
+                to="/dashboard"
+                search={{ tab: "settings", ...(isPlatformAdmin ? { firmId: firm.id } : {}) }}
+                className="mt-5 inline-flex items-center rounded-md bg-cream/10 px-4 py-2 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+              >
+                <Pencil className="mr-2 h-4 w-4" /> Edit this Profile
+              </Link>
+            )}
           </div>
           {firm.logo_url && (
             <img
@@ -105,6 +127,7 @@ function FirmProfile() {
           )}
         </div>
       </section>
+
 
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
