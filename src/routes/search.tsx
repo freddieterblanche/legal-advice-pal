@@ -7,7 +7,8 @@ import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 
-type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type?: "attorney" | "advocate"; page?: number };
+type LawyerType = "attorney" | "advocate";
+type Search = { q?: string; area?: string; province?: string; town?: string; designation?: string; type: LawyerType; page?: number };
 
 export const Route = createFileRoute("/search")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -16,12 +17,12 @@ export const Route = createFileRoute("/search")({
     province: typeof s.province === "string" ? s.province : undefined,
     town: typeof s.town === "string" ? s.town : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
-    type: s.type === "attorney" || s.type === "advocate" ? s.type : undefined,
+    type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
   }),
-  head: () => ({
+  head: ({ match }) => ({
     meta: [
-      { title: "Find a Lawyer — Lawexpert.co.za" },
+      { title: match.search.type === "advocate" ? "Find an Advocate — Lawexpert.co.za" : "Find an Attorney — Lawexpert.co.za" },
       { name: "description", content: "Search South African lawyers by name, practice area, and province." },
     ],
   }),
