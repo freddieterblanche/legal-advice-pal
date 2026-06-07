@@ -114,6 +114,37 @@ function AdminAdvocatesPage() {
       || chambersName(a.chambers_id).toLowerCase().includes(s);
   });
 
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    const dir = search.dir === "desc" ? -1 : 1;
+    const sort = search.sort;
+    if (sort === "experience") {
+      const currentYear = new Date().getFullYear();
+      list.sort((a, b) => {
+        const ya = a.year_of_admission ? currentYear - a.year_of_admission : 0;
+        const yb = b.year_of_admission ? currentYear - b.year_of_admission : 0;
+        return (ya - yb) * dir;
+      });
+    } else if (sort === "listed") {
+      list.sort((a, b) => {
+        const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return (da - db) * dir;
+      });
+    } else {
+      list.sort((a, b) => `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`) * dir);
+    }
+    return list;
+  }, [filtered, search.sort, search.dir]);
+
+  const setSort = (field: "surname" | "experience" | "listed") => {
+    if (search.sort === field) {
+      navigate({ search: (prev) => ({ ...prev, dir: search.dir === "asc" ? "desc" : "asc" }) });
+    } else {
+      navigate({ search: (prev) => ({ ...prev, sort: field, dir: "asc" }) });
+    }
+  };
+
   return (
     <div className="bg-cream">
       <div className="border-b border-border bg-card">
@@ -130,7 +161,26 @@ function AdminAdvocatesPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, bar or chambers…" className="mb-4 w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, bar or chambers…" className="w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div className="flex items-center gap-1.5">
+            {(["surname", "experience", "listed"] as const).map((field) => {
+              const active = search.sort === field;
+              const asc = active && search.dir === "asc";
+              const label = field === "surname" ? "Surname" : field === "experience" ? "Years Experience" : "Date Listed";
+              return (
+                <button
+                  key={field}
+                  onClick={() => setSort(field)}
+                  className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-card text-ink hover:border-ink"}`}
+                >
+                  {label}
+                  {active ? (asc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="overflow-x-auto rounded-md border border-border bg-card">
           <table className="w-full text-sm">
             <thead className="bg-cream text-left text-xs uppercase tracking-wider text-muted-foreground">
