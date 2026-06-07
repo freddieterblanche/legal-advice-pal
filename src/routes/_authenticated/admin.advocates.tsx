@@ -525,6 +525,14 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </button>
         </div>
       </div>
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          busy={uploading}
+          onCancel={closeCrop}
+          onConfirm={uploadCroppedBlob}
+        />
+      )}
     </div>
   );
 }
