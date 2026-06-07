@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { ComboboxCreatable } from "../../components/ComboboxCreatable";
 import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
+import { ImageCropModal } from "../../components/ImageCropModal";
 
 type AdvocateRow = {
   id: string;
@@ -191,6 +192,8 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropSrcIsObjectUrl, setCropSrcIsObjectUrl] = useState(false);
 
   // All practice areas
   const { data: allPracticeAreas } = useQuery({
@@ -229,17 +232,28 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     });
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+    const url = URL.createObjectURL(file);
+    setCropSrcIsObjectUrl(true);
+    setCropSrc(url);
+  };
+
+  const closeCrop = () => {
+    if (cropSrc && cropSrcIsObjectUrl) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+    setCropSrcIsObjectUrl(false);
+  };
+
+  const uploadCroppedBlob = async (blob: Blob) => {
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `advocates/${advocate?.id ?? "new"}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, file, {
-        contentType: file.type || "image/jpeg",
+      const path = `advocates/${advocate?.id ?? "new"}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("lawyer-photos").upload(path, blob, {
+        contentType: "image/jpeg",
         upsert: false,
       });
       if (upErr) throw upErr;
@@ -248,12 +262,19 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
       setForm((f) => ({ ...f, avatar_url: signed.signedUrl }));
-      toast.success("Photo uploaded");
+      toast.success("Photo saved");
+      closeCrop();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
     }
+  };
+
+  const openRepositionExisting = () => {
+    if (!form.avatar_url) return;
+    setCropSrcIsObjectUrl(false);
+    setCropSrc(form.avatar_url);
   };
 
   // Chambers list narrows to selected Bar (plus unaffiliated)
@@ -441,7 +462,10 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
                     <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileUpload} />
                   </label>
                   {form.avatar_url && (
-                    <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                    <>
+                      <button type="button" onClick={openRepositionExisting} className="text-xs text-ink underline hover:text-gold">Reposition</button>
+                      <button type="button" onClick={() => setForm({ ...form, avatar_url: "" })} className="text-xs text-destructive hover:underline">Remove</button>
+                    </>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
@@ -501,6 +525,14 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </button>
         </div>
       </div>
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          busy={uploading}
+          onCancel={closeCrop}
+          onConfirm={uploadCroppedBlob}
+        />
+      )}
     </div>
   );
 }
