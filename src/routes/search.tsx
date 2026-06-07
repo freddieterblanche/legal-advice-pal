@@ -6,7 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
-import { SortBar } from "../components/SortBar";
+import { SortBar, type SortDir } from "../components/SortBar";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
