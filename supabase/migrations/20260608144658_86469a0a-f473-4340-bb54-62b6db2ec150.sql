@@ -1,0 +1,1 @@
+DELETE FROM public.service_providers WHERE id = '84176f20-de90-417d-9b38-92eb38b257e6';
