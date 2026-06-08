@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X, Building2, Trash2, Users, Settings as SettingsIcon } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
@@ -480,8 +480,34 @@ type BranchRow = {
   is_head_office: boolean;
 };
 
+type BranchDraft = Omit<BranchRow, "firm_id" | "is_head_office"> & { is_head_office: boolean };
+
+const toBranchDraft = (branch: BranchRow): BranchDraft => ({
+  id: branch.id,
+  name: branch.name ?? "",
+  address: branch.address ?? "",
+  city: branch.city ?? "",
+  province: branch.province ?? "",
+  country: branch.country || "South Africa",
+  phone: branch.phone ?? "",
+  email: branch.email ?? "",
+  is_head_office: !!branch.is_head_office,
+});
+
+const toBranchPayload = (branch: BranchDraft): Partial<BranchRow> => ({
+  name: branch.name.trim(),
+  address: branch.address.trim() || null,
+  city: branch.city.trim() || null,
+  province: branch.province.trim() || null,
+  country: branch.country || "South Africa",
+  phone: branch.phone.trim() || null,
+  email: branch.email.trim() || null,
+  is_head_office: branch.is_head_office,
+});
+
 function BranchesEditor({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
+  const [branchDrafts, setBranchDrafts] = useState<Record<string, BranchDraft>>({});
   const { data: branches, isLoading } = useQuery({
     queryKey: ["firm-branches", firmId],
     queryFn: async () => {
@@ -498,6 +524,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
 
   const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!branches) return;
+    setBranchDrafts(Object.fromEntries(branches.map((branch) => [branch.id, toBranchDraft(branch)])));
+  }, [branches]);
 
   const { data: countries } = useQuery({
     queryKey: ["countries-options"],
@@ -534,10 +565,25 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     }
   };
 
-  const updateBranch = async (id: string, patch: Partial<BranchRow>) => {
+  const updateBranch = async (id: string, patch: Partial<BranchRow>, refreshAfter = true) => {
     const { error } = await supabase.from("firm_branches").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    refresh();
+    if (refreshAfter) refresh();
+  };
+
+  const saveBranchDraft = async (id: string) => {
+    const current = branchDrafts[id];
+    if (!current) return;
+    if (!current.name.trim()) { toast.error("Branch name required"); return; }
+    await updateBranch(id, toBranchPayload(current));
+  };
+
+  const setBranchField = (id: string, patch: Partial<BranchDraft>) => {
+    setBranchDrafts((prev) => {
+      const existing = prev[id];
+      if (!existing) return prev;
+      return { ...prev, [id]: { ...existing, ...patch } };
+    });
   };
 
   const deleteBranch = async (id: string) => {
