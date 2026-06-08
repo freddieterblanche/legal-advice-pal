@@ -289,6 +289,27 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
           {/* Editor pane */}
           <div className={`overflow-y-auto p-6 ${isEdit ? "lg:w-[520px] lg:flex-shrink-0 lg:border-r lg:border-border" : ""}`}>
             <form onSubmit={submit} className="space-y-3" id="firm-edit-form">
+              {!isEdit && (
+                <ProfileImportBar
+                  serverFn={importFirmProfile}
+                  onImported={(d) => setForm((f) => ({
+                    ...f,
+                    name: d.name || f.name,
+                    registration_number: d.registration_number || f.registration_number,
+                    description: d.description || f.description,
+                    website: d.website || f.website,
+                    phone: d.phone || f.phone,
+                    email: d.email || f.email,
+                    address: d.address || f.address,
+                    city: d.city || f.city,
+                    province: d.province || f.province,
+                    logo_url: d.logo_url || f.logo_url,
+                    services: d.services.length ? d.services : f.services,
+                  }))}
+                  placeholder="https://yourfirm.co.za"
+                  helpText="Paste the firm's website URL and AI will fill the firm details."
+                />
+              )}
               <input required placeholder="Firm name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               <input placeholder="Registration number (optional)" value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
 
