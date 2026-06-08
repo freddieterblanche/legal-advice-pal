@@ -10,6 +10,7 @@ import { ReportedCasesEditor } from "../../components/ReportedCasesEditor";
 import { ImageCropModal } from "../../components/ImageCropModal";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
+import { StatusCell } from "../../components/StatusCell";
 
 type AdvocateRow = {
   id: string;
