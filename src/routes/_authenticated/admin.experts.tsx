@@ -309,6 +309,7 @@ function AdminExpertFormModal({
         registration_body: form.registration_body || null,
         city: form.city || null,
         province: form.province || null,
+        country: form.country || "South Africa",
         bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
