@@ -214,6 +214,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
         ...form,
         description: form.description ? sanitizeBioHtml(form.description) : null,
         services: form.services.length ? form.services : null,
+        logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
       };
       if (isEdit && firm) {
         const { error } = await supabase.from("firms").update(payload).eq("id", firm.id);
