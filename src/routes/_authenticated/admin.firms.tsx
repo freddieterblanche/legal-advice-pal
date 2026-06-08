@@ -318,22 +318,28 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
               {!isEdit && (
                 <ProfileImportBar
                   serverFn={importFirmProfile}
-                  onImported={(d) => setForm((f) => ({
-                    ...f,
-                    name: d.name || f.name,
-                    registration_number: d.registration_number || f.registration_number,
-                    description: d.description || f.description,
-                    website: d.website || f.website,
-                    phone: d.phone || f.phone,
-                    email: d.email || f.email,
-                    address: d.address || f.address,
-                    city: d.city || f.city,
-                    province: d.province || f.province,
-                    logo_url: d.logo_url || f.logo_url,
-                    services: d.services.length ? d.services : f.services,
-                  }))}
+                  onImported={(d) => {
+                    setForm((f) => ({
+                      ...f,
+                      name: d.name || f.name,
+                      registration_number: d.registration_number || f.registration_number,
+                      description: d.description || f.description,
+                      website: d.website || f.website,
+                      phone: d.phone || f.phone,
+                      email: d.email || f.email,
+                      address: d.address || f.address,
+                      city: d.city || f.city,
+                      province: d.province || f.province,
+                      logo_url: d.logo_url || f.logo_url,
+                      services: d.services.length ? d.services : f.services,
+                    }));
+                    if (d.branches && d.branches.length > 0) {
+                      setImportedBranches(d.branches);
+                      toast.success(`Imported ${d.branches.length} branch${d.branches.length === 1 ? "" : "es"} — saved when you create the firm.`);
+                    }
+                  }}
                   placeholder="https://yourfirm.co.za"
-                  helpText="Paste the firm's website URL and AI will fill the firm details."
+                  helpText="Paste the firm's website URL and AI will fill the firm details and branch offices."
                 />
               )}
               <input required placeholder="Firm name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
