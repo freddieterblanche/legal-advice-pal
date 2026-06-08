@@ -160,7 +160,16 @@ function AdminExpertsPage() {
                   <td className="px-4 py-3 text-muted-foreground">{e.job_title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{firmName(e.firm_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
+                  <td className="px-4 py-3">
+                    <StatusCell
+                      table="service_providers"
+                      id={e.id}
+                      status={e.status}
+                      isFeatured={e.is_featured}
+                      featuredCategory={{ table: "service_providers", key: "expert" }}
+                      invalidateKeys={[["admin-experts"]]}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{e.profile_views}</td>
                   <td className="px-4 py-3 text-right">
                     {(e.status === "trial" || e.status === "active") && (
