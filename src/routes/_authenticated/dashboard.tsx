@@ -690,7 +690,11 @@ function SettingsTab({ firm }: { firm: any }) {
 
   const save = useMutation({
     mutationFn: async () => {
-      const clean = { ...form, description: sanitizeBioHtml(form.description) };
+      const clean = {
+        ...form,
+        description: sanitizeBioHtml(form.description),
+        logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
+      };
       const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
     },
