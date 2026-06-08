@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Upload, Sparkles, Star, Trash2 } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { PROVINCES, slugify } from "../lib/constants";
-import { ProvinceCityFields } from "./ProvinceCityFields";
+
 import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../lib/designation";
 import { importLawyerProfile } from "../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
@@ -196,6 +196,39 @@ export function LawyerFormModal({
   const fetchImageFn = useServerFn(fetchImageAsDataUrl);
   const [loadingUrlCrop, setLoadingUrlCrop] = useState(false);
 
+  // Autosave state — once the lawyer row exists (either editing, or after the
+  // first manual "Add"), we persist updates in the background without closing.
+  const [currentLawyerId, setCurrentLawyerId] = useState<string | null>(lawyer?.id ?? null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const skipFirstAutosave = useRef(true);
+
+  // Province / city pickers (inline so the user can free-type any city)
+  const { data: townsAll } = useQuery({
+    queryKey: ["towns-all-lawyer-modal"],
+    queryFn: async () =>
+      (await supabase
+        .from("towns")
+        .select("name, province_id")
+        .order("is_major_city", { ascending: false })
+        .order("name")
+      ).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: provincesAll } = useQuery({
+    queryKey: ["provinces-all-lawyer-modal"],
+    queryFn: async () =>
+      (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const cityOptions: string[] = (() => {
+    if (!townsAll) return [];
+    const provId = provincesAll?.find((p) => p.name === form.province)?.id;
+    return provId
+      ? townsAll.filter((t) => t.province_id === provId).map((t) => t.name as string)
+      : [];
+  })();
+
   // Load firm branches
   useEffect(() => {
     (async () => {
@@ -379,6 +412,74 @@ export function LawyerFormModal({
     if (error) throw error;
   };
 
+  // Shared payload builder used by both manual save and autosave so the
+  // database always sees the same normalised shape.
+  const buildParsed = () => {
+    const isAdvocate = form.provider_type === "advocate";
+    const normalised = {
+      ...form,
+      designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
+      designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
+      is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
+      is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
+      practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
+      is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
+      sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
+    };
+    const legacyDesignation = isAdvocate
+      ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
+      : (normalised.designation_code || normalised.designation_custom || "Attorney");
+    return lawyerSchema.parse({
+      ...normalised,
+      designation: legacyDesignation,
+      bio: sanitizeBioHtml(form.bio),
+      overview: sanitizeBioHtml(form.overview),
+      qualifications: sanitizeBioHtml(form.qualifications),
+      accolades: sanitizeBioHtml(form.accolades),
+      noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
+      reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+      mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
+      mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
+      mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
+      arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
+      arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
+      arbitrator_experience_years:
+        form.is_arbitrator && form.arbitrator_experience_years
+          ? Number(form.arbitrator_experience_years)
+          : null,
+      availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
+        ? form.availability_notes
+        : null,
+    });
+  };
+
+  // Background autosave: once we have a row id (either editing existing, or
+  // after the first manual "Add"), debounce changes and patch the DB so the
+  // user can keep filling fields without fear of losing work.
+  useEffect(() => {
+    if (!currentLawyerId) return;
+    if (skipFirstAutosave.current) { skipFirstAutosave.current = false; return; }
+    const t = setTimeout(async () => {
+      setAutoSaving(true);
+      try {
+        const parsed = buildParsed();
+        const { error } = await supabase
+          .from("service_providers")
+          .update({ ...parsed, status: form.status })
+          .eq("id", currentLawyerId);
+        if (!error) setLastSavedAt(new Date());
+        else console.warn("autosave failed:", error.message);
+      } catch (e) {
+        // Validation failures are expected while the user is mid-edit — skip silently.
+        console.debug("autosave skipped (validation):", e);
+      } finally {
+        setAutoSaving(false);
+      }
+    }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, otherDesignation, currentLawyerId]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -416,51 +517,15 @@ export function LawyerFormModal({
         }
       }
 
-      // Normalise structured designation fields by type
-      const isAdvocate = form.provider_type === "advocate";
-      const normalised = {
-        ...form,
-        designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
-        designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
-        is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
-        is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
-        practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
-        is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
-        sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
-      };
-      // Keep the legacy `designation` text in sync for views/lists that haven't migrated
-      const legacyDesignation = isAdvocate
-        ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
-        : (normalised.designation_code || normalised.designation_custom || "Attorney");
-
-      const parsed = lawyerSchema.parse({
-        ...normalised,
-        designation: legacyDesignation,
-        bio: sanitizeBioHtml(form.bio),
-        overview: sanitizeBioHtml(form.overview),
-        qualifications: sanitizeBioHtml(form.qualifications),
-        accolades: sanitizeBioHtml(form.accolades),
-        noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
-        reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
-        mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
-        mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
-        mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
-        arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
-        arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
-        arbitrator_experience_years:
-          form.is_arbitrator && form.arbitrator_experience_years
-            ? Number(form.arbitrator_experience_years)
-            : null,
-        availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
-          ? form.availability_notes
-          : null,
-      });
-      if (isEdit && lawyer) {
-        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", lawyer.id);
+      const parsed = buildParsed();
+      if (currentLawyerId) {
+        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", currentLawyerId);
         if (error) throw error;
-        await syncPracticeAreas(lawyer.id);
-        await syncBranches(lawyer.id);
+        await syncPracticeAreas(currentLawyerId);
+        await syncBranches(currentLawyerId);
+        setLastSavedAt(new Date());
         toast.success("Profile updated");
+        onSaved();
       } else {
         const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
@@ -472,10 +537,14 @@ export function LawyerFormModal({
         if (inserted) {
           await syncPracticeAreas(inserted.id);
           await syncBranches(inserted.id);
+          // Keep the modal open and switch into autosave mode so the user can
+          // continue editing without losing work.
+          skipFirstAutosave.current = true;
+          setCurrentLawyerId(inserted.id);
+          setLastSavedAt(new Date());
         }
-        toast.success("Lawyer added");
+        toast.success("Lawyer added — autosave on. Keep editing or click Done.");
       }
-      onSaved();
     } catch (err) {
       console.error("Lawyer save failed:", err);
       if (err instanceof z.ZodError) {
@@ -494,10 +563,21 @@ export function LawyerFormModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="flex max-h-[90vh] w-[90vw] flex-col overflow-hidden rounded-lg bg-card shadow-xl md:w-[70vw]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
-          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="font-heading text-xl text-ink">{currentLawyerId ? "Edit Lawyer" : "Add Lawyer"}</h3>
+            {currentLawyerId && (
+              <span className="text-xs text-muted-foreground">
+                {autoSaving
+                  ? "Autosaving…"
+                  : lastSavedAt
+                    ? `Saved ${lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                    : "Autosave on"}
+              </span>
+            )}
+          </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => { if (currentLawyerId) onSaved(); else onClose(); }}
             aria-label="Close"
             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink"
           >
@@ -821,79 +901,48 @@ export function LawyerFormModal({
               )}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <ProvinceCityFields
-              province={form.province}
-              city={form.city}
-              onProvince={(v: string) => setForm({ ...form, province: v })}
-              onCity={(v: string) => setForm({ ...form, city: v })}
-            />
-          </div>
-          {firmBranches.length > 0 && (
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Branches <span className="text-muted-foreground/70">(select one or more)</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {firmBranches.map((b) => {
-                  const checked = selectedBranchIds.has(b.id);
-                  return (
-                    <button
-                      type="button"
-                      key={b.id}
-                      onClick={() => toggleBranch(b.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
-                        checked ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground hover:text-ink"
-                      }`}
-                    >
-                      {b.is_head_office && <Star className="h-3 w-3 text-gold" />}
-                      {b.name}
-                      {b.city ? ` · ${b.city}` : ""}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
-            </div>
-          )}
-          <Section title="Overview" hint="Lead paragraph(s) for the profile.">
-            <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
-          </Section>
-
-          <Section title="Qualifications" hint="Degrees, admissions, memberships.">
-            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />
-          </Section>
-
-          <Section title="Accolades & Awards">
-            <RichTextEditor value={form.accolades} onChange={(html) => setForm({ ...form, accolades: html })} placeholder="Chambers Global ranking, awards, recognitions…" />
-          </Section>
-
-          <Section title="Articles Published" hint="Add each article with a title, publication, date and link.">
-            {lawyer ? (
-              <ArticlesEditor lawyerId={lawyer.id} />
-            ) : (
-              <p className="text-xs text-muted-foreground">Save the lawyer first to add articles.</p>
-            )}
-          </Section>
-
-          <Section title="Reported Cases" hint="Add each case with a name and an optional link (e.g. SAFLII URL).">
-            {lawyer ? (
-              <ReportedCasesEditor lawyerId={lawyer.id} />
-            ) : (
-              <p className="text-xs text-muted-foreground">Save the lawyer first to add reported cases.</p>
-            )}
-          </Section>
-
-          <Section title="Reported Cases — additional notes" hint="Optional free-text notes (commentary, unlinked citations).">
-            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Brief commentary, additional citations…" />
-          </Section>
-
-          <Section title="Noteworthy Matters" hint="Significant deals, transactions, mandates.">
-            <RichTextEditor value={form.noteworthy_matters} onChange={(html) => setForm({ ...form, noteworthy_matters: html })} placeholder="Major transactions, mandates and matters…" />
-          </Section>
-
+          {/* Contact details — quick wins, captured early */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Photo</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contact details</label>
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <input
+                  type="email"
+                  placeholder="Email (optional)"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <input
+                  type="tel"
+                  placeholder="Office / landline (optional)"
+                  value={form.office_phone}
+                  onChange={(e) => setForm({ ...form, office_phone: e.target.value })}
+                  className="rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <input
+                  type="tel"
+                  placeholder="Mobile (optional)"
+                  value={form.mobile_phone}
+                  onChange={(e) => setForm({ ...form, mobile_phone: e.target.value, phone: e.target.value })}
+                  className="rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+                <input
+                  type="url"
+                  placeholder="LinkedIn URL (optional)"
+                  value={form.linkedin_url}
+                  onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
+                  className="rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Profile photo */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile photo</label>
             <div className="flex items-start gap-3">
               {form.avatar_url && (
                 <img
@@ -934,44 +983,104 @@ export function LawyerFormModal({
                     </button>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB). Use Reposition to crop URL images.</p>
+                <p className="text-xs text-muted-foreground">Paste a URL or upload a file (max 5 MB).</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <input
-              type="email"
-              placeholder="Email (optional)"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="rounded border border-border bg-background px-3 py-2 text-sm"
-            />
-            <input
-              type="tel"
-              placeholder="Office / landline (optional)"
-              value={form.office_phone}
-              onChange={(e) => setForm({ ...form, office_phone: e.target.value })}
-              className="rounded border border-border bg-background px-3 py-2 text-sm"
-            />
+          {/* Location — free-typed city with suggestions filtered by province */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Province</label>
+              <select
+                value={form.province}
+                onChange={(e) => setForm({ ...form, province: e.target.value, city: "" })}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select province</option>
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">City / town</label>
+              <input
+                list="lawyer-city-suggestions"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                placeholder={form.province ? "Type or pick a city/town…" : "Select a province first…"}
+                disabled={!form.province}
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+              />
+              <datalist id="lawyer-city-suggestions">
+                {cityOptions.map((c) => <option key={c} value={c} />)}
+              </datalist>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <input
-              type="tel"
-              placeholder="Mobile (optional)"
-              value={form.mobile_phone}
-              onChange={(e) => setForm({ ...form, mobile_phone: e.target.value, phone: e.target.value })}
-              className="rounded border border-border bg-background px-3 py-2 text-sm"
-            />
-            <div />
-          </div>
-          <input
-            type="url"
-            placeholder="LinkedIn URL (optional) — https://www.linkedin.com/in/…"
-            value={form.linkedin_url}
-            onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
-            className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-          />
+
+          {firmBranches.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Branches <span className="text-muted-foreground/70">(select one or more)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {firmBranches.map((b) => {
+                  const checked = selectedBranchIds.has(b.id);
+                  return (
+                    <button
+                      type="button"
+                      key={b.id}
+                      onClick={() => toggleBranch(b.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+                        checked ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {b.is_head_office && <Star className="h-3 w-3 text-gold" />}
+                      {b.name}
+                      {b.city ? ` · ${b.city}` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">City and province above auto-fill from the first selected branch.</p>
+            </div>
+          )}
+
+          <Section title="Overview" hint="Lead paragraph(s) for the profile.">
+            <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
+          </Section>
+
+          <Section title="Qualifications" hint="Degrees, admissions, memberships.">
+            <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />
+          </Section>
+
+          <Section title="Accolades & Awards">
+            <RichTextEditor value={form.accolades} onChange={(html) => setForm({ ...form, accolades: html })} placeholder="Chambers Global ranking, awards, recognitions…" />
+          </Section>
+
+          <Section title="Articles Published" hint="Add each article with a title, publication, date and link.">
+            {currentLawyerId ? (
+              <ArticlesEditor lawyerId={currentLawyerId} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Save the lawyer first to add articles.</p>
+            )}
+          </Section>
+
+          <Section title="Reported Cases" hint="Add each case with a name and an optional link (e.g. SAFLII URL).">
+            {currentLawyerId ? (
+              <ReportedCasesEditor lawyerId={currentLawyerId} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Save the lawyer first to add reported cases.</p>
+            )}
+          </Section>
+
+          <Section title="Reported Cases — additional notes" hint="Optional free-text notes (commentary, unlinked citations).">
+            <RichTextEditor value={form.reported_cases_notes} onChange={(html) => setForm({ ...form, reported_cases_notes: html })} placeholder="Brief commentary, additional citations…" />
+          </Section>
+
+          <Section title="Noteworthy Matters" hint="Significant deals, transactions, mandates.">
+            <RichTextEditor value={form.noteworthy_matters} onChange={(html) => setForm({ ...form, noteworthy_matters: html })} placeholder="Major transactions, mandates and matters…" />
+          </Section>
+
 
 
 
@@ -1006,10 +1115,20 @@ export function LawyerFormModal({
               )}
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            {currentLawyerId && (
+              <span className="mr-auto text-xs text-muted-foreground">
+                {autoSaving ? "Autosaving…" : lastSavedAt ? `Saved ${lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Autosave on"}
+              </span>
+            )}
+            <button type="button" onClick={() => { if (currentLawyerId) onSaved(); else onClose(); }} className="rounded px-4 py-2 text-sm">
+              {currentLawyerId ? "Done" : "Cancel"}
+            </button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+              {saving ? "Saving…" : currentLawyerId ? "Save now" : "Add Lawyer"}
+            </button>
           </div>
+
         </form>
         </div>
       </div>
