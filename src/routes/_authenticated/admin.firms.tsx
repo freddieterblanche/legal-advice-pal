@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X, Building2, Trash2, Users, Settings as SettingsIcon } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
@@ -480,8 +480,44 @@ type BranchRow = {
   is_head_office: boolean;
 };
 
+type BranchDraft = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  province: string;
+  country: string;
+  phone: string;
+  email: string;
+  is_head_office: boolean;
+};
+
+const toBranchDraft = (branch: BranchRow): BranchDraft => ({
+  id: branch.id,
+  name: branch.name ?? "",
+  address: branch.address ?? "",
+  city: branch.city ?? "",
+  province: branch.province ?? "",
+  country: branch.country || "South Africa",
+  phone: branch.phone ?? "",
+  email: branch.email ?? "",
+  is_head_office: !!branch.is_head_office,
+});
+
+const toBranchPayload = (branch: BranchDraft): Partial<BranchRow> => ({
+  name: branch.name.trim(),
+  address: branch.address.trim() || null,
+  city: branch.city.trim() || null,
+  province: branch.province.trim() || null,
+  country: branch.country || "South Africa",
+  phone: branch.phone.trim() || null,
+  email: branch.email.trim() || null,
+  is_head_office: branch.is_head_office,
+});
+
 function BranchesEditor({ firmId }: { firmId: string }) {
   const qc = useQueryClient();
+  const [branchDrafts, setBranchDrafts] = useState<Record<string, BranchDraft>>({});
   const { data: branches, isLoading } = useQuery({
     queryKey: ["firm-branches", firmId],
     queryFn: async () => {
@@ -498,6 +534,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
 
   const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!branches) return;
+    setBranchDrafts(Object.fromEntries(branches.map((branch) => [branch.id, toBranchDraft(branch)])));
+  }, [branches]);
 
   const { data: countries } = useQuery({
     queryKey: ["countries-options"],
@@ -534,10 +575,25 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     }
   };
 
-  const updateBranch = async (id: string, patch: Partial<BranchRow>) => {
+  const updateBranch = async (id: string, patch: Partial<BranchRow>, refreshAfter = false) => {
     const { error } = await supabase.from("firm_branches").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
-    refresh();
+    if (refreshAfter) refresh();
+  };
+
+  const saveBranchDraft = async (id: string) => {
+    const current = branchDrafts[id];
+    if (!current) return;
+    if (!current.name.trim()) { toast.error("Branch name required"); return; }
+    await updateBranch(id, toBranchPayload(current));
+  };
+
+  const setBranchField = (id: string, patch: Partial<BranchDraft>) => {
+    setBranchDrafts((prev) => {
+      const existing = prev[id];
+      if (!existing) return prev;
+      return { ...prev, [id]: { ...existing, ...patch } };
+    });
   };
 
   const deleteBranch = async (id: string) => {
@@ -555,37 +611,40 @@ function BranchesEditor({ firmId }: { firmId: string }) {
         <p className="text-xs text-muted-foreground">Loading branches…</p>
       ) : (
         <div className="space-y-2">
-          {(branches ?? []).map((b) => (
-            <div key={b.id} className="rounded border border-border bg-card p-2">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <input value={b.name} onChange={(e) => updateBranch(b.id, { name: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
-                <input value={b.phone ?? ""} onChange={(e) => updateBranch(b.id, { phone: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
-                <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
-                <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
-                <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
-                {(b.country ?? "South Africa") === "South Africa" ? (
-                  <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                    <option value="">Province…</option>
-                    {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+          {(branches ?? []).map((b) => {
+            const current = branchDrafts[b.id] ?? toBranchDraft(b);
+            return (
+              <div key={b.id} className="rounded border border-border bg-card p-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <input value={current.name} onChange={(e) => setBranchField(b.id, { name: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
+                  <input value={current.phone} onChange={(e) => setBranchField(b.id, { phone: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
+                  <input type="email" value={current.email} onChange={(e) => setBranchField(b.id, { email: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
+                  <input value={current.address} onChange={(e) => setBranchField(b.id, { address: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
+                  <input value={current.city} onChange={(e) => setBranchField(b.id, { city: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
+                  {current.country === "South Africa" ? (
+                    <select value={current.province} onChange={(e) => { setBranchField(b.id, { province: e.target.value }); updateBranch(b.id, { province: e.target.value }); }} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                      <option value="">Province…</option>
+                      {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  ) : (
+                    <input value={current.province} onChange={(e) => setBranchField(b.id, { province: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
+                  )}
+                  <select value={current.country} onChange={(e) => { const country = e.target.value; const province = country === "South Africa" ? "Gauteng" : ""; setBranchField(b.id, { country, province }); updateBranch(b.id, { country, province }); }} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                    {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select>
-                ) : (
-                  <input value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
-                )}
-                <select value={b.country ?? "South Africa"} onChange={(e) => updateBranch(b.id, { country: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
-                  {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-                </select>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={current.is_head_office} onChange={(e) => { setBranchField(b.id, { is_head_office: e.target.checked }); updateBranch(b.id, { is_head_office: e.target.checked }); }} />
+                    Head office
+                  </label>
+                  <button type="button" onClick={() => deleteBranch(b.id)} className="text-xs text-destructive hover:underline">
+                    <Trash2 className="mr-1 inline h-3 w-3" /> Remove
+                  </button>
+                </div>
               </div>
-              <div className="mt-2 flex items-center justify-between">
-                <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={b.is_head_office} onChange={(e) => updateBranch(b.id, { is_head_office: e.target.checked })} />
-                  Head office
-                </label>
-                <button type="button" onClick={() => deleteBranch(b.id)} className="text-xs text-destructive hover:underline">
-                  <Trash2 className="mr-1 inline h-3 w-3" /> Remove
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {branches && branches.length === 0 && (
             <p className="text-xs text-muted-foreground">No branches yet.</p>
           )}
