@@ -400,6 +400,7 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
+          profile_url: string | null
           province: string | null
           registration_number: string | null
           services: string[] | null
@@ -420,6 +421,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
+          profile_url?: string | null
           province?: string | null
           registration_number?: string | null
           services?: string[] | null
@@ -440,6 +442,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
+          profile_url?: string | null
           province?: string | null
           registration_number?: string | null
           services?: string[] | null
@@ -970,6 +973,7 @@ export type Database = {
           trial_end_date: string | null
           trial_start_date: string | null
           updated_at: string
+          website_url: string | null
           year_of_admission: number | null
         }
         Insert: {
@@ -1041,6 +1045,7 @@ export type Database = {
           trial_end_date?: string | null
           trial_start_date?: string | null
           updated_at?: string
+          website_url?: string | null
           year_of_admission?: number | null
         }
         Update: {
@@ -1112,6 +1117,7 @@ export type Database = {
           trial_end_date?: string | null
           trial_start_date?: string | null
           updated_at?: string
+          website_url?: string | null
           year_of_admission?: number | null
         }
         Relationships: [
