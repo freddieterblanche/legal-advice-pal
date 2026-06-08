@@ -198,6 +198,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     province: firm?.province ?? "Gauteng",
     status: firm?.status ?? "active",
     logo_url: firm?.logo_url ?? "",
+    logo_accent_color: firm?.logo_accent_color ?? "",
     services: (firm?.services ?? []) as string[],
   });
   const [saving, setSaving] = useState(false);
