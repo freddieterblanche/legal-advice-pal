@@ -293,6 +293,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
+    website_url: "",
     bio: "",
   });
   // Hydrate the full row (incl. bio + any columns not in the list query) before allowing edit
@@ -330,6 +331,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
         avatar_url: data.avatar_url ?? "",
         status: data.status ?? "active",
+        website_url: data.website_url ?? "",
         bio: data.bio ?? "",
       }));
       setHydrated(true);
@@ -496,6 +498,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         provider_type: "advocate" as const,
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
         bio: sanitizeBioHtml(form.bio) || null,
+        website_url: form.website_url.trim() || null,
         firm_id: null,
       };
       let advocateId = advocate?.id;
@@ -603,8 +606,9 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="Mobile" type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <div />
+            <input placeholder="Website URL (e.g. https://chambers.co.za/advocate)" type="url" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} maxLength={500} className="rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
+
 
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
