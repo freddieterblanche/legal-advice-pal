@@ -7,6 +7,8 @@ import { RichTextEditor } from "./RichTextEditor";
 import { TagInput } from "./TagInput";
 import { ProvinceCityFields } from "./ProvinceCityFields";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { ProfileImportBar } from "./ProfileImportBar";
+import { importMediatorArbitratorProfile } from "../lib/profile-import.functions";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
