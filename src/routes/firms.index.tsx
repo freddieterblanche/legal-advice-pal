@@ -231,7 +231,7 @@ function FirmsIndex() {
                     return (
                       <TableRow key={f.id} className={f.is_featured ? "bg-amber-50/40" : undefined}>
                         <TableCell>
-                          <FirmLogo src={f.logo_url} alt={`${f.name} logo`} size="sm" />
+                          <FirmLogo src={f.logo_url} alt={`${f.name} logo`} size="sm" accentColor={f.logo_accent_color} />
                         </TableCell>
                         <TableCell className="font-medium">
                           <div className="flex flex-wrap items-center gap-2">
