@@ -240,6 +240,7 @@ function ArbitratorSearch() {
                         {typeof l.arbitrator_experience_years === "number" && (
                           <span className="rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-ink">{l.arbitrator_experience_years} yrs</span>
                         )}
+                        {l.is_featured && <FeaturedBadge />}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
