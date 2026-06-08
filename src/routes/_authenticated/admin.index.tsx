@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Users, Scale, Landmark, Briefcase, MapPin, Stethoscope, Handshake, Gavel, BookOpen } from "lucide-react";
+import { Building2, Users, Scale, Landmark, Briefcase, MapPin, Stethoscope, Handshake, Gavel, BookOpen, Globe } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -23,7 +23,7 @@ function AdminHub() {
     queryKey: ["admin-counts"],
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
-      const [firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns, practiceAreas] = await Promise.all([
+      const [firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns, practiceAreas, countries] = await Promise.all([
         supabase.from("firms").select("id", { count: "exact", head: true }),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "expert").not("firm_id", "is", null),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "expert").eq("provider_type", "advocate"),
@@ -34,6 +34,7 @@ function AdminHub() {
         supabase.from("chambers").select("id", { count: "exact", head: true }),
         supabase.from("towns").select("id", { count: "exact", head: true }),
         supabase.from("practice_areas").select("id", { count: "exact", head: true }),
+        supabase.from("countries").select("id", { count: "exact", head: true }),
       ]);
       return {
         firms: firms.count ?? 0,
@@ -46,6 +47,7 @@ function AdminHub() {
         chambers: chambers.count ?? 0,
         towns: towns.count ?? 0,
         practiceAreas: practiceAreas.count ?? 0,
+        countries: countries.count ?? 0,
       };
     },
   });
@@ -130,6 +132,13 @@ function AdminHub() {
       title: "Practice Areas",
       desc: "Areas of law lawyers can be tagged with.",
       count: counts?.practiceAreas,
+    },
+    {
+      to: "/admin/countries",
+      icon: Globe,
+      title: "Countries",
+      desc: "Countries available when adding firm branches.",
+      count: counts?.countries,
     },
   ] as const;
 

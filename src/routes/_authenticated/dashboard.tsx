@@ -26,6 +26,7 @@ type Branch = {
   address: string | null;
   city: string | null;
   province: string | null;
+  country: string;
   phone: string | null;
   is_head_office: boolean;
 };
@@ -873,7 +874,7 @@ function BranchesManager({ firmId }: { firmId: string }) {
                 <p className="text-sm font-semibold text-ink">{b.name}</p>
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {[b.address, b.city, b.province].filter(Boolean).join(", ") || "No address set"}
+                {[b.address, b.city, b.province, b.country && b.country !== "South Africa" ? b.country : null].filter(Boolean).join(", ") || "No address set"}
                 {b.phone ? ` · ${b.phone}` : ""}
               </p>
             </div>
@@ -921,10 +922,19 @@ function BranchFormModal({
     address: branch?.address ?? "",
     city: branch?.city ?? "",
     province: branch?.province ?? "Gauteng",
+    country: branch?.country ?? "South Africa",
     phone: branch?.phone ?? "",
     is_head_office: branch?.is_head_office ?? false,
   });
   const [saving, setSaving] = useState(false);
+
+  const { data: countries } = useQuery({
+    queryKey: ["countries-options"],
+    queryFn: async () =>
+      (await supabase.from("countries").select("name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const isSA = form.country === "South Africa";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -940,12 +950,13 @@ function BranchFormModal({
           .neq("id", branch?.id ?? "00000000-0000-0000-0000-000000000000");
         if (clearErr) throw clearErr;
       }
+      const payload = { ...form, province: isSA ? form.province : null };
       if (isEdit && branch) {
-        const { error } = await supabase.from("firm_branches").update(form).eq("id", branch.id);
+        const { error } = await supabase.from("firm_branches").update(payload).eq("id", branch.id);
         if (error) throw error;
         toast.success("Branch updated");
       } else {
-        const { error } = await supabase.from("firm_branches").insert({ ...form, firm_id: firmId });
+        const { error } = await supabase.from("firm_branches").insert({ ...payload, firm_id: firmId });
         if (error) throw error;
         toast.success("Branch added");
       }
@@ -969,11 +980,21 @@ function BranchFormModal({
         <form onSubmit={submit} className="space-y-3">
           <input required placeholder="Branch name (e.g. Cape Town Office)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           <input placeholder="Street address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Country</label>
+            <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
+              {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            {isSA ? (
+              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            ) : (
+              <input placeholder="State / region (optional)" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+            )}
           </div>
           <input placeholder="Phone (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           <label className="flex items-center gap-2 text-sm text-ink">

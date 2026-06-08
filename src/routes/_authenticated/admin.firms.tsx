@@ -474,6 +474,7 @@ type BranchRow = {
   address: string | null;
   city: string | null;
   province: string | null;
+  country: string;
   phone: string | null;
   email: string | null;
   is_head_office: boolean;
@@ -495,8 +496,14 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     },
   });
 
-  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
+  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
+
+  const { data: countries } = useQuery({
+    queryKey: ["countries-options"],
+    queryFn: async () => (await supabase.from("countries").select("name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["firm-branches", firmId] });
 
@@ -504,18 +511,20 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     if (!draft.name.trim()) { toast.error("Branch name required"); return; }
     setBusy(true);
     try {
+      const isSA = draft.country === "South Africa";
       const { error } = await supabase.from("firm_branches").insert({
         firm_id: firmId,
         name: draft.name.trim(),
         address: draft.address || null,
         city: draft.city || null,
-        province: draft.province || null,
+        province: isSA ? (draft.province || null) : (draft.province || null),
+        country: draft.country || "South Africa",
         phone: draft.phone || null,
         email: draft.email || null,
         is_head_office: draft.is_head_office,
       });
       if (error) throw error;
-      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
+      setDraft({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
       refresh();
       toast.success("Branch added");
     } catch (e) {
@@ -554,9 +563,16 @@ function BranchesEditor({ firmId }: { firmId: string }) {
                 <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
                 <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
                 <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
-                <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                  <option value="">Province…</option>
-                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                {(b.country ?? "South Africa") === "South Africa" ? (
+                  <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                    <option value="">Province…</option>
+                    {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                ) : (
+                  <input value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
+                )}
+                <select value={b.country ?? "South Africa"} onChange={(e) => updateBranch(b.id, { country: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                  {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               <div className="mt-2 flex items-center justify-between">
@@ -581,8 +597,15 @@ function BranchesEditor({ firmId }: { firmId: string }) {
               <input type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
-              <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              {draft.country === "South Africa" ? (
+                <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              ) : (
+                <input value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} placeholder="State / region (optional)" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              )}
+              <select value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value, province: e.target.value === "South Africa" ? "Gauteng" : "" })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select>
             </div>
             <div className="mt-2 flex items-center justify-between">

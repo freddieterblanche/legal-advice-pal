@@ -253,6 +253,30 @@ export type Database = {
         }
         Relationships: []
       }
+      countries: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       enquiries: {
         Row: {
           created_at: string | null
@@ -326,6 +350,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          country: string
           created_at: string
           email: string | null
           firm_id: string
@@ -339,6 +364,7 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          country?: string
           created_at?: string
           email?: string | null
           firm_id: string
@@ -352,6 +378,7 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          country?: string
           created_at?: string
           email?: string | null
           firm_id?: string
