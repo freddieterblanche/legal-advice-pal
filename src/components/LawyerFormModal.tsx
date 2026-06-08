@@ -1333,3 +1333,105 @@ function ArticlesEditor({ lawyerId }: { lawyerId: string }) {
     </div>
   );
 }
+
+/**
+ * Country + Province + City row for the lawyer edit form.
+ * - SA: native province <select> + city <datalist> seeded with town options
+ *   filtered by the chosen province (mirrors the original UX).
+ * - Non-SA: free-text "State / region" and "City" inputs because we don't
+ *   seed province/town reference data for other countries.
+ */
+function LocationFields({
+  country,
+  province,
+  city,
+  cityOptions,
+  onChange,
+}: {
+  country: string;
+  province: string;
+  city: string;
+  cityOptions: string[];
+  onChange: (patch: { country?: string; province?: string; city?: string }) => void;
+}) {
+  const { data: countries } = useQuery({
+    queryKey: ["countries-list"],
+    queryFn: async () =>
+      (await supabase.from("countries").select("name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const options = (countries?.map((c) => c.name as string) ?? []);
+  if (!options.includes("South Africa")) options.unshift("South Africa");
+  if (country && !options.includes(country)) options.push(country);
+  const isSA = country === "South Africa";
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div>
+        <label className="mb-1 block text-xs text-muted-foreground">Country</label>
+        <select
+          value={country}
+          onChange={(e) => {
+            const next = e.target.value;
+            // Wipe province/city when switching country group so SA values
+            // don't linger on non-SA records and vice versa.
+            const reset = (next === "South Africa") !== isSA;
+            onChange({ country: next, ...(reset ? { province: "", city: "" } : {}) });
+          }}
+          className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+        >
+          {options.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      {isSA ? (
+        <>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">Province</label>
+            <select
+              value={province}
+              onChange={(e) => onChange({ province: e.target.value, city: "" })}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Select province</option>
+              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">City / town</label>
+            <input
+              list="lawyer-city-suggestions"
+              value={city}
+              onChange={(e) => onChange({ city: e.target.value })}
+              placeholder={province ? "Type or pick a city/town…" : "Select a province first…"}
+              disabled={!province}
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
+            />
+            <datalist id="lawyer-city-suggestions">
+              {cityOptions.map((c) => <option key={c} value={c} />)}
+            </datalist>
+          </div>
+        </>
+      ) : (
+        <>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">State / region</label>
+            <input
+              value={province}
+              onChange={(e) => onChange({ province: e.target.value })}
+              placeholder="State / region (optional)"
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">City</label>
+            <input
+              value={city}
+              onChange={(e) => onChange({ city: e.target.value })}
+              placeholder="City"
+              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
