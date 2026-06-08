@@ -674,6 +674,36 @@ export function LawyerFormModal({
               </div>
             )}
 
+            {isEdit && currentLawyerId && (
+              <div className="rounded-md border border-amber-300/60 bg-amber-50/40 p-3">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-amber-800">Featured listing</label>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[12px] text-muted-foreground">
+                    Premium placement at the top of the {form.provider_type === "advocate" ? "advocates" : "attorneys"} category. R10 000 / month. Max {FEATURED_CAP} per category.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={featuredMut.isPending}
+                    onClick={() => {
+                      const next = !isFeatured;
+                      featuredMut.mutate(
+                        { id: currentLawyerId, value: next },
+                        { onSuccess: () => setIsFeatured(next) }
+                      );
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ring-1 transition disabled:opacity-50 ${
+                      isFeatured
+                        ? "bg-amber-400/90 text-ink ring-amber-600/60 hover:bg-amber-300"
+                        : "bg-transparent text-amber-700 ring-amber-400/50 hover:bg-amber-50"
+                    }`}
+                  >
+                    <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-ink" : ""}`} />
+                    {isFeatured ? "Featured" : "Mark as Featured"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {form.provider_type === "advocate" ? (
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm">
