@@ -173,6 +173,7 @@ export function LawyerFormModal({
     arbitrator_experience_years:
       lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
     availability_notes: lawyer?.availability_notes ?? "",
+    status: lawyer?.status ?? "active",
   });
 
   const toggleArr = (key: "mediator_sectors" | "arbitrator_types", v: string) =>
