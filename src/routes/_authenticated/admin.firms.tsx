@@ -403,7 +403,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     },
   });
 
-  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["firm-branches", firmId] });
