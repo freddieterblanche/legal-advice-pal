@@ -318,6 +318,10 @@ function SearchPage() {
               Search
             </button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">
+            Tip: combine terms with <span className="font-semibold text-cream/80">OR</span> and{" "}
+            <span className="font-semibold text-cream/80">NOT</span> — e.g. <em>insolvency OR tax NOT labour</em>.
+          </p>
         </div>
       </section>
 
