@@ -73,6 +73,7 @@ export function formatDesignation(l: StructuredLawyer): string {
       : designationKind(l.designation);
   if (kind === "advocate") {
     const seniority = l.is_senior_counsel ? "Senior Counsel" : "Junior Counsel";
+    if (l.is_senior_counsel) return seniority;
     const years = yearsInPractice(l.year_of_admission ?? null);
     return years !== null ? `${seniority} · ${years} year${years === 1 ? "" : "s"} in practice` : seniority;
   }
