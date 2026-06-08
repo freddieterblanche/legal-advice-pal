@@ -362,12 +362,23 @@ function FirmsIndex() {
                           </Link>
                           {f.is_featured && <FeaturedBadge />}
                         </div>
-                        {(f.city || f.province) && (
-                          <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground sm:text-sm">
-                            <MapPin className="h-3 w-3" strokeWidth={1.5} />
-                            {[f.city, f.province].filter(Boolean).join(", ")}
-                          </p>
-                        )}
+                        {(() => {
+                          const mb = data?.matchedBranch?.[f.id];
+                          const city = mb?.city ?? f.city;
+                          const province = mb?.province ?? f.province;
+                          const country = mb?.country;
+                          const parts = [city, province ?? (mb ? country : undefined)].filter(Boolean);
+                          if (parts.length === 0) return null;
+                          return (
+                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground sm:text-sm">
+                              <MapPin className="h-3 w-3" strokeWidth={1.5} />
+                              {parts.join(", ")}
+                              {mb && mb.name && (
+                                <span className="ml-1 text-muted-foreground/70">· {mb.name}</span>
+                              )}
+                            </p>
+                          );
+                        })()}
                       </div>
                       <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                         <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-0.5 text-xs font-medium text-ink">
