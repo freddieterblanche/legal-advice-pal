@@ -11,6 +11,7 @@ import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../lib/designation";
 import { importLawyerProfile } from "../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
 import { RichTextEditor } from "./RichTextEditor";
+import { TagInput } from "./TagInput";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
@@ -71,6 +72,7 @@ export const lawyerSchema = z.object({
   arbitrator_types: z.array(z.string().trim().max(120)).nullable().optional(),
   arbitrator_experience_years: z.number().int().min(0).max(80).nullable().optional(),
   availability_notes: z.string().trim().max(1000).nullable().optional(),
+  services: z.array(z.string().trim().min(1).max(120)).nullable().optional(),
 });
 
 export type LawyerRow = {
@@ -115,6 +117,7 @@ export type LawyerRow = {
   arbitrator_types?: string[] | null;
   arbitrator_experience_years?: number | null;
   availability_notes?: string | null;
+  services?: string[] | null;
   firm_id: string | null;
 };
 
@@ -173,6 +176,7 @@ export function LawyerFormModal({
     arbitrator_experience_years:
       lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
     availability_notes: lawyer?.availability_notes ?? "",
+    services: (lawyer?.services ?? []) as string[],
     status: lawyer?.status ?? "active",
   });
 
@@ -450,6 +454,7 @@ export function LawyerFormModal({
       availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
         ? form.availability_notes
         : null,
+      services: form.services.length ? form.services : null,
     });
   };
 
@@ -1048,6 +1053,15 @@ export function LawyerFormModal({
           <Section title="Overview" hint="Lead paragraph(s) for the profile.">
             <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
           </Section>
+
+          <Section title="Services" hint="Type a service and press Enter to add it as a tag.">
+            <TagInput
+              value={form.services}
+              onChange={(next) => setForm({ ...form, services: next })}
+              placeholder="e.g. Trust formation — press Enter"
+            />
+          </Section>
+
 
           <Section title="Qualifications" hint="Degrees, admissions, memberships.">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />

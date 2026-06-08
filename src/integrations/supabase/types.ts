@@ -401,6 +401,7 @@ export type Database = {
           phone: string | null
           province: string | null
           registration_number: string | null
+          services: string[] | null
           slug: string
           status: string | null
           website: string | null
@@ -419,6 +420,7 @@ export type Database = {
           phone?: string | null
           province?: string | null
           registration_number?: string | null
+          services?: string[] | null
           slug: string
           status?: string | null
           website?: string | null
@@ -437,6 +439,7 @@ export type Database = {
           phone?: string | null
           province?: string | null
           registration_number?: string | null
+          services?: string[] | null
           slug?: string
           status?: string | null
           website?: string | null
@@ -957,6 +960,7 @@ export type Database = {
           saflii_author_url: string | null
           search_vector: unknown
           sector_head_area: string | null
+          services: string[] | null
           slug: string
           status: string | null
           town_id: string | null
@@ -1027,6 +1031,7 @@ export type Database = {
           saflii_author_url?: string | null
           search_vector?: unknown
           sector_head_area?: string | null
+          services?: string[] | null
           slug: string
           status?: string | null
           town_id?: string | null
@@ -1097,6 +1102,7 @@ export type Database = {
           saflii_author_url?: string | null
           search_vector?: unknown
           sector_head_area?: string | null
+          services?: string[] | null
           slug?: string
           status?: string | null
           town_id?: string | null

@@ -6,6 +6,7 @@ import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
+import { TagInput } from "../../components/TagInput";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 type FirmRow = {
@@ -22,6 +23,7 @@ type FirmRow = {
   province: string | null;
   status: string | null;
   logo_url: string | null;
+  services: string[] | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/firms")({
@@ -196,6 +198,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     province: firm?.province ?? "Gauteng",
     status: firm?.status ?? "active",
     logo_url: firm?.logo_url ?? "",
+    services: (firm?.services ?? []) as string[],
   });
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
@@ -208,6 +211,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
       const payload = {
         ...form,
         description: form.description ? sanitizeBioHtml(form.description) : null,
+        services: form.services.length ? form.services : null,
       };
       if (isEdit && firm) {
         const { error } = await supabase.from("firms").update(payload).eq("id", firm.id);
@@ -290,6 +294,16 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                   onChange={(html) => setForm({ ...form, description: html })}
                   placeholder="Describe the firm — use headings, paragraphs, lists…"
                 />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Services offered</label>
+                <TagInput
+                  value={form.services}
+                  onChange={(next) => setForm({ ...form, services: next })}
+                  placeholder="e.g. Trust formation — press Enter"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Type a service and press Enter to add it as a tag. Use short labels.</p>
               </div>
 
               <div>

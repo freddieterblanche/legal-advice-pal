@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { RichTextEditor } from "./RichTextEditor";
+import { TagInput } from "./TagInput";
 import { ProvinceCityFields } from "./ProvinceCityFields";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import {
@@ -28,6 +29,7 @@ type FormState = {
   mobile_phone: string;
   bio: string;
   languages: string[];
+  services: string[];
   daily_rate_range: string;
   availability_notes: string;
   status: string;
@@ -55,6 +57,7 @@ const EMPTY: FormState = {
   mobile_phone: "",
   bio: "",
   languages: [],
+  services: [],
   daily_rate_range: "",
   availability_notes: "",
   status: "active",
@@ -110,6 +113,7 @@ export function MediatorArbitratorFormModal({
       mobile_phone: row.mobile_phone ?? "",
       bio: row.bio ?? "",
       languages: Array.isArray(row.languages) ? row.languages : [],
+      services: Array.isArray((row as any).services) ? ((row as any).services as string[]) : [],
       daily_rate_range: row.daily_rate_range ?? "",
       availability_notes: row.availability_notes ?? "",
       status: row.status ?? "active",
@@ -173,6 +177,7 @@ export function MediatorArbitratorFormModal({
       mobile_phone: form.mobile_phone.trim() || null,
       bio: sanitizeBioHtml(form.bio) || null,
       languages: form.languages.length ? form.languages : null,
+      services: form.services.length ? form.services : null,
       daily_rate_range: form.daily_rate_range.trim() || null,
       availability_notes: form.availability_notes.trim() || null,
       status: form.status,
@@ -380,6 +385,15 @@ export function MediatorArbitratorFormModal({
                 ))}
               </div>
             </Field>
+
+            <Field label="Services">
+              <TagInput
+                value={form.services}
+                onChange={(next) => setForm((f) => ({ ...f, services: next }))}
+                placeholder="e.g. Workplace mediation — press Enter"
+              />
+            </Field>
+
 
             {/* Rate & availability */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

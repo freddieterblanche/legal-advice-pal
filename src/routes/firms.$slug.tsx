@@ -134,6 +134,18 @@ function FirmProfile() {
           />
         )}
 
+        {firm.services && firm.services.length > 0 && (
+          <section className="mt-8">
+            <h2 className="font-heading text-xl text-ink">Services</h2>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {firm.services.map((s: string) => (
+                <span key={s} className="rounded-full bg-gold/15 px-2.5 py-1 text-xs font-medium text-ink">{s}</span>
+              ))}
+            </div>
+          </section>
+        )}
+
+
         {branches && branches.length > 0 && (
           <section className="mt-10">
             <h2 className="flex items-center gap-2 font-heading text-2xl text-ink">
