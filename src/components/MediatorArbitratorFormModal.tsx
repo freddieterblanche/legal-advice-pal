@@ -111,6 +111,7 @@ export function MediatorArbitratorFormModal({
     setForm({
       first_name: row.first_name ?? "",
       last_name: row.last_name ?? "",
+      company_name: (row as any).company_name ?? "",
       avatar_url: row.avatar_url ?? "",
       city: row.city ?? "",
       province: row.province ?? "",
