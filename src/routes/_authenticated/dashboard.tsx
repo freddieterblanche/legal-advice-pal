@@ -26,7 +26,7 @@ type Branch = {
   address: string | null;
   city: string | null;
   province: string | null;
-  country: string | null;
+  country: string;
   phone: string | null;
   is_head_office: boolean;
 };
