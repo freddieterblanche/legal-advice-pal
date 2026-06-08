@@ -1,0 +1,1 @@
+ALTER TABLE public.service_providers ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'South Africa';
