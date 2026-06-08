@@ -9,6 +9,19 @@ import { sanitizeBioHtml } from "./sanitize";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Lenient field helpers: the model frequently returns nulls or overlong strings;
+// we accept them at parse time and clamp/sanitize after extraction.
+const sText = z.preprocess((v) => (v == null ? "" : typeof v === "string" ? v : String(v)), z.string()).default("");
+const sBool = z.preprocess((v) => (v == null ? false : v), z.boolean()).default(false);
+const sStrArr = z.preprocess(
+  (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string") : []),
+  z.array(z.string()),
+).default([]);
+const sIntOrNull = z.preprocess(
+  (v) => (v == null || v === "" ? null : typeof v === "number" ? Math.trunc(v) : Number.isFinite(Number(v)) ? Math.trunc(Number(v)) : null),
+  z.number().int().nullable(),
+).default(null);
+
 const inputSchema = z.object({
   url: z.string().trim().url().max(500).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
     message: "URL must start with http:// or https://",
@@ -16,26 +29,24 @@ const inputSchema = z.object({
 });
 
 const extractionSchema = z.object({
-  first_name: z.string().max(80).default(""),
-  last_name: z.string().max(80).default(""),
-  // Structured designation
-  provider_type: z.enum(["attorney", "advocate", ""]).default(""),
-  is_senior_counsel: z.boolean().default(false),
-  designation_code: z.string().max(60).default(""),
-  designation_custom: z.string().max(60).default(""),
-  year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().default(null),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  // Structured bio sections (HTML)
-  overview: z.string().max(10000).default(""),
-  qualifications: z.string().max(10000).default(""),
-  accolades: z.string().max(10000).default(""),
-  noteworthy_matters: z.string().max(10000).default(""),
-  practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
-  photo_url: z.string().max(2000).default(""),
-  email: z.string().max(200).default(""),
-  phone: z.string().max(60).default(""),
-  linkedin_url: z.string().max(500).default(""),
+  first_name: sText,
+  last_name: sText,
+  provider_type: z.preprocess((v) => (v === "advocate" || v === "attorney" ? v : ""), z.enum(["attorney", "advocate", ""])).default(""),
+  is_senior_counsel: sBool,
+  designation_code: sText,
+  designation_custom: sText,
+  year_of_admission: sIntOrNull,
+  city: sText,
+  province: sText,
+  overview: sText,
+  qualifications: sText,
+  accolades: sText,
+  noteworthy_matters: sText,
+  practice_area_slugs: sStrArr,
+  photo_url: sText,
+  email: sText,
+  phone: sText,
+  linkedin_url: sText,
 });
 
 
