@@ -296,12 +296,12 @@ function FirmsIndex() {
                 return (
                   <article
                     key={f.id}
-                    className={`flex gap-4 overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 ${f.is_featured ? "ring-2 ring-amber-400/70" : ""}`}
+                    className={`flex items-stretch gap-3 overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 ${f.is_featured ? "ring-2 ring-amber-400/70" : ""}`}
                   >
                     <Link
                       to="/firms/$slug"
                       params={{ slug: f.slug }}
-                      className="shrink-0 self-stretch"
+                      className="flex w-20 shrink-0 items-center justify-center self-stretch sm:w-auto"
                       aria-label={f.name}
                     >
                       <FirmLogo
@@ -309,30 +309,30 @@ function FirmsIndex() {
                         alt={`${f.name} logo`}
                         size="card"
                         accentColor={f.logo_accent_color}
-                        className="!h-full"
+                        className="!h-full !w-20 sm:!w-auto"
                       />
                     </Link>
-                    <div className="flex flex-1 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <div className="flex flex-1 min-w-0 flex-col gap-2 py-3 pr-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                           <Link
                             to="/firms/$slug"
                             params={{ slug: f.slug }}
-                            className="truncate font-heading text-lg font-semibold text-ink hover:text-gold"
+                            className="font-heading text-base font-semibold text-ink hover:text-gold sm:text-lg sm:truncate"
                           >
                             {f.name}
                           </Link>
                           {f.is_featured && <FeaturedBadge />}
                         </div>
                         {(f.city || f.province) && (
-                          <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                          <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground sm:text-sm">
                             <MapPin className="h-3 w-3" strokeWidth={1.5} />
                             {[f.city, f.province].filter(Boolean).join(", ")}
                           </p>
                         )}
                       </div>
                       <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-0.5 text-xs font-medium text-ink">
                           <Users className="h-3 w-3" strokeWidth={1.5} />
                           {lawyerCount}
                         </span>
@@ -341,7 +341,7 @@ function FirmsIndex() {
                           params={{ slug: f.slug }}
                           className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90"
                         >
-                          View Firm
+                          View
                         </Link>
                       </div>
                     </div>
