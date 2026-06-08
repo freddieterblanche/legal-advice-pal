@@ -133,6 +133,13 @@ function AdminHub() {
       desc: "Areas of law lawyers can be tagged with.",
       count: counts?.practiceAreas,
     },
+    {
+      to: "/admin/countries",
+      icon: Globe,
+      title: "Countries",
+      desc: "Countries available when adding firm branches.",
+      count: counts?.countries,
+    },
   ] as const;
 
   return (
