@@ -459,6 +459,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <input value={b.name} onChange={(e) => updateBranch(b.id, { name: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
                 <input value={b.phone ?? ""} onChange={(e) => updateBranch(b.id, { phone: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
+                <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
                 <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
                 <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
                 <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
