@@ -480,7 +480,17 @@ type BranchRow = {
   is_head_office: boolean;
 };
 
-type BranchDraft = Omit<BranchRow, "firm_id" | "is_head_office"> & { is_head_office: boolean };
+type BranchDraft = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  province: string;
+  country: string;
+  phone: string;
+  email: string;
+  is_head_office: boolean;
+};
 
 const toBranchDraft = (branch: BranchRow): BranchDraft => ({
   id: branch.id,
@@ -565,7 +575,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     }
   };
 
-  const updateBranch = async (id: string, patch: Partial<BranchRow>, refreshAfter = true) => {
+  const updateBranch = async (id: string, patch: Partial<BranchRow>, refreshAfter = false) => {
     const { error } = await supabase.from("firm_branches").update(patch).eq("id", id);
     if (error) { toast.error(error.message); return; }
     if (refreshAfter) refresh();
