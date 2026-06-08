@@ -89,11 +89,38 @@ function SearchPage() {
   });
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["search", search],
+    queryKey: ["search", search, (areas ?? []).length],
+    enabled: !search.q || !!areas,
     queryFn: async () => {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
       query = query.eq("exclude_from_lawyer_listing", false);
-      if (search.q) query = query.ilike("full_name", `%${search.q}%`);
+      if (search.q) {
+        // Boolean AND search across name, firm/chambers, location and practice areas.
+        // Each whitespace-separated token must match at least one of these fields.
+        const tokens = search.q.trim().split(/\s+/).filter(Boolean).slice(0, 8);
+        for (const raw of tokens) {
+          const t = raw.replace(/[(),"]/g, " ").trim();
+          if (!t) continue;
+          const like = `*${t}*`; // PostgREST ilike uses * as wildcard inside or()
+          const lower = t.toLowerCase();
+          const matchedSlugs = (areas ?? [])
+            .filter((a) => a.name.toLowerCase().includes(lower) || a.slug.toLowerCase().includes(lower))
+            .map((a) => a.slug);
+          const parts = [
+            `full_name.ilike.${like}`,
+            `firm_name.ilike.${like}`,
+            `chambers_name.ilike.${like}`,
+            `city.ilike.${like}`,
+            `province.ilike.${like}`,
+            `town_name.ilike.${like}`,
+            `province_name.ilike.${like}`,
+          ];
+          for (const slug of matchedSlugs) {
+            parts.push(`practice_area_slugs.cs.{${slug}}`);
+          }
+          query = query.or(parts.join(","));
+        }
+      }
       if (search.town) {
         query = query.eq("town_slug", search.town);
       } else if (search.province) {
@@ -238,7 +265,7 @@ function SearchPage() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name or firm…"
+              placeholder="Search by name, firm, practice area, city, town or province…"
               maxLength={120}
               className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
