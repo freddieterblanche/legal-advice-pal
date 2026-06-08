@@ -218,19 +218,24 @@ function AdminAdvocatesPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{barName(a.bar_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{chambersName(a.chambers_id)}</td>
-                  <td className="px-4 py-3"><span className={`rounded-full px-2 py-0.5 text-xs capitalize ${a.status === "suspended" ? "bg-destructive/15 text-destructive" : "bg-muted"}`}>{a.status}</span></td>
+                  <td className="px-4 py-3">
+                    <StatusCell
+                      table="service_providers"
+                      id={a.id}
+                      status={a.status ?? null}
+                      isFeatured={a.is_featured}
+                      featuredCategory={{ table: "service_providers", key: "advocate" }}
+                      invalidateKeys={[["admin-advocates"]]}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <button onClick={() => setEditing(a)} className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-gold"><Pencil className="h-3 w-3" /> Edit</button>
                     {a.status === "active" || a.status === "trial" ? (
                       <Link to="/lawyers/$slug" params={{ slug: a.slug }} target="_blank" className="mr-3 text-xs font-medium text-forest hover:text-gold">Open <ExternalLink className="inline h-3 w-3" /></Link>
                     ) : null}
-                    {a.status === "suspended" ? (
-                      <button onClick={() => setStatus.mutate({ id: a.id, status: "active" })} className="mr-3 text-xs font-medium text-forest hover:underline">Activate</button>
-                    ) : (
-                      <button onClick={() => { if (confirm(`Suspend ${a.first_name} ${a.last_name}? They will be hidden from public listings.`)) setStatus.mutate({ id: a.id, status: "suspended" }); }} className="mr-3 text-xs font-medium text-ink hover:text-destructive">Suspend</button>
-                    )}
                     <button onClick={() => { if (confirm(`Delete ${a.first_name} ${a.last_name}?`)) remove.mutate(a.id); }} className="text-xs text-destructive"><Trash2 className="inline h-3 w-3" /></button>
                   </td>
+
                 </tr>
               ))}
               {!isLoading && sorted.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No advocates yet. Click <strong>Add Advocate</strong> to create one.</td></tr>}
