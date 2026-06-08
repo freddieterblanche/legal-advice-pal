@@ -163,6 +163,11 @@ function FirmProfile() {
                       <Phone className="h-3 w-3" /> {b.phone}
                     </a>
                   )}
+                  {b.email && (
+                    <a href={`mailto:${b.email}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                      <Mail className="h-3 w-3" /> {b.email}
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
