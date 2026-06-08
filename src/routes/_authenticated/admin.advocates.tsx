@@ -30,6 +30,7 @@ type AdvocateRow = {
   exclude_from_lawyer_listing: boolean | null;
   year_of_admission: number | null;
   status: string | null;
+  is_featured: boolean | null;
   avatar_url: string | null;
   created_at: string | null;
 };
@@ -78,7 +79,7 @@ function AdminAdvocatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, exclude_from_lawyer_listing, year_of_admission, status, avatar_url, created_at")
+        .select("id, slug, first_name, last_name, email, phone, office_phone, mobile_phone, city, province, bar_id, chambers_id, is_senior_counsel, is_mediator, is_arbitrator, exclude_from_lawyer_listing, year_of_admission, status, is_featured, avatar_url, created_at")
         .eq("provider_type", "advocate")
         .order("last_name");
       if (error) throw error;
