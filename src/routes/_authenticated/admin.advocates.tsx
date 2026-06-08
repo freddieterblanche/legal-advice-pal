@@ -331,6 +331,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         year_of_admission: data.year_of_admission ? String(data.year_of_admission) : "",
         avatar_url: data.avatar_url ?? "",
         status: data.status ?? "active",
+        website_url: data.website_url ?? "",
         bio: data.bio ?? "",
       }));
       setHydrated(true);
