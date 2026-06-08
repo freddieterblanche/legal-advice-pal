@@ -332,11 +332,14 @@ function SearchPage() {
                     const badgeLabel = l.designation
                       ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                     return (
-                      <TableRow key={l.id}>
+                      <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
                         <TableCell className="font-medium">
-                          <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
-                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
+                              {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                            </Link>
+                            {l.is_featured && <FeaturedBadge />}
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{badgeLabel}</TableCell>
                         <TableCell className="text-muted-foreground">{l.firm_name ?? l.chambers_name ?? "—"}</TableCell>
