@@ -685,6 +685,7 @@ function SettingsTab({ firm }: { firm: any }) {
     city: firm.city ?? "",
     province: firm.province ?? "Gauteng",
     logo_url: firm.logo_url ?? "",
+    logo_accent_color: firm.logo_accent_color ?? "",
   });
 
   const save = useMutation({
