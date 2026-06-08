@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { TagInput } from "../../components/TagInput";
+import { ProfileImportBar } from "../../components/ProfileImportBar";
+import { importFirmProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 type FirmRow = {
