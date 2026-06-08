@@ -160,6 +160,7 @@ function ExpertWitnessSearch() {
               Search
             </button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
