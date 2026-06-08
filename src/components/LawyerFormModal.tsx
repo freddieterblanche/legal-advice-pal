@@ -173,6 +173,7 @@ export function LawyerFormModal({
     arbitrator_experience_years:
       lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
     availability_notes: lawyer?.availability_notes ?? "",
+    status: lawyer?.status ?? "active",
   });
 
   const toggleArr = (key: "mediator_sectors" | "arbitrator_types", v: string) =>
@@ -455,7 +456,7 @@ export function LawyerFormModal({
           : null,
       });
       if (isEdit && lawyer) {
-        const { error } = await supabase.from("service_providers").update(parsed).eq("id", lawyer.id);
+        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", lawyer.id);
         if (error) throw error;
         await syncPracticeAreas(lawyer.id);
         await syncBranches(lawyer.id);
@@ -555,6 +556,31 @@ export function LawyerFormModal({
                 ))}
               </div>
             </div>
+
+            {isEdit && (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Listing status</label>
+                <div className="flex flex-wrap gap-2">
+                  {(["active", "trial", "suspended", "pending_payment"] as const).map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => setForm({ ...form, status: s })}
+                      className={`rounded border px-3 py-1.5 text-xs capitalize transition-colors ${
+                        form.status === s
+                          ? s === "suspended"
+                            ? "border-destructive bg-destructive/15 text-destructive"
+                            : "border-gold bg-gold/15 text-ink"
+                          : "border-border bg-card text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {s.replace("_", " ")}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">Suspended profiles are hidden from public listings and search.</p>
+              </div>
+            )}
 
             {form.provider_type === "advocate" ? (
               <div className="space-y-3">
