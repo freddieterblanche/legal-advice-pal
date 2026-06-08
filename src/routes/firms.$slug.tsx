@@ -118,15 +118,8 @@ function FirmProfile() {
               </Link>
             )}
           </div>
-          {firm.logo_url && (
-            <img
-              src={firm.logo_url}
-              alt={`${firm.name} logo`}
-              className="h-20 w-auto object-contain"
-              style={{ filter: "brightness(0) invert(1)" }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          )}
+          <FirmLogo src={firm.logo_url} alt={`${firm.name} logo`} size="lg" />
+
         </div>
       </section>
 
