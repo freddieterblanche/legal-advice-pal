@@ -393,6 +393,7 @@ export function LawyerFormModal({
         phone: res.phone || f.phone,
         mobile_phone: res.phone || f.mobile_phone,
         linkedin_url: res.linkedin_url || f.linkedin_url,
+        website_url: res.website_url || f.website_url,
       }));
       // If imported designation_custom is set, switch the "Other" toggle on
       if (res.designation_custom && !res.designation_code) setOtherDesignation(true);
