@@ -13,6 +13,7 @@ import { ProvinceCityFields } from "../../components/ProvinceCityFields";
 import { ProfileImportBar } from "../../components/ProfileImportBar";
 import { importExpertProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
+import { StatusCell } from "../../components/StatusCell";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
@@ -34,6 +35,7 @@ type ExpertRow = {
   city: string | null;
   province: string | null;
   status: string;
+  is_featured: boolean | null;
   trial_end_date: string | null;
   profile_views: number;
   firm_id: string | null;
@@ -67,7 +69,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, name_title, job_title, city, province, status, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
+        .select("id, slug, first_name, last_name, name_title, job_title, city, province, status, is_featured, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
@@ -158,7 +160,16 @@ function AdminExpertsPage() {
                   <td className="px-4 py-3 text-muted-foreground">{e.job_title ?? "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{firmName(e.firm_id)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[e.city, e.province].filter(Boolean).join(", ") || "—"}</td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{e.status}</span></td>
+                  <td className="px-4 py-3">
+                    <StatusCell
+                      table="service_providers"
+                      id={e.id}
+                      status={e.status}
+                      isFeatured={e.is_featured}
+                      featuredCategory={{ table: "service_providers", key: "expert" }}
+                      invalidateKeys={[["admin-experts"]]}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{e.profile_views}</td>
                   <td className="px-4 py-3 text-right">
                     {(e.status === "trial" || e.status === "active") && (
