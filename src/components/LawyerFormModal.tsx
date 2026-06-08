@@ -118,6 +118,7 @@ export type LawyerRow = {
   arbitrator_experience_years?: number | null;
   availability_notes?: string | null;
   services?: string[] | null;
+  is_featured?: boolean | null;
   firm_id: string | null;
 };
 
