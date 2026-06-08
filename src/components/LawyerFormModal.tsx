@@ -557,6 +557,31 @@ export function LawyerFormModal({
               </div>
             </div>
 
+            {isEdit && (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Listing status</label>
+                <div className="flex flex-wrap gap-2">
+                  {(["active", "trial", "suspended", "pending_payment"] as const).map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => setForm({ ...form, status: s })}
+                      className={`rounded border px-3 py-1.5 text-xs capitalize transition-colors ${
+                        form.status === s
+                          ? s === "suspended"
+                            ? "border-destructive bg-destructive/15 text-destructive"
+                            : "border-gold bg-gold/15 text-ink"
+                          : "border-border bg-card text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {s.replace("_", " ")}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">Suspended profiles are hidden from public listings and search.</p>
+              </div>
+            )}
+
             {form.provider_type === "advocate" ? (
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm">
