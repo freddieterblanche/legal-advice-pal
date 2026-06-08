@@ -316,6 +316,7 @@ function AdminExpertFormModal({
         mobile_phone: form.mobile_phone?.trim() || null,
         contact_email: form.contact_email?.trim() || null,
         services: form.services.length ? form.services : null,
+        website_url: form.website_url?.trim() || null,
       };
       if (isEdit && expert) {
         const { error } = await supabase
