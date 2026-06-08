@@ -71,6 +71,7 @@ export const lawyerSchema = z.object({
   arbitrator_types: z.array(z.string().trim().max(120)).nullable().optional(),
   arbitrator_experience_years: z.number().int().min(0).max(80).nullable().optional(),
   availability_notes: z.string().trim().max(1000).nullable().optional(),
+  services: z.array(z.string().trim().min(1).max(120)).nullable().optional(),
 });
 
 export type LawyerRow = {
@@ -115,6 +116,7 @@ export type LawyerRow = {
   arbitrator_types?: string[] | null;
   arbitrator_experience_years?: number | null;
   availability_notes?: string | null;
+  services?: string[] | null;
   firm_id: string | null;
 };
 
@@ -173,6 +175,7 @@ export function LawyerFormModal({
     arbitrator_experience_years:
       lawyer?.arbitrator_experience_years != null ? String(lawyer.arbitrator_experience_years) : "",
     availability_notes: lawyer?.availability_notes ?? "",
+    services: (lawyer?.services ?? []) as string[],
     status: lawyer?.status ?? "active",
   });
 
@@ -450,6 +453,7 @@ export function LawyerFormModal({
       availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
         ? form.availability_notes
         : null,
+      services: form.services.length ? form.services : null,
     });
   };
 
