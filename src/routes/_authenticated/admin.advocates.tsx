@@ -293,6 +293,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
     year_of_admission: advocate?.year_of_admission ? String(advocate.year_of_admission) : "",
     avatar_url: advocate?.avatar_url ?? "",
     status: advocate?.status ?? "active",
+    website_url: "",
     bio: "",
   });
   // Hydrate the full row (incl. bio + any columns not in the list query) before allowing edit
