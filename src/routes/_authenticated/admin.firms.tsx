@@ -419,10 +419,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
         city: draft.city || null,
         province: draft.province || null,
         phone: draft.phone || null,
+        email: draft.email || null,
         is_head_office: draft.is_head_office,
       });
       if (error) throw error;
-      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
       refresh();
       toast.success("Branch added");
     } catch (e) {
