@@ -15,6 +15,7 @@ import { TagInput } from "./TagInput";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
+import { useFeaturedToggle, FEATURED_CAP } from "./FeaturedToggle";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
