@@ -159,20 +159,9 @@ function SearchPage() {
           })
           .filter((x): x is string => !!x);
 
-        if (clauseExprs.length === 1) {
-          query = query.or(clauseExprs[0].replace(/^or\(|\)$/g, "").replace(/^and\(|\)$/g, ""));
-          // Fallback: if the single clause was an and(...) wrapper, re-apply as a single or() containing it.
-          // (The replace above strips the outer wrapper only when it's a pure or(); otherwise we need the wrapper.)
-        }
-        if (clauseExprs.length > 1) {
+        if (clauseExprs.length) {
           query = query.or(clauseExprs.join(","));
-        } else if (clauseExprs.length === 1) {
-          // Robust path: wrap in or((expr)) so AND/OR clauses both work uniformly.
-          query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
-          query = query.eq("exclude_from_lawyer_listing", false);
-          query = query.or(clauseExprs[0]);
         }
-      }
       if (search.town) {
         query = query.eq("town_slug", search.town);
       } else if (search.province) {
