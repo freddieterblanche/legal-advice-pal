@@ -574,6 +574,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
         office_phone: form.office_phone?.trim() || null,
         mobile_phone: form.mobile_phone?.trim() || null,
         contact_email: form.contact_email?.trim() || null,
+        website_url: form.website_url?.trim() || null,
       };
       if (isEdit && expert) {
         const { error } = await supabase.from("service_providers").update(payload).eq("id", expert.id);
