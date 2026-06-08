@@ -393,7 +393,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string | null
+          featured_since: string | null
           id: string
+          is_featured: boolean
           logo_url: string | null
           name: string
           phone: string | null
@@ -409,7 +411,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          featured_since?: string | null
           id?: string
+          is_featured?: boolean
           logo_url?: string | null
           name: string
           phone?: string | null
@@ -425,7 +429,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          featured_since?: string | null
           id?: string
+          is_featured?: boolean
           logo_url?: string | null
           name?: string
           phone?: string | null
@@ -913,6 +919,7 @@ export type Database = {
           email: string | null
           employer: string | null
           exclude_from_lawyer_listing: boolean
+          featured_since: string | null
           fee_range: string | null
           firm_id: string | null
           first_name: string
@@ -920,6 +927,7 @@ export type Database = {
           id: string
           is_arbitrator: boolean
           is_claimed: boolean | null
+          is_featured: boolean
           is_independent: boolean
           is_mediator: boolean
           is_practice_head: boolean
@@ -981,6 +989,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           exclude_from_lawyer_listing?: boolean
+          featured_since?: string | null
           fee_range?: string | null
           firm_id?: string | null
           first_name: string
@@ -988,6 +997,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean
           is_practice_head?: boolean
@@ -1049,6 +1059,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           exclude_from_lawyer_listing?: boolean
+          featured_since?: string | null
           fee_range?: string | null
           firm_id?: string | null
           first_name?: string
@@ -1056,6 +1067,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean
           is_practice_head?: boolean
