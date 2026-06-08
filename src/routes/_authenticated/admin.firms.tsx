@@ -563,9 +563,16 @@ function BranchesEditor({ firmId }: { firmId: string }) {
                 <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
                 <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
                 <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
-                <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                  <option value="">Province…</option>
-                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                {(b.country ?? "South Africa") === "South Africa" ? (
+                  <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                    <option value="">Province…</option>
+                    {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                ) : (
+                  <input value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
+                )}
+                <select value={b.country ?? "South Africa"} onChange={(e) => updateBranch(b.id, { country: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                  {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
                 </select>
               </div>
               <div className="mt-2 flex items-center justify-between">
