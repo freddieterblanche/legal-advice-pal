@@ -7,9 +7,11 @@ import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/designation";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
+type ViewMode = "cards" | "list";
 type Search = {
   q?: string;
   area?: string;
@@ -20,6 +22,7 @@ type Search = {
   page?: number;
   sort?: SortField;
   dir?: SortDir;
+  view?: ViewMode;
 };
 
 export const Route = createFileRoute("/search")({
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/search")({
       ? s.sort
       : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
@@ -260,18 +264,39 @@ function SearchPage() {
                 ? "Searching…"
                 : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
-            <SortBar
-              options={[
-                { key: "surname", label: "Surname" },
-                { key: "experience", label: "Years Experience" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "surname"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) =>
-                navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
-              }
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "surname", label: "Surname" },
+                  { key: "experience", label: "Years Experience" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "surname"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) =>
+                  navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
+                }
+              />
+              <div className="inline-flex rounded-full border border-border bg-background p-1">
+                {([
+                  { key: "cards" as const, label: "Cards" },
+                  { key: "list" as const, label: "List" },
+                ]).map((v) => {
+                  const active = (search.view ?? "cards") === v.key;
+                  return (
+                    <button
+                      key={v.key}
+                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key }) })}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                        active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
 
@@ -282,6 +307,54 @@ function SearchPage() {
           ) : results?.rows.length === 0 ? (
             <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
               No lawyers match your search. Try fewer filters.
+            </div>
+          ) : (search.view ?? "cards") === "list" ? (
+            <div className="overflow-hidden rounded-md border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Designation</TableHead>
+                    <TableHead>Firm / Chambers</TableHead>
+                    <TableHead>City</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results?.rows.map((l) => {
+                    const kind: "advocate" | "attorney" =
+                      l.provider_type === "advocate" || l.provider_type === "attorney"
+                        ? l.provider_type
+                        : designationKind(l.designation);
+                    const badgeLabel = l.designation
+                      ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
+                    return (
+                      <TableRow key={l.id}>
+                        <TableCell className="font-medium">
+                          <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
+                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{badgeLabel}</TableCell>
+                        <TableCell className="text-muted-foreground">{l.firm_name ?? l.chambers_name ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {l.city ?? "—"}
+                          {l.province ? <span className="text-muted-foreground/70">, {l.province}</span> : null}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Link
+                            to="/lawyers/$slug"
+                            params={{ slug: l.slug ?? "" }}
+                            className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90"
+                          >
+                            View
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="space-y-3">

@@ -1,21 +1,28 @@
-## Fix
+## Add "View as List" toggle to search results
 
-Only 4 TypeScript errors remain — all on a single line in `src/routes/expert-witnesses.index.tsx:51`, where the previous refactor accidentally injected an `.eq("provider_type", "expert")` call *inside* the `.select(...)` string, breaking the parser:
+Adds a compact list view to `/search` while keeping the existing card view as default.
 
-```ts
-.select("*, provider_disciplines(expert_disciplines(name, slug, parent_category).eq("provider_type", "expert")), case_service_providers(id)", { count: "exact" })
-```
+### UX
+- Small toggle in the results header (next to SortBar): **Cards | List**.
+- Default = Cards (existing behaviour, unchanged).
+- Selection persists in the URL as `?view=list` (so it survives reloads and shareable links) and falls back to `cards`.
 
-### Change
+### List view
+A dense table (no photos) using existing `Table` primitives:
 
-Restore the select string and move the filter to a proper chained call:
+| Name | Designation | Firm | City | |
+|---|---|---|---|---|
+| Full name (+ " SC" if senior counsel), linked to profile | Designation text, or fallback "Advocate"/"Senior Counsel"/"Attorney" derived via the existing `resolveKind` logic | `firm_name ?? chambers_name` | `city` (province as muted suffix) | "View" link button |
 
-```ts
-.select("*, provider_disciplines(expert_disciplines(name, slug, parent_category)), case_service_providers(id)", { count: "exact" })
-.eq("provider_type", "expert")
-.in("status", ["trial", "active"]);
-```
+- Same query, sorting, pagination, filters, and type tabs as the card view — only the row rendering changes.
+- Row click → profile (same target as "View Profile").
+- Mobile: horizontal scroll on the table (matches `Table` component default).
 
-### Verify
+### Files
+- `src/routes/search.tsx`
+  - Extend `validateSearch` with `view: "cards" | "list"` (default `"cards"`).
+  - Add a small two-button toggle near the SortBar.
+  - Branch render: existing `<article>` cards when `view === "cards"`, new `<Table>` block when `view === "list"`.
+  - Reuse the existing `kind` / `badgeLabel` / link logic so labels stay consistent with the cards.
 
-Run `bunx tsc --noEmit` — expect 0 errors.
+No backend, schema, or query changes.
