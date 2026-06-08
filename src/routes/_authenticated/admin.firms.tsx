@@ -10,6 +10,7 @@ import { TagInput } from "../../components/TagInput";
 import { ProfileImportBar } from "../../components/ProfileImportBar";
 import { importFirmProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
+import { StatusCell } from "../../components/StatusCell";
 
 type FirmRow = {
   id: string;
@@ -24,6 +25,7 @@ type FirmRow = {
   city: string | null;
   province: string | null;
   status: string | null;
+  is_featured: boolean | null;
   logo_url: string | null;
   logo_accent_color: string | null;
   services: string[] | null;
@@ -141,7 +143,16 @@ function AdminFirmsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{[f.city, f.province].filter(Boolean).join(", ") || "—"}</td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{f.status}</span></td>
+                  <td className="px-4 py-3">
+                    <StatusCell
+                      table="firms"
+                      id={f.id}
+                      status={f.status ?? null}
+                      isFeatured={f.is_featured}
+                      featuredCategory={{ table: "firms" }}
+                      invalidateKeys={[["admin-firms"]]}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <button
                       onClick={() => navigate({ to: "/dashboard", search: { firmId: f.id, tab: "lawyers" } as never })}
