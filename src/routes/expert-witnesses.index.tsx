@@ -58,9 +58,17 @@ function ExpertWitnessSearch() {
         .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category)), case_service_providers(id)", { count: "exact" })
         .eq("provider_type", "expert")
         .in("status", ["trial", "active"]);
-      if (search.q) {
-        query = query.or(`first_name.ilike.%${search.q}%,last_name.ilike.%${search.q}%,employer.ilike.%${search.q}%`);
-      }
+      query = applyBooleanSearch(query, search.q, [
+        "first_name",
+        "last_name",
+        "employer",
+        "company_name",
+        "city",
+        "province",
+        "job_title",
+        "name_title",
+        "registration_body",
+      ]);
       if (search.province) query = query.eq("province", search.province);
       if (search.independent === "yes") query = query.eq("is_independent", true);
       if (search.independent === "no") query = query.eq("is_independent", false);
