@@ -253,6 +253,7 @@ function AdminExpertFormModal({
     mobile_phone: "",
     contact_email: "",
     services: [] as string[],
+    website_url: "",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
