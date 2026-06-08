@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, X, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { MediatorArbitratorFormModal } from "./MediatorArbitratorFormModal";
+import { StatusCell } from "./StatusCell";
 
 type Role = "mediator" | "arbitrator";
 
@@ -18,6 +19,7 @@ type LawyerRow = {
   provider_type: string | null;
   firm_id: string | null;
   status: string | null;
+  is_featured: boolean | null;
   is_mediator: boolean;
   is_arbitrator: boolean;
 };
@@ -58,7 +60,7 @@ export function AdminRoleListPage({ role }: { role: Role }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, city, province, provider_type, firm_id, status, is_mediator, is_arbitrator")
+        .select("id, slug, first_name, last_name, city, province, provider_type, firm_id, status, is_featured, is_mediator, is_arbitrator")
         .eq(meta.column, true)
         .order("last_name");
       if (error) throw error;
@@ -138,7 +140,16 @@ export function AdminRoleListPage({ role }: { role: Role }) {
                   <td className="px-4 py-3 font-medium text-ink">{r.first_name} {r.last_name}</td>
                   <td className="px-4 py-3 text-muted-foreground capitalize">{r.provider_type ?? (r.firm_id ? "attorney" : "—")}</td>
                   <td className="px-4 py-3 text-muted-foreground">{[r.city, r.province].filter(Boolean).join(", ") || "—"}</td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status ?? "—"}</span></td>
+                  <td className="px-4 py-3">
+                    <StatusCell
+                      table="service_providers"
+                      id={r.id}
+                      status={r.status ?? null}
+                      isFeatured={r.is_featured}
+                      featuredCategory={{ table: "service_providers", key: role }}
+                      invalidateKeys={[["admin-role-list", role]]}
+                    />
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap text-right">
                     {editsInPlace(r) ? (
                       <button
