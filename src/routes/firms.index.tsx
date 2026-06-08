@@ -81,11 +81,27 @@ function FirmsIndex() {
         branchFirmIds = Array.from(new Set((branchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
       }
 
+      // Pre-resolve free-text q against firm_branches so that branch cities/names match too
+      let qBranchFirmIds: string[] | null = null;
+      if (search.q) {
+        const { data: qBranchRows } = await supabase
+          .from("firm_branches")
+          .select("firm_id")
+          .or(`city.ilike.%${search.q}%,name.ilike.%${search.q}%,province.ilike.%${search.q}%,country.ilike.%${search.q}%`);
+        qBranchFirmIds = Array.from(new Set((qBranchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
+      }
+
       let query = supabase
         .from("firms")
         .select("id, name, slug, city, province, website, phone, email, description, logo_url, logo_accent_color, created_at, is_featured", { count: "exact" })
         .eq("status", "active");
-      if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
+      if (search.q) {
+        const qParts = [`name.ilike.%${search.q}%`, `city.ilike.%${search.q}%`, `province.ilike.%${search.q}%`];
+        if (qBranchFirmIds && qBranchFirmIds.length > 0) {
+          qParts.push(`id.in.(${qBranchFirmIds.join(",")})`);
+        }
+        query = query.or(qParts.join(","));
+      }
       if (provName || townName) {
         const orParts: string[] = [];
         if (provName && !townName) orParts.push(`province.eq.${provName}`);
