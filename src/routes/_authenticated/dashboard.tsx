@@ -727,6 +727,17 @@ function SettingsTab({ firm }: { firm: any }) {
         </div>
 
         <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Services offered</label>
+          <TagInput
+            value={form.services}
+            onChange={(next) => setForm({ ...form, services: next })}
+            placeholder="e.g. Trust formation — press Enter"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">Type a service and press Enter to add it as a tag. Use short labels.</p>
+        </div>
+
+
+        <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Logo image URL</label>
           <div className="flex items-start gap-3">
             {form.logo_url && (
