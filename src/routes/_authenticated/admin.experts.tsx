@@ -10,6 +10,8 @@ import { TagInput } from "../../components/TagInput";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 import { ProvinceCityFields } from "../../components/ProvinceCityFields";
+import { ProfileImportBar } from "../../components/ProfileImportBar";
+import { importExpertProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
