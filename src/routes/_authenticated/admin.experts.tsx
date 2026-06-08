@@ -282,6 +282,7 @@ function AdminExpertFormModal({
       mobile_phone: (e.mobile_phone as string) ?? "",
       contact_email: (e.contact_email as string) ?? "",
       services: Array.isArray(e.services) ? (e.services as string[]) : [],
+      website_url: (e.website_url as string) ?? "",
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
