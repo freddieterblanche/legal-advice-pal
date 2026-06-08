@@ -195,7 +195,10 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       is_senior_counsel: provider_type === "advocate" ? !!extracted.is_senior_counsel : false,
       designation_code,
       designation_custom,
-      year_of_admission: extracted.year_of_admission,
+      year_of_admission:
+        extracted.year_of_admission != null && extracted.year_of_admission >= 1900 && extracted.year_of_admission <= CURRENT_YEAR
+          ? extracted.year_of_admission
+          : null,
       designation: legacyDesignation,
       city: extracted.city,
       province,
