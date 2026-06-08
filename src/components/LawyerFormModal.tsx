@@ -983,6 +983,18 @@ export function LawyerFormModal({
                   className="rounded border border-border bg-background px-3 py-2 text-sm"
                 />
               </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Website URL (link visitors directly to this profile on the lawyer's firm/personal site)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://example.co.za/people/jane-doe"
+                  value={form.website_url}
+                  onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
             </div>
           </div>
 
