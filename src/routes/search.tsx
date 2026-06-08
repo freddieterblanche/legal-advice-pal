@@ -9,6 +9,7 @@ import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { FeaturedBadge } from "../components/FeaturedBadge";
+import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
