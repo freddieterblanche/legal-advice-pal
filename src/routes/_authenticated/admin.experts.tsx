@@ -422,6 +422,9 @@ function AdminExpertFormModal({
           <AField label="Contact email">
             <input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="eric@example.co.za" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
+          <AField label="Website URL (deep link to this profile on the expert's own site)">
+            <input type="url" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} placeholder="https://example.co.za/team/jane-doe" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
           <AField label="Qualifications">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />
           </AField>
