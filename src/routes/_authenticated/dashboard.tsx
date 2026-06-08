@@ -703,6 +703,7 @@ function SettingsTab({ firm }: { firm: any }) {
         description: sanitizeBioHtml(form.description),
         logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
         services: form.services.length ? form.services : null,
+        email: form.email?.trim() || null,
       };
       const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
