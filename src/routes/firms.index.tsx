@@ -5,6 +5,7 @@ import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "name" | "lawyers" | "listed";
 type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir };
@@ -62,7 +63,7 @@ function FirmsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("firms")
-        .select("id, name, slug, city, province, website, phone, email, description, logo_url, created_at", { count: "exact" })
+        .select("id, name, slug, city, province, website, phone, email, description, logo_url, created_at, is_featured", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
       if (search.province) {
@@ -78,6 +79,8 @@ function FirmsIndex() {
       const sort = search.sort ?? "name";
       const ascending = (search.dir ?? "asc") === "asc";
       query = query.range(from, from + PAGE_SIZE - 1);
+      // Featured firms always first
+      query = query.order("is_featured", { ascending: false });
       if (sort === "listed") {
         query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
@@ -207,7 +210,7 @@ function FirmsIndex() {
                     key={f.id}
                     to="/firms/$slug"
                     params={{ slug: f.slug }}
-                    className="group flex items-center gap-3 rounded-lg bg-card px-4 py-3 shadow-sm transition-all hover:shadow-md"
+                    className={`group flex items-center gap-3 rounded-lg bg-card px-4 py-3 shadow-sm transition-all hover:shadow-md ${f.is_featured ? "ring-2 ring-amber-400/70" : ""}`}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gold/10 text-gold">
                       <Building2 className="h-5 w-5" strokeWidth={1.5} />
@@ -217,6 +220,7 @@ function FirmsIndex() {
                         <h3 className="truncate font-heading text-base font-semibold text-ink group-hover:text-gold">
                           {f.name}
                         </h3>
+                        {f.is_featured && <FeaturedBadge />}
                         {(f.city || f.province) && (
                           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                             <MapPin className="h-3 w-3" strokeWidth={1.5} />

@@ -8,6 +8,7 @@ import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
@@ -119,6 +120,8 @@ function SearchPage() {
       }
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
+      // Always prioritise featured listings first, then apply the chosen sort.
+      query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
@@ -329,11 +332,14 @@ function SearchPage() {
                     const badgeLabel = l.designation
                       ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                     return (
-                      <TableRow key={l.id}>
+                      <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
                         <TableCell className="font-medium">
-                          <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
-                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
+                              {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                            </Link>
+                            {l.is_featured && <FeaturedBadge />}
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{badgeLabel}</TableCell>
                         <TableCell className="text-muted-foreground">{l.firm_name ?? l.chambers_name ?? "—"}</TableCell>
@@ -372,7 +378,7 @@ function SearchPage() {
                   ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
+                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
@@ -404,6 +410,7 @@ function SearchPage() {
                           <KindIcon className="h-3 w-3" strokeWidth={2} />
                           {badgeLabel}
                         </span>
+                        {l.is_featured && <FeaturedBadge />}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {[

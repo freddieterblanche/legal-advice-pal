@@ -6,6 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "surname" | "listed";
 type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir };
@@ -57,6 +58,7 @@ function MediatorSearch() {
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
       query = query.range(from, from + PAGE_SIZE - 1);
+      query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else {
@@ -158,7 +160,7 @@ function MediatorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
+                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
                   {l.avatar_url ? (
                     <img src={l.avatar_url} alt={l.full_name} className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top" />
                   ) : (
@@ -175,6 +177,7 @@ function MediatorSearch() {
                         {l.mediator_accreditation && (
                           <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">{l.mediator_accreditation}</span>
                         )}
+                        {l.is_featured && <FeaturedBadge />}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
