@@ -549,6 +549,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
     office_phone: expert?.office_phone ?? "",
     mobile_phone: expert?.mobile_phone ?? "",
     contact_email: expert?.contact_email ?? "",
+    website_url: expert?.website_url ?? "",
   });
   const [saving, setSaving] = useState(false);
 
