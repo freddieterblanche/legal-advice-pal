@@ -96,6 +96,7 @@ export type LawyerRow = {
   sector_head_area: string | null;
   city: string | null;
   province: string | null;
+  country: string | null;
   bio: string | null;
   overview: string | null;
   qualifications: string | null;
