@@ -9,6 +9,19 @@ import { sanitizeBioHtml } from "./sanitize";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Lenient field helpers: the model frequently returns nulls or overlong strings;
+// we accept them at parse time and clamp/sanitize after extraction.
+const sText = z.preprocess((v) => (v == null ? "" : typeof v === "string" ? v : String(v)), z.string()).default("");
+const sBool = z.preprocess((v) => (v == null ? false : v), z.boolean()).default(false);
+const sStrArr = z.preprocess(
+  (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string") : []),
+  z.array(z.string()),
+).default([]);
+const sIntOrNull = z.preprocess(
+  (v) => (v == null || v === "" ? null : typeof v === "number" ? Math.trunc(v) : Number.isFinite(Number(v)) ? Math.trunc(Number(v)) : null),
+  z.number().int().nullable(),
+).default(null);
+
 const inputSchema = z.object({
   url: z.string().trim().url().max(500).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
     message: "URL must start with http:// or https://",
@@ -16,26 +29,24 @@ const inputSchema = z.object({
 });
 
 const extractionSchema = z.object({
-  first_name: z.string().max(80).default(""),
-  last_name: z.string().max(80).default(""),
-  // Structured designation
-  provider_type: z.enum(["attorney", "advocate", ""]).default(""),
-  is_senior_counsel: z.boolean().default(false),
-  designation_code: z.string().max(60).default(""),
-  designation_custom: z.string().max(60).default(""),
-  year_of_admission: z.number().int().min(1900).max(CURRENT_YEAR).nullable().default(null),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  // Structured bio sections (HTML)
-  overview: z.string().max(10000).default(""),
-  qualifications: z.string().max(10000).default(""),
-  accolades: z.string().max(10000).default(""),
-  noteworthy_matters: z.string().max(10000).default(""),
-  practice_area_slugs: z.array(z.string().max(60)).max(15).default([]),
-  photo_url: z.string().max(2000).default(""),
-  email: z.string().max(200).default(""),
-  phone: z.string().max(60).default(""),
-  linkedin_url: z.string().max(500).default(""),
+  first_name: sText,
+  last_name: sText,
+  provider_type: z.preprocess((v) => (v === "advocate" || v === "attorney" ? v : ""), z.enum(["attorney", "advocate", ""])).default(""),
+  is_senior_counsel: sBool,
+  designation_code: sText,
+  designation_custom: sText,
+  year_of_admission: sIntOrNull,
+  city: sText,
+  province: sText,
+  overview: sText,
+  qualifications: sText,
+  accolades: sText,
+  noteworthy_matters: sText,
+  practice_area_slugs: sStrArr,
+  photo_url: sText,
+  email: sText,
+  phone: sText,
+  linkedin_url: sText,
 });
 
 
@@ -184,7 +195,10 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       is_senior_counsel: provider_type === "advocate" ? !!extracted.is_senior_counsel : false,
       designation_code,
       designation_custom,
-      year_of_admission: extracted.year_of_admission,
+      year_of_admission:
+        extracted.year_of_admission != null && extracted.year_of_admission >= 1900 && extracted.year_of_admission <= CURRENT_YEAR
+          ? extracted.year_of_admission
+          : null,
       designation: legacyDesignation,
       city: extracted.city,
       province,
@@ -255,21 +269,21 @@ function mapAiError(err: unknown): Error {
 // ---------- Expert witness import ----------
 
 const expertExtractionSchema = z.object({
-  first_name: z.string().max(80).default(""),
-  last_name: z.string().max(80).default(""),
-  name_title: z.string().max(20).default(""),
-  job_title: z.string().max(120).default(""),
-  qualifications: z.string().max(10000).default(""),
-  registration_body: z.string().max(200).default(""),
-  bio: z.string().max(10000).default(""),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  company_name: z.string().max(200).default(""),
-  photo_url: z.string().max(2000).default(""),
-  email: z.string().max(200).default(""),
-  office_phone: z.string().max(60).default(""),
-  mobile_phone: z.string().max(60).default(""),
-  services: z.array(z.string().max(120)).max(20).default([]),
+  first_name: sText,
+  last_name: sText,
+  name_title: sText,
+  job_title: sText,
+  qualifications: sText,
+  registration_body: sText,
+  bio: sText,
+  city: sText,
+  province: sText,
+  company_name: sText,
+  photo_url: sText,
+  email: sText,
+  office_phone: sText,
+  mobile_phone: sText,
+  services: sStrArr,
 });
 
 export const importExpertProfile = createServerFn({ method: "POST" })
@@ -327,27 +341,27 @@ export const importExpertProfile = createServerFn({ method: "POST" })
 // ---------- Mediator / Arbitrator import ----------
 
 const medArbExtractionSchema = z.object({
-  first_name: z.string().max(80).default(""),
-  last_name: z.string().max(80).default(""),
-  photo_url: z.string().max(2000).default(""),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  email: z.string().max(200).default(""),
-  office_phone: z.string().max(60).default(""),
-  mobile_phone: z.string().max(60).default(""),
-  bio: z.string().max(10000).default(""),
-  languages: z.array(z.string().max(40)).max(15).default([]),
-  services: z.array(z.string().max(120)).max(20).default([]),
-  daily_rate_range: z.string().max(120).default(""),
-  availability_notes: z.string().max(500).default(""),
-  is_mediator: z.boolean().default(false),
-  is_arbitrator: z.boolean().default(false),
-  mediator_accreditation: z.string().max(200).default(""),
-  mediator_style: z.string().max(200).default(""),
-  mediator_sectors: z.array(z.string().max(80)).max(15).default([]),
-  arbitrator_accreditation: z.string().max(200).default(""),
-  arbitrator_types: z.array(z.string().max(80)).max(15).default([]),
-  arbitrator_experience_years: z.number().int().min(0).max(80).nullable().default(null),
+  first_name: sText,
+  last_name: sText,
+  photo_url: sText,
+  city: sText,
+  province: sText,
+  email: sText,
+  office_phone: sText,
+  mobile_phone: sText,
+  bio: sText,
+  languages: sStrArr,
+  services: sStrArr,
+  daily_rate_range: sText,
+  availability_notes: sText,
+  is_mediator: sBool,
+  is_arbitrator: sBool,
+  mediator_accreditation: sText,
+  mediator_style: sText,
+  mediator_sectors: sStrArr,
+  arbitrator_accreditation: sText,
+  arbitrator_types: sStrArr,
+  arbitrator_experience_years: sIntOrNull,
 });
 
 export const importMediatorArbitratorProfile = createServerFn({ method: "POST" })
@@ -411,17 +425,17 @@ export const importMediatorArbitratorProfile = createServerFn({ method: "POST" }
 // ---------- Firm import ----------
 
 const firmExtractionSchema = z.object({
-  name: z.string().max(200).default(""),
-  registration_number: z.string().max(60).default(""),
-  description: z.string().max(15000).default(""),
-  website: z.string().max(500).default(""),
-  phone: z.string().max(60).default(""),
-  email: z.string().max(200).default(""),
-  address: z.string().max(300).default(""),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  logo_url: z.string().max(2000).default(""),
-  services: z.array(z.string().max(120)).max(20).default([]),
+  name: sText,
+  registration_number: sText,
+  description: sText,
+  website: sText,
+  phone: sText,
+  email: sText,
+  address: sText,
+  city: sText,
+  province: sText,
+  logo_url: sText,
+  services: sStrArr,
 });
 
 export const importFirmProfile = createServerFn({ method: "POST" })
