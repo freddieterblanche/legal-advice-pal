@@ -82,7 +82,7 @@ export function Navbar() {
                       <DropdownMenuSeparator />
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>Admin Hub</DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent align="end" className="w-52">
+                        <DropdownMenuSubContent className="w-52">
                           <DropdownMenuItem asChild>
                             <Link to="/admin">Overview</Link>
                           </DropdownMenuItem>
