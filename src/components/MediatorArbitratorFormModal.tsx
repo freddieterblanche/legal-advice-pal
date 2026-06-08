@@ -255,6 +255,7 @@ export function MediatorArbitratorFormModal({
                 arbitrator_types: d.arbitrator_types.length ? d.arbitrator_types : f.arbitrator_types,
                 arbitrator_experience_years:
                   d.arbitrator_experience_years != null ? String(d.arbitrator_experience_years) : f.arbitrator_experience_years,
+                website_url: d.website_url || f.website_url,
               }))}
               placeholder="https://example.co.za/people/jane-doe"
               helpText={`Paste a link to the ${role}'s public profile and AI will refresh the fields below.`}
