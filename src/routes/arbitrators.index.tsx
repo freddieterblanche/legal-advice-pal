@@ -112,8 +112,8 @@ function ArbitratorSearch() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by arbitrator name…"
-              maxLength={120}
+              placeholder="Search — supports AND / OR / NOT…"
+              maxLength={240}
               className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
             <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
