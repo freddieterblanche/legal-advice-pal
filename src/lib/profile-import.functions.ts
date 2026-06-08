@@ -336,6 +336,7 @@ export const importExpertProfile = createServerFn({ method: "POST" })
       office_phone: cleanPhone(extracted.office_phone),
       mobile_phone: cleanPhone(extracted.mobile_phone),
       services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      website_url: data.url.slice(0, 500),
     };
   });
 
