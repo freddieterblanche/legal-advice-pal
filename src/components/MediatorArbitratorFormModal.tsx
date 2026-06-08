@@ -53,6 +53,7 @@ type FormState = {
 const EMPTY: FormState = {
   first_name: "",
   last_name: "",
+  company_name: "",
   avatar_url: "",
   city: "",
   province: "",
