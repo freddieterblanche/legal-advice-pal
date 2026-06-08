@@ -264,18 +264,39 @@ function SearchPage() {
                 ? "Searching…"
                 : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
             </h1>
-            <SortBar
-              options={[
-                { key: "surname", label: "Surname" },
-                { key: "experience", label: "Years Experience" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "surname"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) =>
-                navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
-              }
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "surname", label: "Surname" },
+                  { key: "experience", label: "Years Experience" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "surname"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) =>
+                  navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
+                }
+              />
+              <div className="inline-flex rounded-full border border-border bg-background p-1">
+                {([
+                  { key: "cards" as const, label: "Cards" },
+                  { key: "list" as const, label: "List" },
+                ]).map((v) => {
+                  const active = (search.view ?? "cards") === v.key;
+                  return (
+                    <button
+                      key={v.key}
+                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key }) })}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                        active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
 
