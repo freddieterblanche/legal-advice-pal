@@ -250,7 +250,7 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
       >
         <input
           type="text"
-          placeholder={`Search ${title.toLowerCase()} by name or firm`}
+          placeholder={`Search by name, firm, practice area, city, town or province`}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           maxLength={120}
