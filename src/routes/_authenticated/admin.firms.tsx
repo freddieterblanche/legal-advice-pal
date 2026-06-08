@@ -190,6 +190,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     description: firm?.description ?? "",
     website: firm?.website ?? "",
     phone: firm?.phone ?? "",
+    email: firm?.email ?? "",
     address: firm?.address ?? "",
     city: firm?.city ?? "",
     province: firm?.province ?? "Gauteng",
