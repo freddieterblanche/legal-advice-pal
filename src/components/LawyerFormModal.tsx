@@ -456,7 +456,7 @@ export function LawyerFormModal({
           : null,
       });
       if (isEdit && lawyer) {
-        const { error } = await supabase.from("service_providers").update(parsed).eq("id", lawyer.id);
+        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", lawyer.id);
         if (error) throw error;
         await syncPracticeAreas(lawyer.id);
         await syncBranches(lawyer.id);
