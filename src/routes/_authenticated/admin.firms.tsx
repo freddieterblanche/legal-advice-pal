@@ -247,8 +247,22 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
           .select("id")
           .single();
         if (error) throw error;
-        // Seed a head-office branch from the firm address
-        if (form.city || form.address) {
+        // Seed branches: prefer AI-imported branches, else fall back to a single Head Office row.
+        if (importedBranches.length > 0) {
+          const headFromImport = importedBranches.find((b) => b.is_head_office);
+          const rows = importedBranches.map((b, i) => ({
+            firm_id: inserted.id,
+            name: b.name || b.city || (b.is_head_office ? "Head Office" : `Office ${i + 1}`),
+            address: b.address || null,
+            city: b.city || null,
+            province: b.province || null,
+            country: b.country || "South Africa",
+            phone: b.phone || null,
+            email: b.email || null,
+            is_head_office: headFromImport ? b.is_head_office : i === 0,
+          }));
+          await supabase.from("firm_branches").insert(rows);
+        } else if (form.city || form.address) {
           await supabase.from("firm_branches").insert({
             firm_id: inserted.id,
             name: "Head Office",
