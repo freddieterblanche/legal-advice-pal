@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Handshake, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
+import { applyBooleanSearch, BOOLEAN_SEARCH_HINT } from "../lib/boolean-search";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { FeaturedBadge } from "../components/FeaturedBadge";
