@@ -23,6 +23,7 @@ type Role = "mediator" | "arbitrator";
 type FormState = {
   first_name: string;
   last_name: string;
+  company_name: string;
   avatar_url: string;
   city: string;
   province: string;
@@ -52,6 +53,7 @@ type FormState = {
 const EMPTY: FormState = {
   first_name: "",
   last_name: "",
+  company_name: "",
   avatar_url: "",
   city: "",
   province: "",
@@ -109,6 +111,7 @@ export function MediatorArbitratorFormModal({
     setForm({
       first_name: row.first_name ?? "",
       last_name: row.last_name ?? "",
+      company_name: (row as any).company_name ?? "",
       avatar_url: row.avatar_url ?? "",
       city: row.city ?? "",
       province: row.province ?? "",
@@ -174,6 +177,7 @@ export function MediatorArbitratorFormModal({
     const payload = {
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
+      company_name: form.company_name.trim() || null,
       avatar_url: form.avatar_url.trim() || null,
       city: form.city.trim() || null,
       province: form.province.trim() || null,
@@ -290,6 +294,16 @@ export function MediatorArbitratorFormModal({
                   </label>
                 </div>
               </div>
+            </Field>
+
+            <Field label="Company / Organisation">
+              <input
+                className={inputCls}
+                placeholder="e.g. Mediation in Motion"
+                maxLength={255}
+                value={form.company_name}
+                onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+              />
             </Field>
 
             {/* Location */}
