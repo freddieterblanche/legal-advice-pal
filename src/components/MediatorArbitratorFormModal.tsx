@@ -296,6 +296,16 @@ export function MediatorArbitratorFormModal({
               </div>
             </Field>
 
+            <Field label="Company / Organisation">
+              <input
+                className={inputCls}
+                placeholder="e.g. Mediation in Motion"
+                maxLength={255}
+                value={form.company_name}
+                onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+              />
+            </Field>
+
             {/* Location */}
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
