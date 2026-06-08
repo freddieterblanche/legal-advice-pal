@@ -274,6 +274,7 @@ function AdminExpertFormModal({
       registration_body: (e.registration_body as string) ?? "",
       city: (e.city as string) ?? f.city,
       province: (e.province as string) ?? f.province,
+      country: (e.country as string) ?? f.country,
       bio: (e.bio as string) ?? "",
       avatar_url: (e.avatar_url as string) ?? "",
       firm_id: (e.firm_id as string) ?? f.firm_id,
