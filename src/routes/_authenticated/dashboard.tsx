@@ -693,6 +693,7 @@ function SettingsTab({ firm }: { firm: any }) {
     logo_url: firm.logo_url ?? "",
     logo_accent_color: firm.logo_accent_color ?? "",
     services: (firm.services ?? []) as string[],
+    email: firm.email ?? "",
   });
 
   const save = useMutation({
