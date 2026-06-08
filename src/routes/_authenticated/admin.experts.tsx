@@ -435,9 +435,11 @@ function AdminExpertFormModal({
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
-            <div className="grid gap-3 md:grid-cols-2">
+            <p className="text-xs font-medium text-muted-foreground">Country, Province &amp; City</p>
+            <div className="grid gap-3 md:grid-cols-3">
               <ProvinceCityFields
+                country={form.country}
+                onCountry={(v: string) => setForm({ ...form, country: v })}
                 province={form.province}
                 city={form.city}
                 onProvince={(v: string) => setForm({ ...form, province: v })}
