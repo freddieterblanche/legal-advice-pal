@@ -166,8 +166,19 @@ function SearchPage() {
 
   return (
     <div className="bg-cream">
-      <section className="bg-ink py-12 text-cream">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section className="relative overflow-hidden bg-ink py-12 text-cream">
+        {search.type === "attorney" && (
+          <>
+            <img
+              src={attorneysHero.url}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+          </>
+        )}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           {/* Type tabs */}
           <div className="mb-6 inline-flex rounded-full border border-cream/20 bg-ink/40 p-1">
             {([
