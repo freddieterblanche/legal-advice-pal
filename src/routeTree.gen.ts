@@ -27,6 +27,7 @@ import { Route as ExpertWitnessesSlugRouteImport } from './routes/expert-witness
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
+import { Route as AuthenticatedAdminPracticeAreasRouteImport } from './routes/_authenticated/admin.practice-areas'
 import { Route as AuthenticatedAdminMediatorsRouteImport } from './routes/_authenticated/admin.mediators'
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin.experts'
@@ -125,6 +126,12 @@ const AuthenticatedAdminTownsRoute = AuthenticatedAdminTownsRouteImport.update({
   path: '/admin/towns',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminPracticeAreasRoute =
+  AuthenticatedAdminPracticeAreasRouteImport.update({
+    id: '/admin/practice-areas',
+    path: '/admin/practice-areas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminMediatorsRoute =
   AuthenticatedAdminMediatorsRouteImport.update({
     id: '/admin/mediators',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
+  '/admin/practice-areas': typeof AuthenticatedAdminPracticeAreasRoute
   '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
+  '/admin/practice-areas': typeof AuthenticatedAdminPracticeAreasRoute
   '/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -252,6 +261,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
   '/_authenticated/admin/mediators': typeof AuthenticatedAdminMediatorsRoute
+  '/_authenticated/admin/practice-areas': typeof AuthenticatedAdminPracticeAreasRoute
   '/_authenticated/admin/towns': typeof AuthenticatedAdminTownsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/admin/experts'
     | '/admin/firms'
     | '/admin/mediators'
+    | '/admin/practice-areas'
     | '/admin/towns'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/experts'
     | '/admin/firms'
     | '/admin/mediators'
+    | '/admin/practice-areas'
     | '/admin/towns'
     | '/admin'
   id:
@@ -336,6 +348,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/experts'
     | '/_authenticated/admin/firms'
     | '/_authenticated/admin/mediators'
+    | '/_authenticated/admin/practice-areas'
     | '/_authenticated/admin/towns'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTownsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/practice-areas': {
+      id: '/_authenticated/admin/practice-areas'
+      path: '/admin/practice-areas'
+      fullPath: '/admin/practice-areas'
+      preLoaderRoute: typeof AuthenticatedAdminPracticeAreasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/mediators': {
       id: '/_authenticated/admin/mediators'
       path: '/admin/mediators'
@@ -555,6 +575,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
   AuthenticatedAdminMediatorsRoute: typeof AuthenticatedAdminMediatorsRoute
+  AuthenticatedAdminPracticeAreasRoute: typeof AuthenticatedAdminPracticeAreasRoute
   AuthenticatedAdminTownsRoute: typeof AuthenticatedAdminTownsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
@@ -569,6 +590,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
   AuthenticatedAdminMediatorsRoute: AuthenticatedAdminMediatorsRoute,
+  AuthenticatedAdminPracticeAreasRoute: AuthenticatedAdminPracticeAreasRoute,
   AuthenticatedAdminTownsRoute: AuthenticatedAdminTownsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
