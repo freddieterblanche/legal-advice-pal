@@ -6,9 +6,11 @@ import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { ARBITRATION_TYPES, ARBITRATION_ACCREDITATIONS } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { ViewToggle, type ViewMode } from "../components/ViewToggle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 type SortField = "surname" | "experience" | "listed";
-type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir };
+type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
 
 export const Route = createFileRoute("/arbitrators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/arbitrators/")({
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
     sort: s.sort === "surname" || s.sort === "experience" || s.sort === "listed" ? s.sort : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
@@ -32,16 +35,19 @@ export const Route = createFileRoute("/arbitrators/")({
   component: ArbitratorSearch,
 });
 
-const PAGE_SIZE = 20;
+const CARDS_PAGE_SIZE = 20;
+const LIST_PAGE_SIZE = 100;
 
 function ArbitratorSearch() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/arbitrators" });
   const [q, setQ] = useState(search.q ?? "");
   useEffect(() => { setQ(search.q ?? ""); }, [search.q]);
+  const view: ViewMode = search.view ?? "cards";
+  const pageSize = view === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["arbitrator-search", search],
+    queryKey: ["arbitrator-search", search, pageSize],
     queryFn: async () => {
       let query = supabase
         .from("lawyer_search_view")
@@ -55,10 +61,10 @@ function ArbitratorSearch() {
       if (search.experience === "5-10") query = query.gt("arbitrator_experience_years", 5).lte("arbitrator_experience_years", 10);
       if (search.experience === "10+") query = query.gt("arbitrator_experience_years", 10);
       const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
+      const from = (page - 1) * pageSize;
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
-      query = query.range(from, from + PAGE_SIZE - 1);
+      query = query.range(from, from + pageSize - 1);
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
@@ -75,7 +81,7 @@ function ArbitratorSearch() {
   const update = (patch: Partial<Search>) => navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
   const page = search.page ?? 1;
   const total = results?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="bg-cream">
@@ -147,22 +153,64 @@ function ArbitratorSearch() {
             <h2 className="font-heading text-2xl text-ink">
               {isLoading ? "Searching…" : `${total} arbitrator${total === 1 ? "" : "s"} found`}
             </h2>
-            <SortBar
-              options={[
-                { key: "surname", label: "Surname" },
-                { key: "experience", label: "Years Experience" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "surname"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "surname", label: "Surname" },
+                  { key: "experience", label: "Years Experience" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "surname"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+              />
+              <ViewToggle
+                value={view}
+                onChange={(v) => navigate({ search: (prev: Search) => ({ ...prev, view: v, page: 1 }) })}
+              />
+            </div>
           </div>
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>
           ) : results?.rows.length === 0 ? (
             <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
               No arbitrators match your search.
+            </div>
+          ) : view === "list" ? (
+            <div className="overflow-hidden rounded-md border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Accreditation</TableHead>
+                    <TableHead className="text-right">Years</TableHead>
+                    <TableHead>City</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results?.rows.map((l: any) => (
+                    <TableRow key={l.id}>
+                      <TableCell className="font-medium">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
+                          {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{l.arbitrator_accreditation ?? "—"}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{l.arbitrator_experience_years ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {l.city ?? "—"}
+                        {l.province ? <span className="text-muted-foreground/70">, {l.province}</span> : null}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90">
+                          View
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="space-y-3">

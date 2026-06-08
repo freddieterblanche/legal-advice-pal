@@ -7,9 +7,11 @@ import { PROVINCES } from "../lib/constants";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { FeaturedBadge } from "../components/FeaturedBadge";
+import { ViewToggle, type ViewMode } from "../components/ViewToggle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 type SortField = "surname" | "listed";
-type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir };
+type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
 
 export const Route = createFileRoute("/mediators/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -21,6 +23,7 @@ export const Route = createFileRoute("/mediators/")({
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
     sort: s.sort === "surname" || s.sort === "listed" ? s.sort : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
@@ -33,16 +36,19 @@ export const Route = createFileRoute("/mediators/")({
   component: MediatorSearch,
 });
 
-const PAGE_SIZE = 20;
+const CARDS_PAGE_SIZE = 20;
+const LIST_PAGE_SIZE = 100;
 
 function MediatorSearch() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/mediators" });
   const [q, setQ] = useState(search.q ?? "");
   useEffect(() => { setQ(search.q ?? ""); }, [search.q]);
+  const view: ViewMode = search.view ?? "cards";
+  const pageSize = view === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["mediator-search", search],
+    queryKey: ["mediator-search", search, pageSize],
     queryFn: async () => {
       let query = supabase
         .from("lawyer_search_view")
@@ -54,10 +60,10 @@ function MediatorSearch() {
       if (search.accreditation) query = query.ilike("mediator_accreditation", `%${search.accreditation}%`);
       if (search.sector) query = query.contains("mediator_sectors", [search.sector]);
       const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
+      const from = (page - 1) * pageSize;
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
-      query = query.range(from, from + PAGE_SIZE - 1);
+      query = query.range(from, from + pageSize - 1);
       query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
@@ -73,7 +79,7 @@ function MediatorSearch() {
   const update = (patch: Partial<Search>) => navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
   const page = search.page ?? 1;
   const total = results?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="bg-cream">
@@ -141,21 +147,66 @@ function MediatorSearch() {
             <h2 className="font-heading text-2xl text-ink">
               {isLoading ? "Searching…" : `${total} mediator${total === 1 ? "" : "s"} found`}
             </h2>
-            <SortBar
-              options={[
-                { key: "surname", label: "Surname" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "surname"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "surname", label: "Surname" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "surname"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+              />
+              <ViewToggle
+                value={view}
+                onChange={(v) => navigate({ search: (prev: Search) => ({ ...prev, view: v, page: 1 }) })}
+              />
+            </div>
           </div>
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-md bg-muted" />)}</div>
           ) : results?.rows.length === 0 ? (
             <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
               No mediators match your search.
+            </div>
+          ) : view === "list" ? (
+            <div className="overflow-hidden rounded-md border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Accreditation</TableHead>
+                    <TableHead>Firm</TableHead>
+                    <TableHead>City</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results?.rows.map((l: any) => (
+                    <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
+                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                          </Link>
+                          {l.is_featured && <FeaturedBadge />}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{l.mediator_accreditation ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{l.firm_name ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {l.city ?? "—"}
+                        {l.province ? <span className="text-muted-foreground/70">, {l.province}</span> : null}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90">
+                          View
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="space-y-3">
