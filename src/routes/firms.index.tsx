@@ -5,6 +5,7 @@ import { Building2, MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "name" | "lawyers" | "listed";
 type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir };
