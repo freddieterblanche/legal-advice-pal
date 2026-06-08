@@ -331,6 +331,47 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                 <p className="mt-1 text-xs text-muted-foreground">Paste a public URL to your firm logo. PNG or SVG with a transparent background works best.</p>
               </div>
 
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Logo background colour</label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div
+                    className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded border border-border"
+                    style={{ backgroundColor: form.logo_accent_color || "#f1f5f9" }}
+                  >
+                    {form.logo_url ? (
+                      <img src={form.logo_url} alt="Logo preview" className="h-full w-full object-contain p-2" />
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">Preview</span>
+                    )}
+                  </div>
+                  <input
+                    type="color"
+                    value={form.logo_accent_color || "#f1f5f9"}
+                    onChange={(e) => setForm({ ...form, logo_accent_color: e.target.value })}
+                    className="h-10 w-14 cursor-pointer rounded border border-border bg-background"
+                    aria-label="Pick logo background colour"
+                  />
+                  <input
+                    type="text"
+                    value={form.logo_accent_color}
+                    onChange={(e) => setForm({ ...form, logo_accent_color: e.target.value })}
+                    placeholder="#0F172A"
+                    maxLength={7}
+                    className="w-32 rounded border border-border bg-background px-3 py-2 font-mono text-sm"
+                  />
+                  {form.logo_accent_color && (
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, logo_accent_color: "" })}
+                      className="rounded border border-border bg-background px-3 py-2 text-xs text-muted-foreground hover:text-ink"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Pick an accent colour for the logo tile shown on listing cards. Leave empty to use the default light tile.</p>
+              </div>
+
               <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
