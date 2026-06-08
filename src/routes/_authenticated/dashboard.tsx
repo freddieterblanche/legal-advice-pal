@@ -17,6 +17,7 @@ import { createLawyerInvite } from "../../lib/lawyer-invite.functions";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 import { LawyerFormModal, type LawyerRow } from "../../components/LawyerFormModal";
+import { TagInput } from "../../components/TagInput";
 
 type Branch = {
   id: string;
@@ -691,6 +692,7 @@ function SettingsTab({ firm }: { firm: any }) {
     province: firm.province ?? "Gauteng",
     logo_url: firm.logo_url ?? "",
     logo_accent_color: firm.logo_accent_color ?? "",
+    services: (firm.services ?? []) as string[],
   });
 
   const save = useMutation({
@@ -699,6 +701,7 @@ function SettingsTab({ firm }: { firm: any }) {
         ...form,
         description: sanitizeBioHtml(form.description),
         logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
+        services: form.services.length ? form.services : null,
       };
       const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
@@ -722,6 +725,17 @@ function SettingsTab({ firm }: { firm: any }) {
           />
           <p className="mt-1 text-xs text-muted-foreground">Use H2 / H3 for section headings. Bold, italic and lists are supported.</p>
         </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Services offered</label>
+          <TagInput
+            value={form.services}
+            onChange={(next) => setForm({ ...form, services: next })}
+            placeholder="e.g. Trust formation — press Enter"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">Type a service and press Enter to add it as a tag. Use short labels.</p>
+        </div>
+
 
         <div>
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Logo image URL</label>
