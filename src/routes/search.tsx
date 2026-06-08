@@ -10,6 +10,7 @@ import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { FeaturedBadge } from "../components/FeaturedBadge";
 import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
+import advocateHero from "../assets/advocate-hero.jpg.asset.json";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
@@ -176,6 +177,18 @@ function SearchPage() {
               className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+          </>
+        )}
+        {search.type === "advocate" && (
+          <>
+            <img
+              src={advocateHero.url}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60 [filter:grayscale(100%)_contrast(1.05)]"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-forest/55 mix-blend-multiply" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/40 to-ink/80" />
           </>
         )}
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
