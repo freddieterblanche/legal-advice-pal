@@ -496,8 +496,14 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     },
   });
 
-  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
+  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
+
+  const { data: countries } = useQuery({
+    queryKey: ["countries-options"],
+    queryFn: async () => (await supabase.from("countries").select("name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["firm-branches", firmId] });
 
@@ -505,18 +511,20 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     if (!draft.name.trim()) { toast.error("Branch name required"); return; }
     setBusy(true);
     try {
+      const isSA = draft.country === "South Africa";
       const { error } = await supabase.from("firm_branches").insert({
         firm_id: firmId,
         name: draft.name.trim(),
         address: draft.address || null,
         city: draft.city || null,
-        province: draft.province || null,
+        province: isSA ? (draft.province || null) : (draft.province || null),
+        country: draft.country || "South Africa",
         phone: draft.phone || null,
         email: draft.email || null,
         is_head_office: draft.is_head_office,
       });
       if (error) throw error;
-      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
+      setDraft({ name: "", address: "", city: "", province: "Gauteng", country: "South Africa", phone: "", email: "", is_head_office: false });
       refresh();
       toast.success("Branch added");
     } catch (e) {
