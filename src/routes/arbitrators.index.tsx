@@ -66,6 +66,7 @@ function ArbitratorSearch() {
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
       query = query.range(from, from + pageSize - 1);
+      query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
