@@ -58,6 +58,7 @@ const EMPTY: FormState = {
   avatar_url: "",
   city: "",
   province: "",
+  country: "South Africa",
   email: "",
   office_phone: "",
   mobile_phone: "",
