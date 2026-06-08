@@ -89,14 +89,14 @@ function HomePage() {
           <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
               <ShieldCheck className="h-3.5 w-3.5 text-gold" strokeWidth={STROKE} />
-              Verified South African legal directory
+              South Africa's comprehensive legal directory
             </span>
             <h1 className="mt-6 font-heading text-4xl leading-[1.05] text-ink md:text-6xl">
               Find the right legal expertise in one place.
             </h1>
             <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-              South Africa has a split legal profession. Choose who you need — then search verified
-              profiles linked to their reported judgments.
+              South Africa has a split legal profession. Choose who you need — then search a
+              comprehensive database of lawyers across the country.
             </p>
           </div>
           <div className="relative">
