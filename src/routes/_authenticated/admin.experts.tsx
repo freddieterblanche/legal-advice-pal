@@ -13,6 +13,7 @@ import { ProvinceCityFields } from "../../components/ProvinceCityFields";
 import { ProfileImportBar } from "../../components/ProfileImportBar";
 import { importExpertProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
+import { StatusCell } from "../../components/StatusCell";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
@@ -34,6 +35,7 @@ type ExpertRow = {
   city: string | null;
   province: string | null;
   status: string;
+  is_featured: boolean | null;
   trial_end_date: string | null;
   profile_views: number;
   firm_id: string | null;
@@ -67,7 +69,7 @@ function AdminExpertsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
-        .select("id, slug, first_name, last_name, name_title, job_title, city, province, status, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
+        .select("id, slug, first_name, last_name, name_title, job_title, city, province, status, is_featured, trial_end_date, profile_views, firm_id").eq("provider_type", "expert")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpertRow[];
