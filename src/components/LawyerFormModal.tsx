@@ -563,10 +563,21 @@ export function LawyerFormModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div onClick={(e) => e.stopPropagation()} className="flex max-h-[90vh] w-[90vw] flex-col overflow-hidden rounded-lg bg-card shadow-xl md:w-[70vw]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
-          <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Lawyer" : "Add Lawyer"}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="font-heading text-xl text-ink">{currentLawyerId ? "Edit Lawyer" : "Add Lawyer"}</h3>
+            {currentLawyerId && (
+              <span className="text-xs text-muted-foreground">
+                {autoSaving
+                  ? "Autosaving…"
+                  : lastSavedAt
+                    ? `Saved ${lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                    : "Autosave on"}
+              </span>
+            )}
+          </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => { if (currentLawyerId) onSaved(); else onClose(); }}
             aria-label="Close"
             className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-ink"
           >
