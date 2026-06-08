@@ -184,6 +184,7 @@ export function MediatorArbitratorFormModal({
       avatar_url: form.avatar_url.trim() || null,
       city: form.city.trim() || null,
       province: form.province.trim() || null,
+      country: form.country.trim() || "South Africa",
       email: form.email.trim() || null,
       office_phone: form.office_phone.trim() || null,
       mobile_phone: form.mobile_phone.trim() || null,
