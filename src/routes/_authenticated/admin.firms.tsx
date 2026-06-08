@@ -16,6 +16,7 @@ type FirmRow = {
   description: string | null;
   website: string | null;
   phone: string | null;
+  email: string | null;
   address: string | null;
   city: string | null;
   province: string | null;
