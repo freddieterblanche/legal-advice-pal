@@ -611,37 +611,40 @@ function BranchesEditor({ firmId }: { firmId: string }) {
         <p className="text-xs text-muted-foreground">Loading branches…</p>
       ) : (
         <div className="space-y-2">
-          {(branches ?? []).map((b) => (
-            <div key={b.id} className="rounded border border-border bg-card p-2">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <input value={b.name} onChange={(e) => updateBranch(b.id, { name: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
-                <input value={b.phone ?? ""} onChange={(e) => updateBranch(b.id, { phone: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
-                <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
-                <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
-                <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
-                {(b.country ?? "South Africa") === "South Africa" ? (
-                  <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                    <option value="">Province…</option>
-                    {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+          {(branches ?? []).map((b) => {
+            const current = branchDrafts[b.id] ?? toBranchDraft(b);
+            return (
+              <div key={b.id} className="rounded border border-border bg-card p-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <input value={current.name} onChange={(e) => setBranchField(b.id, { name: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
+                  <input value={current.phone} onChange={(e) => setBranchField(b.id, { phone: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
+                  <input type="email" value={current.email} onChange={(e) => setBranchField(b.id, { email: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
+                  <input value={current.address} onChange={(e) => setBranchField(b.id, { address: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
+                  <input value={current.city} onChange={(e) => setBranchField(b.id, { city: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
+                  {current.country === "South Africa" ? (
+                    <select value={current.province} onChange={(e) => { setBranchField(b.id, { province: e.target.value }); updateBranch(b.id, { province: e.target.value }); }} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                      <option value="">Province…</option>
+                      {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  ) : (
+                    <input value={current.province} onChange={(e) => setBranchField(b.id, { province: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
+                  )}
+                  <select value={current.country} onChange={(e) => { const country = e.target.value; const province = country === "South Africa" ? "Gauteng" : ""; setBranchField(b.id, { country, province }); updateBranch(b.id, { country, province }); }} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                    {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select>
-                ) : (
-                  <input value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
-                )}
-                <select value={b.country ?? "South Africa"} onChange={(e) => updateBranch(b.id, { country: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
-                  {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-                </select>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={current.is_head_office} onChange={(e) => { setBranchField(b.id, { is_head_office: e.target.checked }); updateBranch(b.id, { is_head_office: e.target.checked }); }} />
+                    Head office
+                  </label>
+                  <button type="button" onClick={() => deleteBranch(b.id)} className="text-xs text-destructive hover:underline">
+                    <Trash2 className="mr-1 inline h-3 w-3" /> Remove
+                  </button>
+                </div>
               </div>
-              <div className="mt-2 flex items-center justify-between">
-                <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={b.is_head_office} onChange={(e) => updateBranch(b.id, { is_head_office: e.target.checked })} />
-                  Head office
-                </label>
-                <button type="button" onClick={() => deleteBranch(b.id)} className="text-xs text-destructive hover:underline">
-                  <Trash2 className="mr-1 inline h-3 w-3" /> Remove
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {branches && branches.length === 0 && (
             <p className="text-xs text-muted-foreground">No branches yet.</p>
           )}
