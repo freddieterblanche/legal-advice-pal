@@ -105,6 +105,7 @@ export type LawyerRow = {
   office_phone: string | null;
   mobile_phone: string | null;
   linkedin_url: string | null;
+  website_url?: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
