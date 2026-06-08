@@ -6,6 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "surname" | "listed";
 type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir };
