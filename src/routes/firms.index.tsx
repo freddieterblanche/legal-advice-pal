@@ -62,7 +62,7 @@ function FirmsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("firms")
-        .select("id, name, slug, city, province, website, phone, email, description, logo_url, created_at", { count: "exact" })
+        .select("id, name, slug, city, province, website, phone, email, description, logo_url, created_at, is_featured", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
       if (search.province) {
@@ -78,6 +78,8 @@ function FirmsIndex() {
       const sort = search.sort ?? "name";
       const ascending = (search.dir ?? "asc") === "asc";
       query = query.range(from, from + PAGE_SIZE - 1);
+      // Featured firms always first
+      query = query.order("is_featured", { ascending: false });
       if (sort === "listed") {
         query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
