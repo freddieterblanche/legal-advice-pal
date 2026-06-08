@@ -130,6 +130,7 @@ export function MediatorArbitratorFormModal({
         row.arbitrator_experience_years != null ? String(row.arbitrator_experience_years) : "",
       is_mediator: !!row.is_mediator,
       is_arbitrator: !!row.is_arbitrator,
+      website_url: (row as any).website_url ?? "",
     });
     setHydrated(true);
   }, [row, hydrated]);
