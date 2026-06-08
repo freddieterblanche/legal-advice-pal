@@ -805,6 +805,7 @@ function SettingsTab({ firm }: { firm: any }) {
 
         <input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="Website" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Main phone" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+        <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Contact email" maxLength={255} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Main address" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <div className="grid grid-cols-2 gap-3">
           <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
