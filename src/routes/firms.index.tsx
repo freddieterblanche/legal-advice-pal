@@ -68,18 +68,36 @@ function FirmsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["firms-index", search, pageSize],
     queryFn: async () => {
+      // Pre-resolve province/town filters by also checking firm_branches
+      let branchFirmIds: string[] | null = null;
+      const provName = search.province ? provinces?.find((p) => p.slug === search.province)?.name : undefined;
+      const townName = search.town ? towns?.find((t) => t.slug === search.town)?.name : undefined;
+      if (provName || townName) {
+        let bq = supabase.from("firm_branches").select("firm_id");
+        if (provName) bq = bq.eq("province", provName);
+        if (townName) bq = bq.ilike("city", townName);
+        const { data: branchRows } = await bq;
+        branchFirmIds = Array.from(new Set((branchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
+      }
+
       let query = supabase
         .from("firms")
         .select("id, name, slug, city, province, website, phone, email, description, logo_url, logo_accent_color, created_at, is_featured", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
-      if (search.province) {
-        const provName = provinces?.find((p) => p.slug === search.province)?.name;
-        if (provName) query = query.eq("province", provName);
-      }
-      if (search.town) {
-        const townName = towns?.find((t) => t.slug === search.town)?.name;
-        if (townName) query = query.ilike("city", townName);
+      if (provName || townName) {
+        const orParts: string[] = [];
+        if (provName && !townName) orParts.push(`province.eq.${provName}`);
+        if (townName) orParts.push(`city.ilike.${townName}`);
+        if (branchFirmIds && branchFirmIds.length > 0) {
+          orParts.push(`id.in.(${branchFirmIds.join(",")})`);
+        }
+        if (orParts.length > 0) {
+          query = query.or(orParts.join(","));
+        } else {
+          // No firm matches via main fields and no branch matches → force empty
+          query = query.eq("id", "00000000-0000-0000-0000-000000000000");
+        }
       }
       const page = search.page ?? 1;
       const from = (page - 1) * pageSize;
