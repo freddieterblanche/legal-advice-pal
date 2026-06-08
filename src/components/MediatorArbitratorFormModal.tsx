@@ -72,6 +72,7 @@ const EMPTY: FormState = {
   arbitrator_experience_years: "",
   is_mediator: false,
   is_arbitrator: false,
+  website_url: "",
 };
 
 export function MediatorArbitratorFormModal({
