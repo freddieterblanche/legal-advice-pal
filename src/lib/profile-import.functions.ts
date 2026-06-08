@@ -425,17 +425,17 @@ export const importMediatorArbitratorProfile = createServerFn({ method: "POST" }
 // ---------- Firm import ----------
 
 const firmExtractionSchema = z.object({
-  name: z.string().max(200).default(""),
-  registration_number: z.string().max(60).default(""),
-  description: z.string().max(15000).default(""),
-  website: z.string().max(500).default(""),
-  phone: z.string().max(60).default(""),
-  email: z.string().max(200).default(""),
-  address: z.string().max(300).default(""),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  logo_url: z.string().max(2000).default(""),
-  services: z.array(z.string().max(120)).max(20).default([]),
+  name: sText,
+  registration_number: sText,
+  description: sText,
+  website: sText,
+  phone: sText,
+  email: sText,
+  address: sText,
+  city: sText,
+  province: sText,
+  logo_url: sText,
+  services: sStrArr,
 });
 
 export const importFirmProfile = createServerFn({ method: "POST" })
