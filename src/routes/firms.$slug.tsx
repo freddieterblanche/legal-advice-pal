@@ -119,7 +119,7 @@ function FirmProfile() {
               </Link>
             )}
           </div>
-          <FirmLogo src={firm.logo_url} alt={`${firm.name} logo`} size="lg" />
+          <FirmLogo src={firm.logo_url} alt={`${firm.name} logo`} size="lg" accentColor={(firm as { logo_accent_color?: string | null }).logo_accent_color} />
 
         </div>
       </section>
