@@ -378,7 +378,7 @@ function SearchPage() {
                   ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
+                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
