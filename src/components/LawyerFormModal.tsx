@@ -51,7 +51,10 @@ export const lawyerSchema = z.object({
   is_sector_head: z.boolean().optional(),
   sector_head_area: z.string().trim().max(120).nullable().optional(),
   city: z.string().trim().min(1).max(80),
-  province: z.enum(PROVINCES as unknown as [string, ...string[]]),
+  // Province is free-form because non-SA records use a state/region string
+  // rather than the canonical SA province list.
+  province: z.string().trim().min(1).max(120),
+  country: z.string().trim().min(1).max(120).optional(),
   bio: z.string().max(20000).optional(),
   overview: z.string().max(20000).optional(),
   qualifications: z.string().max(20000).optional(),
