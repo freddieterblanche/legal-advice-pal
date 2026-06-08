@@ -338,6 +338,31 @@ function AdminExpertFormModal({
           <div className="py-12 text-center text-sm text-muted-foreground">Loading existing details…</div>
         ) : (
         <form onSubmit={submit} className="space-y-3">
+          {!isEdit && (
+            <ProfileImportBar
+              serverFn={importExpertProfile}
+              onImported={(d) => setForm((f) => ({
+                ...f,
+                first_name: d.first_name || f.first_name,
+                last_name: d.last_name || f.last_name,
+                name_title: d.name_title || f.name_title,
+                title: d.job_title || f.title,
+                qualifications: d.qualifications || f.qualifications,
+                registration_body: d.registration_body || f.registration_body,
+                city: d.city || f.city,
+                province: d.province || f.province,
+                bio: d.bio || f.bio,
+                avatar_url: d.avatar_url || f.avatar_url,
+                company_name: d.company_name || f.company_name,
+                office_phone: d.office_phone || f.office_phone,
+                mobile_phone: d.mobile_phone || f.mobile_phone,
+                contact_email: d.contact_email || f.contact_email,
+                services: d.services.length ? d.services : f.services,
+              }))}
+              placeholder="https://example.co.za/team/jane-doe"
+              helpText="Paste a link to the expert's bio on their firm or personal site and AI will fill the form."
+            />
+          )}
           <AField label="Photo">
             <ExpertPhotoField
               value={form.avatar_url}
