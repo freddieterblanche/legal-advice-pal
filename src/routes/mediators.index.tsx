@@ -123,6 +123,7 @@ function MediatorSearch() {
             </select>
             <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
