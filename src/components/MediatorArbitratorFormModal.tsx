@@ -321,6 +321,17 @@ export function MediatorArbitratorFormModal({
               </Field>
             </div>
 
+            <Field label="Website URL (link visitors to this profile on the practitioner's own site)">
+              <input
+                type="url"
+                className={inputCls}
+                placeholder="https://example.co.za/people/jane-doe"
+                value={form.website_url}
+                onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+              />
+            </Field>
+
+
             {/* Description / bio */}
             <Field label="Description / Bio">
               <RichTextEditor
