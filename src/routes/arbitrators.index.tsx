@@ -55,7 +55,15 @@ function ArbitratorSearch() {
         .from("lawyer_search_view")
         .select("*", { count: "exact" })
         .eq("is_arbitrator", true);
-      if (search.q) query = query.ilike("full_name", `%${search.q}%`);
+      query = applyBooleanSearch(query, search.q, [
+        "full_name",
+        "first_name",
+        "last_name",
+        "firm_name",
+        "city",
+        "province",
+        "arbitrator_accreditation",
+      ]);
       if (search.province) query = query.eq("province", search.province);
       if (search.accreditation) query = query.ilike("arbitrator_accreditation", `%${search.accreditation}%`);
       if (search.atype) query = query.contains("arbitrator_types", [search.atype]);
