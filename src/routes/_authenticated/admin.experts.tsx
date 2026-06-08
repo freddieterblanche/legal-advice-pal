@@ -372,6 +372,7 @@ function AdminExpertFormModal({
                 mobile_phone: d.mobile_phone || f.mobile_phone,
                 contact_email: d.contact_email || f.contact_email,
                 services: d.services.length ? d.services : f.services,
+                website_url: d.website_url || f.website_url,
               }))}
               placeholder="https://example.co.za/team/jane-doe"
               helpText="Paste a link to the expert's bio on their firm or personal site and AI will fill the form."
