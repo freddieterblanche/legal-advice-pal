@@ -235,6 +235,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
             city: form.city || null,
             province: form.province || null,
             phone: form.phone || null,
+            email: form.email || null,
             is_head_office: true,
           });
         }
