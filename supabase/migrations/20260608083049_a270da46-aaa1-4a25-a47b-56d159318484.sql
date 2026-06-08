@@ -1,0 +1,1 @@
+ALTER TABLE public.firms ADD COLUMN IF NOT EXISTS logo_accent_color text;

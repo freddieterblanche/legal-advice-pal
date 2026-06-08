@@ -396,6 +396,7 @@ export type Database = {
           featured_since: string | null
           id: string
           is_featured: boolean
+          logo_accent_color: string | null
           logo_url: string | null
           name: string
           phone: string | null
@@ -415,6 +416,7 @@ export type Database = {
           featured_since?: string | null
           id?: string
           is_featured?: boolean
+          logo_accent_color?: string | null
           logo_url?: string | null
           name: string
           phone?: string | null
@@ -434,6 +436,7 @@ export type Database = {
           featured_since?: string | null
           id?: string
           is_featured?: boolean
+          logo_accent_color?: string | null
           logo_url?: string | null
           name?: string
           phone?: string | null
