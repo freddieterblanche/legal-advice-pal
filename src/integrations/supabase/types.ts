@@ -400,7 +400,6 @@ export type Database = {
           logo_url: string | null
           name: string
           phone: string | null
-          profile_url: string | null
           province: string | null
           registration_number: string | null
           services: string[] | null
@@ -421,7 +420,6 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone?: string | null
-          profile_url?: string | null
           province?: string | null
           registration_number?: string | null
           services?: string[] | null
@@ -442,7 +440,6 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone?: string | null
-          profile_url?: string | null
           province?: string | null
           registration_number?: string | null
           services?: string[] | null

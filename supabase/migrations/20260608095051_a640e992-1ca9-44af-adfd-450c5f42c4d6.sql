@@ -1,0 +1,1 @@
+ALTER TABLE public.firms DROP COLUMN IF EXISTS profile_url;
