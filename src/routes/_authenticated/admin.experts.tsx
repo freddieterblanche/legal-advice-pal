@@ -244,6 +244,7 @@ function AdminExpertFormModal({
     registration_body: "",
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
+    country: ((expert as any)?.country ?? "South Africa") as string,
     bio: "",
     avatar_url: "",
     firm_id: expert?.firm_id ?? "",
