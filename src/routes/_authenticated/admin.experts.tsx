@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "../../integrations/supabase/client";
 import { slugify } from "../../lib/constants";
 import { RichTextEditor } from "../../components/RichTextEditor";
+import { TagInput } from "../../components/TagInput";
 import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 import { ProvinceCityFields } from "../../components/ProvinceCityFields";
@@ -238,6 +239,7 @@ function AdminExpertFormModal({
     office_phone: "",
     mobile_phone: "",
     contact_email: "",
+    services: [] as string[],
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
@@ -265,6 +267,7 @@ function AdminExpertFormModal({
       office_phone: (e.office_phone as string) ?? "",
       mobile_phone: (e.mobile_phone as string) ?? "",
       contact_email: (e.contact_email as string) ?? "",
+      services: Array.isArray(e.services) ? (e.services as string[]) : [],
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
@@ -297,6 +300,7 @@ function AdminExpertFormModal({
         office_phone: form.office_phone?.trim() || null,
         mobile_phone: form.mobile_phone?.trim() || null,
         contact_email: form.contact_email?.trim() || null,
+        services: form.services.length ? form.services : null,
       };
       if (isEdit && expert) {
         const { error } = await supabase
@@ -407,6 +411,14 @@ function AdminExpertFormModal({
           <AField label="Bio / experience">
             <RichTextEditor value={form.bio} onChange={(html) => setForm({ ...form, bio: html })} placeholder="Background, areas of focus, notable experience…" />
           </AField>
+          <AField label="Services offered">
+            <TagInput
+              value={form.services}
+              onChange={(next) => setForm({ ...form, services: next })}
+              placeholder="e.g. Forensic accounting — press Enter"
+            />
+          </AField>
+
 
           {isEdit && expert && (
             <AField label="Samples of work">

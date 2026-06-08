@@ -11,6 +11,7 @@ import { ATTORNEY_DESIGNATIONS, yearsInPractice } from "../lib/designation";
 import { importLawyerProfile } from "../lib/profile-import.functions";
 import { fetchImageAsDataUrl } from "../lib/fetch-image.functions";
 import { RichTextEditor } from "./RichTextEditor";
+import { TagInput } from "./TagInput";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
@@ -1052,6 +1053,15 @@ export function LawyerFormModal({
           <Section title="Overview" hint="Lead paragraph(s) for the profile.">
             <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
           </Section>
+
+          <Section title="Services" hint="Type a service and press Enter to add it as a tag.">
+            <TagInput
+              value={form.services}
+              onChange={(next) => setForm({ ...form, services: next })}
+              placeholder="e.g. Trust formation — press Enter"
+            />
+          </Section>
+
 
           <Section title="Qualifications" hint="Degrees, admissions, memberships.">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB (University of...), Admitted as an Attorney…" />
