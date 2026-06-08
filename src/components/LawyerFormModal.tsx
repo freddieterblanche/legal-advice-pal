@@ -205,6 +205,11 @@ export function LawyerFormModal({
   // Autosave state — once the lawyer row exists (either editing, or after the
   // first manual "Add"), we persist updates in the background without closing.
   const [currentLawyerId, setCurrentLawyerId] = useState<string | null>(lawyer?.id ?? null);
+  const [isFeatured, setIsFeatured] = useState<boolean>(!!lawyer?.is_featured);
+  const featuredMut = useFeaturedToggle(
+    { table: "service_providers", key: (form?.provider_type === "advocate" ? "advocate" : "attorney") as "advocate" | "attorney" },
+    [["lawyers"], ["service_providers"], ["search"]]
+  );
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
   const skipFirstAutosave = useRef(true);
