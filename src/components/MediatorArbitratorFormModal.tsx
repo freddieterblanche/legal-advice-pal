@@ -177,6 +177,7 @@ export function MediatorArbitratorFormModal({
     const payload = {
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
+      company_name: form.company_name.trim() || null,
       avatar_url: form.avatar_url.trim() || null,
       city: form.city.trim() || null,
       province: form.province.trim() || null,
