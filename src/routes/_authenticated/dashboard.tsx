@@ -440,6 +440,7 @@ const expertSchema = z.object({
   office_phone: z.string().trim().max(40).optional(),
   mobile_phone: z.string().trim().max(40).optional(),
   contact_email: z.string().trim().max(200).optional(),
+  website_url: z.string().trim().max(500).optional(),
 });
 
 function ExpertWitnessesTab({ firmId, editExpertId, onClearEditSearch }: { firmId: string; editExpertId?: string; onClearEditSearch?: () => void }) {
