@@ -95,30 +95,72 @@ function SearchPage() {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
       query = query.eq("exclude_from_lawyer_listing", false);
       if (search.q) {
-        // Boolean AND search across name, firm/chambers, location and practice areas.
-        // Each whitespace-separated token must match at least one of these fields.
-        const tokens = search.q.trim().split(/\s+/).filter(Boolean).slice(0, 8);
-        for (const raw of tokens) {
-          const t = raw.replace(/[(),"]/g, " ").trim();
-          if (!t) continue;
-          const like = `*${t}*`; // PostgREST ilike uses * as wildcard inside or()
+        // Boolean search with AND (default), OR, and NOT operators.
+        // Example: "insolvency cape town OR tax NOT labor"
+        //   → (insolvency AND cape AND town) OR (tax AND NOT labor)
+        // Also supports leading "-" as shorthand for NOT (e.g. "-labor").
+        const FIELDS = [
+          "full_name",
+          "firm_name",
+          "chambers_name",
+          "city",
+          "province",
+          "town_name",
+          "province_name",
+        ];
+        const buildTerm = (raw: string, negate: boolean): string | null => {
+          const t = raw.replace(/[(),"*]/g, " ").trim();
+          if (!t) return null;
+          const like = `*${t}*`;
           const lower = t.toLowerCase();
-          const matchedSlugs = (areas ?? [])
+          const slugs = (areas ?? [])
             .filter((a) => a.name.toLowerCase().includes(lower) || a.slug.toLowerCase().includes(lower))
             .map((a) => a.slug);
-          const parts = [
-            `full_name.ilike.${like}`,
-            `firm_name.ilike.${like}`,
-            `chambers_name.ilike.${like}`,
-            `city.ilike.${like}`,
-            `province.ilike.${like}`,
-            `town_name.ilike.${like}`,
-            `province_name.ilike.${like}`,
-          ];
-          for (const slug of matchedSlugs) {
-            parts.push(`practice_area_slugs.cs.{${slug}}`);
+          if (negate) {
+            const negs = FIELDS.map((f) => `${f}.not.ilike.${like}`);
+            for (const s of slugs) negs.push(`practice_area_slugs.not.cs.{${s}}`);
+            return `and(${negs.join(",")})`;
           }
-          query = query.or(parts.join(","));
+          const pos = FIELDS.map((f) => `${f}.ilike.${like}`);
+          for (const s of slugs) pos.push(`practice_area_slugs.cs.{${s}}`);
+          return `or(${pos.join(",")})`;
+        };
+
+        // Parse tokens into OR-separated clauses of AND-joined terms.
+        const tokens = search.q.trim().split(/\s+/).filter(Boolean).slice(0, 16);
+        const clauses: { negate: boolean; raw: string }[][] = [[]];
+        let negateNext = false;
+        for (const tok of tokens) {
+          const u = tok.toUpperCase();
+          if (u === "OR" || u === "||") {
+            clauses.push([]);
+            negateNext = false;
+            continue;
+          }
+          if (u === "NOT" || u === "AND") {
+            if (u === "NOT") negateNext = true;
+            continue;
+          }
+          let term = tok;
+          let neg = negateNext;
+          if (term.startsWith("-") && term.length > 1) {
+            neg = true;
+            term = term.slice(1);
+          }
+          clauses[clauses.length - 1].push({ negate: neg, raw: term });
+          negateNext = false;
+        }
+
+        const clauseExprs = clauses
+          .map((terms) => {
+            const built = terms.map((t) => buildTerm(t.raw, t.negate)).filter((x): x is string => !!x);
+            if (!built.length) return null;
+            return built.length === 1 ? built[0] : `and(${built.join(",")})`;
+          })
+          .filter((x): x is string => !!x);
+
+        if (clauseExprs.length) {
+          query = query.or(clauseExprs.join(","));
         }
       }
       if (search.town) {
@@ -276,6 +318,10 @@ function SearchPage() {
               Search
             </button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">
+            Tip: combine terms with <span className="font-semibold text-cream/80">OR</span> and{" "}
+            <span className="font-semibold text-cream/80">NOT</span> — e.g. <em>insolvency OR tax NOT labour</em>.
+          </p>
         </div>
       </section>
 
