@@ -199,6 +199,7 @@ export function MediatorArbitratorFormModal({
         form.is_arbitrator && form.arbitrator_experience_years
           ? Number(form.arbitrator_experience_years)
           : null,
+      website_url: form.website_url.trim() || null,
     };
     const { error } = await supabase.from("service_providers").update(payload).eq("id", id);
     setSaving(false);
