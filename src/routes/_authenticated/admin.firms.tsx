@@ -597,8 +597,15 @@ function BranchesEditor({ firmId }: { firmId: string }) {
               <input type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
-              <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              {draft.country === "South Africa" ? (
+                <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
+                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              ) : (
+                <input value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} placeholder="State / region (optional)" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              )}
+              <select value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value, province: e.target.value === "South Africa" ? "Gauteng" : "" })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
+                {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
               </select>
             </div>
             <div className="mt-2 flex items-center justify-between">
