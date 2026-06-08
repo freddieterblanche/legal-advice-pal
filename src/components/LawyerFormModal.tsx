@@ -196,6 +196,39 @@ export function LawyerFormModal({
   const fetchImageFn = useServerFn(fetchImageAsDataUrl);
   const [loadingUrlCrop, setLoadingUrlCrop] = useState(false);
 
+  // Autosave state — once the lawyer row exists (either editing, or after the
+  // first manual "Add"), we persist updates in the background without closing.
+  const [currentLawyerId, setCurrentLawyerId] = useState<string | null>(lawyer?.id ?? null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const skipFirstAutosave = useRef(true);
+
+  // Province / city pickers (inline so the user can free-type any city)
+  const { data: townsAll } = useQuery({
+    queryKey: ["towns-all-lawyer-modal"],
+    queryFn: async () =>
+      (await supabase
+        .from("towns")
+        .select("name, province_id")
+        .order("is_major_city", { ascending: false })
+        .order("name")
+      ).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: provincesAll } = useQuery({
+    queryKey: ["provinces-all-lawyer-modal"],
+    queryFn: async () =>
+      (await supabase.from("provinces").select("id, name").order("name")).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  });
+  const cityOptions: string[] = (() => {
+    if (!townsAll) return [];
+    const provId = provincesAll?.find((p) => p.name === form.province)?.id;
+    return provId
+      ? townsAll.filter((t) => t.province_id === provId).map((t) => t.name as string)
+      : [];
+  })();
+
   // Load firm branches
   useEffect(() => {
     (async () => {
