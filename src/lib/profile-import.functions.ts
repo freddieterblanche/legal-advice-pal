@@ -212,6 +212,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       email,
       phone,
       linkedin_url,
+      website_url: data.url.slice(0, 500),
       practice_areas: practiceAreaIds,
     };
   });
