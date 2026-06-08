@@ -292,7 +292,7 @@ function SearchPage() {
                   return (
                     <button
                       key={v.key}
-                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key }) })}
+                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key, page: 1 }) })}
                       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                         active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
                       }`}
