@@ -55,7 +55,16 @@ function MediatorSearch() {
         .from("lawyer_search_view")
         .select("*", { count: "exact" })
         .eq("is_mediator", true);
-      if (search.q) query = query.ilike("full_name", `%${search.q}%`);
+      query = applyBooleanSearch(query, search.q, [
+        "full_name",
+        "first_name",
+        "last_name",
+        "firm_name",
+        "city",
+        "province",
+        "mediator_accreditation",
+        "mediator_style",
+      ]);
       if (search.province) query = query.eq("province", search.province);
       if (search.style) query = query.eq("mediator_style", search.style);
       if (search.accreditation) query = query.ilike("mediator_accreditation", `%${search.accreditation}%`);
