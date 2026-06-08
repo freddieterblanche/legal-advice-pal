@@ -427,6 +427,17 @@ export const importMediatorArbitratorProfile = createServerFn({ method: "POST" }
 
 // ---------- Firm import ----------
 
+const firmBranchSchema = z.object({
+  name: sText,
+  address: sText,
+  city: sText,
+  province: sText,
+  country: sText,
+  phone: sText,
+  email: sText,
+  is_head_office: sBool,
+});
+
 const firmExtractionSchema = z.object({
   name: sText,
   registration_number: sText,
@@ -439,6 +450,10 @@ const firmExtractionSchema = z.object({
   province: sText,
   logo_url: sText,
   services: sStrArr,
+  branches: z.preprocess(
+    (v) => (Array.isArray(v) ? v : []),
+    z.array(firmBranchSchema),
+  ).default([]),
 });
 
 export const importFirmProfile = createServerFn({ method: "POST" })
@@ -454,15 +469,22 @@ export const importFirmProfile = createServerFn({ method: "POST" })
         model: gateway("google/gemini-3-flash-preview"),
         experimental_output: Output.object({ schema: firmExtractionSchema }),
         system:
-          "You extract a South African law firm profile from the firm's website (typically the home / about page). " +
+          "You extract a South African law firm profile from the firm's website (typically the home / about / contact / offices page). " +
           "If a field is not present, use an empty string or empty array. Do not invent information. " +
           "name: REQUIRED. The firm/practice name as displayed on the site. " +
           "description: HTML overview of the firm using ONLY <p>, <ul>, <li>, <strong>, <em>. No headings. " +
           `Allowed province values: ${PROVINCES.join(", ")}. ` +
           "services / practice areas: short labels (max ~12 items). " +
           "logo_url: URL of the firm's logo image. Prefer SVG/PNG. Resolve relative URLs against source URL. " +
-          "phone / email / address / city: the firm's main contact details if shown. " +
-          "website: the firm's primary website URL if different from the source URL.",
+          "phone / email / address / city: the firm's MAIN (head office) contact details if shown. " +
+          "website: the firm's primary website URL if different from the source URL. " +
+          // Branches
+          "branches: an array of EVERY office/branch location of the firm mentioned on the page (Cape Town office, Johannesburg office, Stellenbosch office, Nairobi office, etc.). " +
+          "Include the head office as one of the branches with is_head_office=true. For each branch include: " +
+          "name (a short label like 'Cape Town' or 'Sandton' — usually the city), address (street address if shown), city, province (only if in the allowed South African list above; leave empty for foreign offices), " +
+          "country (e.g. 'South Africa', 'Kenya', 'Namibia' — default 'South Africa' if not stated and the province is South African), " +
+          "phone, email, is_head_office (true only for the main/registered office). " +
+          "Do NOT duplicate the same office twice. If no branch information is on the page, return an empty array.",
         prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
       });
       extracted = experimental_output;
@@ -470,6 +492,25 @@ export const importFirmProfile = createServerFn({ method: "POST" })
       throw mapAiError(err);
     }
     const province = (PROVINCES as readonly string[]).includes(extracted.province) ? extracted.province : "";
+
+    const branches = extracted.branches
+      .map((b) => {
+        const bProvince = (PROVINCES as readonly string[]).includes(b.province) ? b.province : "";
+        const country = b.country.trim().slice(0, 80) || (bProvince ? "South Africa" : "");
+        return {
+          name: b.name.trim().slice(0, 120),
+          address: b.address.trim().slice(0, 300),
+          city: b.city.trim().slice(0, 80),
+          province: bProvince,
+          country: country || "South Africa",
+          phone: cleanPhone(b.phone),
+          email: cleanEmail(b.email),
+          is_head_office: !!b.is_head_office,
+        };
+      })
+      .filter((b) => b.name || b.city || b.address)
+      .slice(0, 25);
+
     return {
       name: extracted.name.trim().slice(0, 200),
       registration_number: extracted.registration_number.trim().slice(0, 60),
@@ -482,5 +523,6 @@ export const importFirmProfile = createServerFn({ method: "POST" })
       province,
       logo_url: resolveAbsoluteUrl(extracted.logo_url, data.url),
       services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      branches,
     };
   });
