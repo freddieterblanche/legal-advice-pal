@@ -162,6 +162,7 @@ function SearchPage() {
         if (clauseExprs.length) {
           query = query.or(clauseExprs.join(","));
         }
+      }
       if (search.town) {
         query = query.eq("town_slug", search.town);
       } else if (search.province) {
