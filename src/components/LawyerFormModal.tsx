@@ -170,6 +170,7 @@ export function LawyerFormModal({
     office_phone: lawyer?.office_phone ?? "",
     mobile_phone: lawyer?.mobile_phone ?? lawyer?.phone ?? "",
     linkedin_url: lawyer?.linkedin_url ?? "",
+    website_url: lawyer?.website_url ?? "",
     is_mediator: !!lawyer?.is_mediator,
     is_arbitrator: !!lawyer?.is_arbitrator,
     mediator_accreditation: lawyer?.mediator_accreditation ?? "",
