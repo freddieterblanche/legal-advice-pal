@@ -486,6 +486,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="New branch name" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} placeholder="Phone" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <input type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
