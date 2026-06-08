@@ -874,7 +874,7 @@ function BranchesManager({ firmId }: { firmId: string }) {
                 <p className="text-sm font-semibold text-ink">{b.name}</p>
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {[b.address, b.city, b.province].filter(Boolean).join(", ") || "No address set"}
+                {[b.address, b.city, b.province, b.country && b.country !== "South Africa" ? b.country : null].filter(Boolean).join(", ") || "No address set"}
                 {b.phone ? ` · ${b.phone}` : ""}
               </p>
             </div>
