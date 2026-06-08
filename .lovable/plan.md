@@ -1,47 +1,23 @@
-## 1. Firm logos on listing rows and detail page
+## Show matched branch on firm search results
 
-**Where logos render today**
-- `firms.$slug.tsx` already renders `firm.logo_url` in the hero.
-- `firms.index.tsx` renders a generic `Building2` icon tile instead of the logo.
-- `admin.firms.tsx` already exposes a `logo_url` URL input.
+When a user's search matches a firm via one of its branches (e.g. "yzerfontein"), the result card currently still shows the firm's head-office city ("Stellenbosch, Western Cape"), which looks wrong. We will surface the matching branch under the firm name so the result makes sense.
 
-**Changes**
-- In `firms.index.tsx`, replace the `Building2` tile with a logo thumbnail when `f.logo_url` exists; fall back to the `Building2` icon when missing or on image error.
-- Add a new shared `<FirmLogo />` component used by both the listing thumbnail and the `firms.$slug` hero so the white-logo fix lives in one place.
+### Changes (frontend only — `src/routes/firms.index.tsx`)
 
-**White-on-transparent logo fix**
-- Wrap every logo in a tile with `bg-slate-100` (light neutral), padding, rounded corners, and `object-contain` so the logo never bleeds to the edge.
-- Use `bg-slate-100` for every firm logo (not just detected white ones) — it is the only reliable way to guarantee white/transparent logos remain visible without per-image detection, and dark/coloured logos still read well on a light neutral.
-- On the firm detail hero, keep the existing larger size but apply the same tile treatment.
+1. **Fetch matched branches alongside firms.**
+   When `search.q`, `search.province`, or `search.town` is set, also fetch the matching `firm_branches` rows (id, firm_id, name, city, province, country) — reuse the same filters already used to compute `branchFirmIds` / `qBranchFirmIds`. Return a `Record<firm_id, MatchedBranch[]>` from the same `useQuery`.
 
-## 2. List view + pagination across listing pages
+2. **Pick a "matched branch" per firm card.**
+   For each firm row, if a matched branch exists for that firm, pick the first one. Prefer a branch whose `city`/`name`/`province`/`country` actually contains `search.q` (case-insensitive) over a town/province filter match.
 
-**Current state**
-- `search.tsx` already has a `view` (cards | list) toggle but always uses `PAGE_SIZE = 20`.
-- `firms.index.tsx`, `mediators.index.tsx`, `arbitrators.index.tsx`, `expert-witnesses.index.tsx` only have one layout and a fixed page size (~25).
+3. **Render the branch location instead of the head-office location** on both the card and list views when a matched branch is present:
+   - Card subtitle: `📍 {branch.city}, {branch.province}` (fallback to country if no province), with a small muted suffix like `— branch of {firm.name}` is NOT needed; just show the branch location.
+   - List view: replace the City and Province cells with the branch's city/province when a matched branch exists.
+   - When no branch match (pure name/city match on the firm itself), keep the existing head-office display unchanged.
 
-**Changes — apply the same pattern to every index page above**
-1. Add a `view: "cards" | "list"` search param (validated, default `"cards"`).
-2. Add a small "Cards / List" toggle next to the existing `SortBar` (same component used in `search.tsx`).
-3. Page size becomes dynamic:
-   - `view === "cards"` → keep current size (firms 25, search 20, etc.).
-   - `view === "list"` → `100`.
-4. When `view === "list"`, render results in a compact `<Table>` (Name, Type/Designation, City/Province, action), reusing the shadcn `Table` primitives already used in `search.tsx`.
-5. Pagination computes `totalPages` from the active page size, so switching view resets to page 1.
+4. **No backend, schema, or search-logic changes.** The existing branch-aware search already returns Cliffe Dekker for "Yzerfontein"; this plan only fixes the displayed location.
 
-**Featured ordering, filters, and sorting are unchanged** — only the row template and page size differ between views.
-
-## 3. Files touched
-
-- `src/components/FirmLogo.tsx` (new) — tile with bg-slate-100, object-contain, fallback icon.
-- `src/routes/firms.index.tsx` — use `FirmLogo`, add view toggle, 100/page in list mode, compact table layout.
-- `src/routes/firms.$slug.tsx` — swap hero logo `<img>` for `<FirmLogo size="lg" />`.
-- `src/routes/search.tsx` — change page size to 100 when `view === "list"` (cards stays at 20).
-- `src/routes/mediators.index.tsx` — add view toggle + 100/page list layout.
-- `src/routes/arbitrators.index.tsx` — same.
-- `src/routes/expert-witnesses.index.tsx` — same.
-
-## 4. Out of scope (flag for follow-up)
-
-- No change to the admin logo input flow (still paste-a-URL). If you want a true file upload to Cloud storage for firm logos, say so and I'll add it as a separate step.
-- No change to how lawyer/expert avatars are rendered — the bg-slate-100 fix is only applied to firm logos, where transparent-white is the common case.
+### Out of scope
+- Showing multiple branches per card.
+- Changing sort/filter behaviour.
+- Any edits to firm detail pages.
