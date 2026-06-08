@@ -383,6 +383,7 @@ type BranchRow = {
   city: string | null;
   province: string | null;
   phone: string | null;
+  email: string | null;
   is_head_office: boolean;
 };
 
