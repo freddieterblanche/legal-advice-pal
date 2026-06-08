@@ -62,7 +62,7 @@ function FirmsIndex() {
     queryFn: async () => {
       let query = supabase
         .from("firms")
-        .select("id, name, slug, city, province, website, phone, description, logo_url, created_at", { count: "exact" })
+        .select("id, name, slug, city, province, website, phone, email, description, logo_url, created_at", { count: "exact" })
         .eq("status", "active");
       if (search.q) query = query.or(`name.ilike.%${search.q}%,city.ilike.%${search.q}%`);
       if (search.province) {
