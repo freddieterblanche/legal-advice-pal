@@ -124,6 +124,13 @@ function AdminHub() {
       desc: "Provinces and towns used for location search.",
       count: counts?.towns,
     },
+    {
+      to: "/admin/practice-areas",
+      icon: BookOpen,
+      title: "Practice Areas",
+      desc: "Areas of law lawyers can be tagged with.",
+      count: counts?.practiceAreas,
+    },
   ] as const;
 
   return (
