@@ -8,6 +8,7 @@ import { ARBITRATION_TYPES, ARBITRATION_ACCREDITATIONS } from "../lib/expert-con
 import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "surname" | "experience" | "listed";
 type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -65,6 +66,7 @@ function ArbitratorSearch() {
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
       query = query.range(from, from + pageSize - 1);
+      query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
@@ -190,11 +192,14 @@ function ArbitratorSearch() {
                 </TableHeader>
                 <TableBody>
                   {results?.rows.map((l: any) => (
-                    <TableRow key={l.id}>
+                    <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
                       <TableCell className="font-medium">
-                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
-                          {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                        </Link>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
+                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                          </Link>
+                          {l.is_featured && <FeaturedBadge />}
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{l.arbitrator_accreditation ?? "—"}</TableCell>
                       <TableCell className="text-right text-muted-foreground">{l.arbitrator_experience_years ?? "—"}</TableCell>
@@ -215,7 +220,7 @@ function ArbitratorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
+                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
                   {l.avatar_url ? (
                     <img src={l.avatar_url} alt={l.full_name} className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top" />
                   ) : (
@@ -235,6 +240,7 @@ function ArbitratorSearch() {
                         {typeof l.arbitrator_experience_years === "number" && (
                           <span className="rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-ink">{l.arbitrator_experience_years} yrs</span>
                         )}
+                        {l.is_featured && <FeaturedBadge />}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {l.firm_name} · <MapPin className="inline h-3 w-3" /> {[l.city, l.province].filter(Boolean).join(", ")}
