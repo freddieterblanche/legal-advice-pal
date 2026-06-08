@@ -1,28 +1,25 @@
-## Add "View as List" toggle to search results
+## Add email address to firms
 
-Adds a compact list view to `/search` while keeping the existing card view as default.
+Adds a contact email to firms (and per-branch) — surfaced on the public firm page and editable in the admin firm form.
 
-### UX
-- Small toggle in the results header (next to SortBar): **Cards | List**.
-- Default = Cards (existing behaviour, unchanged).
-- Selection persists in the URL as `?view=list` (so it survives reloads and shareable links) and falls back to `cards`.
+### Database
+Migration:
+- `ALTER TABLE public.firms ADD COLUMN email text;`
+- `ALTER TABLE public.firm_branches ADD COLUMN email text;`
 
-### List view
-A dense table (no photos) using existing `Table` primitives:
+No CHECK constraint (kept simple text); validation happens in the form. No RLS / grant changes (columns inherit the existing table policies).
 
-| Name | Designation | Firm | City | |
-|---|---|---|---|---|
-| Full name (+ " SC" if senior counsel), linked to profile | Designation text, or fallback "Advocate"/"Senior Counsel"/"Attorney" derived via the existing `resolveKind` logic | `firm_name ?? chambers_name` | `city` (province as muted suffix) | "View" link button |
+### Admin form — `src/routes/_authenticated/admin.firms.tsx`
+- Add `email` to the `Firm` type, the form state (init from `firm?.email`), and the insert/update payloads.
+- Add an "Email" input alongside the existing "Main phone" field (`type="email"`, optional, basic browser validation).
+- Add `email` to the per-branch row type, the "Add branch" draft, the editable branch inputs, and the branch update/insert payloads.
 
-- Same query, sorting, pagination, filters, and type tabs as the card view — only the row rendering changes.
-- Row click → profile (same target as "View Profile").
-- Mobile: horizontal scroll on the table (matches `Table` component default).
+### Public firm page — `src/routes/firms.$slug.tsx`
+- Include `email` in the firm + branches select.
+- Show firm email next to the phone line as a `mailto:` link (Mail icon from lucide-react).
+- Show branch email under each branch the same way as branch phone.
 
-### Files
-- `src/routes/search.tsx`
-  - Extend `validateSearch` with `view: "cards" | "list"` (default `"cards"`).
-  - Add a small two-button toggle near the SortBar.
-  - Branch render: existing `<article>` cards when `view === "cards"`, new `<Table>` block when `view === "list"`.
-  - Reuse the existing `kind` / `badgeLabel` / link logic so labels stay consistent with the cards.
+### Firms listing — `src/routes/firms.index.tsx`
+- Add `email` to the `select(...)` projection so the field is available; no UI change on the card itself (kept minimal — listing already shows phone/website).
 
-No backend, schema, or query changes.
+No changes to search, dashboard, or registration flow.
