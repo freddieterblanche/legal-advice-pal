@@ -9,6 +9,7 @@ import { FeaturedBadge } from "../components/FeaturedBadge";
 import { FirmLogo } from "../components/FirmLogo";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 type SortField = "name" | "lawyers" | "listed";
 type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -156,20 +157,31 @@ function FirmsIndex() {
 
   return (
     <div className="bg-cream">
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <form onSubmit={onSubmit} className="flex flex-wrap gap-2">
+      <section className="relative overflow-hidden bg-ink py-12 text-cream">
+        <img
+          src={attorneysHero.url}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <h1 className="font-heading text-3xl md:text-4xl">Find a Law Firm</h1>
+          <p className="mt-2 max-w-2xl text-cream/70">
+            Search verified South African law firms by name, city and province.
+          </p>
+          <form onSubmit={onSubmit} className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_auto]">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search firms by name or city…"
               maxLength={120}
-              className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
-            <button type="submit" className="rounded-lg bg-ink px-6 py-2 text-sm font-semibold text-white hover:bg-ink/90">Search</button>
+            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
           </form>
         </div>
-      </div>
+      </section>
 
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
         {/* Sidebar */}

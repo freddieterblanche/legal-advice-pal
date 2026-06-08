@@ -4,6 +4,7 @@ import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil } from "lucide-reac
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { FirmLogo } from "../components/FirmLogo";
+import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
@@ -99,8 +100,15 @@ function FirmProfile() {
 
   return (
     <div className="bg-cream">
-      <section className="bg-ink py-16 text-cream">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
+      <section className="relative overflow-hidden bg-ink py-16 text-cream">
+        <img
+          src={attorneysHero.url}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+        <div className="relative mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
           <div>
             <h1 className="font-heading text-4xl md:text-5xl">{firm.name}</h1>
             <div className="mt-4 flex flex-wrap gap-5 text-sm text-cream/70">
