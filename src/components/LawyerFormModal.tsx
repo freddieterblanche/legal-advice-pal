@@ -412,6 +412,74 @@ export function LawyerFormModal({
     if (error) throw error;
   };
 
+  // Shared payload builder used by both manual save and autosave so the
+  // database always sees the same normalised shape.
+  const buildParsed = () => {
+    const isAdvocate = form.provider_type === "advocate";
+    const normalised = {
+      ...form,
+      designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
+      designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
+      is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
+      is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
+      practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
+      is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
+      sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
+    };
+    const legacyDesignation = isAdvocate
+      ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
+      : (normalised.designation_code || normalised.designation_custom || "Attorney");
+    return lawyerSchema.parse({
+      ...normalised,
+      designation: legacyDesignation,
+      bio: sanitizeBioHtml(form.bio),
+      overview: sanitizeBioHtml(form.overview),
+      qualifications: sanitizeBioHtml(form.qualifications),
+      accolades: sanitizeBioHtml(form.accolades),
+      noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
+      reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
+      mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
+      mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
+      mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
+      arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
+      arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
+      arbitrator_experience_years:
+        form.is_arbitrator && form.arbitrator_experience_years
+          ? Number(form.arbitrator_experience_years)
+          : null,
+      availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
+        ? form.availability_notes
+        : null,
+    });
+  };
+
+  // Background autosave: once we have a row id (either editing existing, or
+  // after the first manual "Add"), debounce changes and patch the DB so the
+  // user can keep filling fields without fear of losing work.
+  useEffect(() => {
+    if (!currentLawyerId) return;
+    if (skipFirstAutosave.current) { skipFirstAutosave.current = false; return; }
+    const t = setTimeout(async () => {
+      setAutoSaving(true);
+      try {
+        const parsed = buildParsed();
+        const { error } = await supabase
+          .from("service_providers")
+          .update({ ...parsed, status: form.status })
+          .eq("id", currentLawyerId);
+        if (!error) setLastSavedAt(new Date());
+        else console.warn("autosave failed:", error.message);
+      } catch (e) {
+        // Validation failures are expected while the user is mid-edit — skip silently.
+        console.debug("autosave skipped (validation):", e);
+      } finally {
+        setAutoSaving(false);
+      }
+    }, 1500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, otherDesignation, currentLawyerId]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -449,51 +517,15 @@ export function LawyerFormModal({
         }
       }
 
-      // Normalise structured designation fields by type
-      const isAdvocate = form.provider_type === "advocate";
-      const normalised = {
-        ...form,
-        designation_code: isAdvocate ? null : (otherDesignation ? null : (form.designation_code || null)),
-        designation_custom: isAdvocate ? null : (otherDesignation ? (form.designation_custom || null) : null),
-        is_senior_counsel: isAdvocate ? form.is_senior_counsel : false,
-        is_practice_head: !isAdvocate && form.designation_code === "Director" ? form.is_practice_head : false,
-        practice_head_area: !isAdvocate && form.designation_code === "Director" && form.is_practice_head ? (form.practice_head_area || null) : null,
-        is_sector_head: !isAdvocate && form.designation_code === "Director" ? form.is_sector_head : false,
-        sector_head_area: !isAdvocate && form.designation_code === "Director" && form.is_sector_head ? (form.sector_head_area || null) : null,
-      };
-      // Keep the legacy `designation` text in sync for views/lists that haven't migrated
-      const legacyDesignation = isAdvocate
-        ? (normalised.is_senior_counsel ? "Senior Counsel" : "Advocate")
-        : (normalised.designation_code || normalised.designation_custom || "Attorney");
-
-      const parsed = lawyerSchema.parse({
-        ...normalised,
-        designation: legacyDesignation,
-        bio: sanitizeBioHtml(form.bio),
-        overview: sanitizeBioHtml(form.overview),
-        qualifications: sanitizeBioHtml(form.qualifications),
-        accolades: sanitizeBioHtml(form.accolades),
-        noteworthy_matters: sanitizeBioHtml(form.noteworthy_matters),
-        reported_cases_notes: sanitizeBioHtml(form.reported_cases_notes),
-        mediator_accreditation: form.is_mediator ? (form.mediator_accreditation || null) : null,
-        mediator_style: form.is_mediator ? (form.mediator_style || null) : null,
-        mediator_sectors: form.is_mediator && form.mediator_sectors.length ? form.mediator_sectors : null,
-        arbitrator_accreditation: form.is_arbitrator ? (form.arbitrator_accreditation || null) : null,
-        arbitrator_types: form.is_arbitrator && form.arbitrator_types.length ? form.arbitrator_types : null,
-        arbitrator_experience_years:
-          form.is_arbitrator && form.arbitrator_experience_years
-            ? Number(form.arbitrator_experience_years)
-            : null,
-        availability_notes: (form.is_mediator || form.is_arbitrator) && form.availability_notes
-          ? form.availability_notes
-          : null,
-      });
-      if (isEdit && lawyer) {
-        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", lawyer.id);
+      const parsed = buildParsed();
+      if (currentLawyerId) {
+        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", currentLawyerId);
         if (error) throw error;
-        await syncPracticeAreas(lawyer.id);
-        await syncBranches(lawyer.id);
+        await syncPracticeAreas(currentLawyerId);
+        await syncBranches(currentLawyerId);
+        setLastSavedAt(new Date());
         toast.success("Profile updated");
+        onSaved();
       } else {
         const slug = `${slugify(`${parsed.first_name}-${parsed.last_name}`)}-${Math.random().toString(36).slice(2, 6)}`;
         const { data: inserted, error } = await supabase
@@ -505,10 +537,14 @@ export function LawyerFormModal({
         if (inserted) {
           await syncPracticeAreas(inserted.id);
           await syncBranches(inserted.id);
+          // Keep the modal open and switch into autosave mode so the user can
+          // continue editing without losing work.
+          skipFirstAutosave.current = true;
+          setCurrentLawyerId(inserted.id);
+          setLastSavedAt(new Date());
         }
-        toast.success("Lawyer added");
+        toast.success("Lawyer added — autosave on. Keep editing or click Done.");
       }
-      onSaved();
     } catch (err) {
       console.error("Lawyer save failed:", err);
       if (err instanceof z.ZodError) {
