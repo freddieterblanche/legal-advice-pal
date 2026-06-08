@@ -155,7 +155,21 @@ export function Navbar() {
                 <>
                   <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-gold">Dashboard</Link>
                   {isPlatformAdmin && (
-                    <Link to="/admin" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-gold">Admin Hub</Link>
+                    <>
+                      <span className="block px-3 py-2 text-xs font-semibold uppercase tracking-wider text-cream/50">Admin</span>
+                      <Link to="/admin" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-gold">Admin Hub</Link>
+                      <div className="grid grid-cols-2 gap-1 px-3 pb-2">
+                        <Link to="/admin/firms" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Firms</Link>
+                        <Link to="/admin/attorneys" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Attorneys</Link>
+                        <Link to="/admin/advocates" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Advocates</Link>
+                        <Link to="/admin/experts" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Experts</Link>
+                        <Link to="/admin/mediators" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Mediators</Link>
+                        <Link to="/admin/arbitrators" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Arbitrators</Link>
+                        <Link to="/admin/bars" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Bars</Link>
+                        <Link to="/admin/chambers" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Chambers</Link>
+                        <Link to="/admin/towns" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-cream/80 hover:bg-cream/5">Towns</Link>
+                      </div>
+                    </>
                   )}
                   <button onClick={() => { signOut(); setOpen(false); }} className="block w-full rounded px-3 py-2 text-left text-sm text-cream/80">Sign Out</button>
                 </>
