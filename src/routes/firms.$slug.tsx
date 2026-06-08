@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { FirmLogo } from "../components/FirmLogo";
 
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
@@ -118,15 +119,8 @@ function FirmProfile() {
               </Link>
             )}
           </div>
-          {firm.logo_url && (
-            <img
-              src={firm.logo_url}
-              alt={`${firm.name} logo`}
-              className="h-20 w-auto object-contain"
-              style={{ filter: "brightness(0) invert(1)" }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-          )}
+          <FirmLogo src={firm.logo_url} alt={`${firm.name} logo`} size="lg" />
+
         </div>
       </section>
 

@@ -5,9 +5,11 @@ import { Microscope, MapPin, BookOpen } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { SortBar, type SortDir } from "../components/SortBar";
+import { ViewToggle, type ViewMode } from "../components/ViewToggle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 type SortField = "surname" | "cases" | "listed";
-type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir };
+type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
 
 export const Route = createFileRoute("/expert-witnesses/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/expert-witnesses/")({
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
     sort: s.sort === "surname" || s.sort === "cases" || s.sort === "listed" ? s.sort : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
@@ -30,13 +33,16 @@ export const Route = createFileRoute("/expert-witnesses/")({
   component: ExpertWitnessSearch,
 });
 
-const PAGE_SIZE = 20;
+const CARDS_PAGE_SIZE = 20;
+const LIST_PAGE_SIZE = 100;
 
 function ExpertWitnessSearch() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/expert-witnesses" });
   const [q, setQ] = useState(search.q ?? "");
   useEffect(() => { setQ(search.q ?? ""); }, [search.q]);
+  const view: ViewMode = search.view ?? "cards";
+  const pageSize = view === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
 
   const { data: disciplines } = useQuery({
     queryKey: ["expert-disciplines"],
@@ -44,7 +50,7 @@ function ExpertWitnessSearch() {
   });
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["expert-witness-search", search],
+    queryKey: ["expert-witness-search", search, pageSize],
     queryFn: async () => {
       let query = supabase
         .from("service_providers")
@@ -58,16 +64,15 @@ function ExpertWitnessSearch() {
       if (search.independent === "yes") query = query.eq("is_independent", true);
       if (search.independent === "no") query = query.eq("is_independent", false);
       const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
+      const from = (page - 1) * pageSize;
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
-      query = query.range(from, from + PAGE_SIZE - 1);
+      query = query.range(from, from + pageSize - 1);
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "listed") {
         query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
-        // cases: defer to client-side sort below
         query = query.order("last_name", { ascending: true });
       }
       const { data, count, error } = await query;
@@ -92,9 +97,8 @@ function ExpertWitnessSearch() {
   const update = (patch: Partial<Search>) => navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
   const page = search.page ?? 1;
   const total = results?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // Group disciplines by parent for the dropdown
   const groupedDisciplines = (disciplines ?? []).reduce((acc: Record<string, typeof disciplines>, d) => {
     const k = d.parent_category ?? "Other";
     (acc[k] ||= [] as never).push(d);
@@ -195,16 +199,22 @@ function ExpertWitnessSearch() {
             <h2 className="font-heading text-2xl text-ink">
               {isLoading ? "Searching…" : `${total} expert${total === 1 ? "" : "s"} found`}
             </h2>
-            <SortBar
-              options={[
-                { key: "surname", label: "Surname" },
-                { key: "cases", label: "Cases" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "surname"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "surname", label: "Surname" },
+                  { key: "cases", label: "Cases" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "surname"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+              />
+              <ViewToggle
+                value={view}
+                onChange={(v) => navigate({ search: (prev: Search) => ({ ...prev, view: v, page: 1 }) })}
+              />
+            </div>
           </div>
 
           {isLoading ? (
@@ -215,10 +225,52 @@ function ExpertWitnessSearch() {
             <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
               No expert witnesses match your search. Try fewer filters.
             </div>
+          ) : view === "list" ? (
+            <div className="overflow-hidden rounded-md border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Discipline</TableHead>
+                    <TableHead>Employer / Practice</TableHead>
+                    <TableHead>City</TableHead>
+                    <TableHead className="text-right">Cases</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results?.rows.map((e: any) => {
+                    const disc: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
+                    const caseCount = e.case_service_providers?.length ?? 0;
+                    return (
+                      <TableRow key={e.id}>
+                        <TableCell className="font-medium">
+                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="text-ink hover:text-gold">
+                            {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{disc[0]?.name ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{e.is_independent ? "Independent" : (e.employer ?? "—")}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {e.city ?? "—"}
+                          {e.province ? <span className="text-muted-foreground/70">, {e.province}</span> : null}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">{caseCount}</TableCell>
+                        <TableCell className="text-right">
+                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90">
+                            View
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <div className="space-y-3">
               {results?.rows.map((e: any) => {
-                const disciplines: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
+                const disc: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_service_providers?.length ?? 0;
                 return (
                   <article key={e.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
@@ -248,9 +300,9 @@ function ExpertWitnessSearch() {
                               <span aria-hidden className="mr-2">•</span>{e.title}
                             </span>
                           )}
-                          {disciplines[0] && (
+                          {disc[0] && (
                             <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">
-                              {disciplines[0].name}
+                              {disc[0].name}
                             </span>
                           )}
                         </div>

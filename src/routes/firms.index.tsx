@@ -1,14 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Building2, MapPin, Users } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { FeaturedBadge } from "../components/FeaturedBadge";
+import { FirmLogo } from "../components/FirmLogo";
+import { ViewToggle, type ViewMode } from "../components/ViewToggle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 type SortField = "name" | "lawyers" | "listed";
-type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir };
+type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
 
 export const Route = createFileRoute("/firms/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
@@ -18,6 +21,7 @@ export const Route = createFileRoute("/firms/")({
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
     sort: s.sort === "name" || s.sort === "lawyers" || s.sort === "listed" ? s.sort : "name",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
@@ -30,12 +34,15 @@ export const Route = createFileRoute("/firms/")({
   component: FirmsIndex,
 });
 
-const PAGE_SIZE = 25;
+const CARDS_PAGE_SIZE = 25;
+const LIST_PAGE_SIZE = 100;
 
 function FirmsIndex() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/firms" });
   const [q, setQ] = useState(search.q ?? "");
+  const view: ViewMode = search.view ?? "cards";
+  const pageSize = view === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
 
   useEffect(() => { setQ(search.q ?? ""); }, [search.q]);
 
@@ -59,7 +66,7 @@ function FirmsIndex() {
   })();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["firms-index", search],
+    queryKey: ["firms-index", search, pageSize],
     queryFn: async () => {
       let query = supabase
         .from("firms")
@@ -75,16 +82,14 @@ function FirmsIndex() {
         if (townName) query = query.ilike("city", townName);
       }
       const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
+      const from = (page - 1) * pageSize;
       const sort = search.sort ?? "name";
       const ascending = (search.dir ?? "asc") === "asc";
-      query = query.range(from, from + PAGE_SIZE - 1);
-      // Featured firms always first
+      query = query.range(from, from + pageSize - 1);
       query = query.order("is_featured", { ascending: false });
       if (sort === "listed") {
         query = query.order("created_at", { ascending, nullsFirst: false });
       } else {
-        // "name" — and fall-through for "lawyers" which is re-sorted client-side below
         query = query.order("name", { ascending });
       }
       const { data, count, error } = await query;
@@ -118,7 +123,7 @@ function FirmsIndex() {
   };
 
   const total = data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const page = search.page ?? 1;
   const sortedRows = (() => {
     const rows = data?.rows ?? [];
@@ -181,16 +186,22 @@ function FirmsIndex() {
             <h1 className="font-heading text-2xl text-ink">
               {isLoading ? "Loading…" : `${total} firm${total === 1 ? "" : "s"} found`}
             </h1>
-            <SortBar
-              options={[
-                { key: "name", label: "Name" },
-                { key: "lawyers", label: "Lawyers" },
-                { key: "listed", label: "Date Listed" },
-              ]}
-              sort={search.sort ?? "name"}
-              dir={search.dir ?? "asc"}
-              onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <SortBar
+                options={[
+                  { key: "name", label: "Name" },
+                  { key: "lawyers", label: "Lawyers" },
+                  { key: "listed", label: "Date Listed" },
+                ]}
+                sort={search.sort ?? "name"}
+                dir={search.dir ?? "asc"}
+                onChange={(sort, dir) => navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })}
+              />
+              <ViewToggle
+                value={view}
+                onChange={(v) => navigate({ search: (prev: Search) => ({ ...prev, view: v, page: 1 }) })}
+              />
+            </div>
           </div>
 
           {isLoading ? (
@@ -200,6 +211,53 @@ function FirmsIndex() {
           ) : data?.rows.length === 0 ? (
             <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
               No firms match your search.
+            </div>
+          ) : view === "list" ? (
+            <div className="overflow-hidden rounded-md border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>City</TableHead>
+                    <TableHead>Province</TableHead>
+                    <TableHead className="text-right">Lawyers</TableHead>
+                    <TableHead className="text-right"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedRows.map((f) => {
+                    const lawyerCount = counts?.[f.id] ?? 0;
+                    return (
+                      <TableRow key={f.id} className={f.is_featured ? "bg-amber-50/40" : undefined}>
+                        <TableCell>
+                          <FirmLogo src={f.logo_url} alt={`${f.name} logo`} size="sm" />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link to="/firms/$slug" params={{ slug: f.slug }} className="text-ink hover:text-gold">
+                              {f.name}
+                            </Link>
+                            {f.is_featured && <FeaturedBadge />}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{f.city ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{f.province ?? "—"}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{lawyerCount}</TableCell>
+                        <TableCell className="text-right">
+                          <Link
+                            to="/firms/$slug"
+                            params={{ slug: f.slug }}
+                            className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90"
+                          >
+                            View
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           ) : (
             <div className="space-y-2">
@@ -212,9 +270,7 @@ function FirmsIndex() {
                     params={{ slug: f.slug }}
                     className={`group flex items-center gap-3 rounded-lg bg-card px-4 py-3 shadow-sm transition-all hover:shadow-md ${f.is_featured ? "ring-2 ring-amber-400/70" : ""}`}
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-gold/10 text-gold">
-                      <Building2 className="h-5 w-5" strokeWidth={1.5} />
-                    </div>
+                    <FirmLogo src={f.logo_url} alt={`${f.name} logo`} size="sm" />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                         <h3 className="truncate font-heading text-base font-semibold text-ink group-hover:text-gold">

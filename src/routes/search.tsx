@@ -51,7 +51,8 @@ export const Route = createFileRoute("/search")({
 });
 
 
-const PAGE_SIZE = 20;
+const CARDS_PAGE_SIZE = 20;
+const LIST_PAGE_SIZE = 100;
 
 function SearchPage() {
   const search = Route.useSearch();
@@ -130,8 +131,9 @@ function SearchPage() {
         query = query.order("created_at", { ascending, nullsFirst: false });
       }
       const page = search.page ?? 1;
-      const from = (page - 1) * PAGE_SIZE;
-      query = query.range(from, from + PAGE_SIZE - 1);
+      const pageSize = (search.view ?? "cards") === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
+      const from = (page - 1) * pageSize;
+      query = query.range(from, from + pageSize - 1);
       const { data, error, count } = await query;
       if (error) throw error;
       let rows = data ?? [];
@@ -157,7 +159,8 @@ function SearchPage() {
   };
 
   const total = results?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageSize = (search.view ?? "cards") === "list" ? LIST_PAGE_SIZE : CARDS_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const page = search.page ?? 1;
 
   return (
@@ -289,7 +292,7 @@ function SearchPage() {
                   return (
                     <button
                       key={v.key}
-                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key }) })}
+                      onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key, page: 1 }) })}
                       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                         active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
                       }`}
