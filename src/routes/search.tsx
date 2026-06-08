@@ -120,6 +120,8 @@ function SearchPage() {
       }
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
+      // Always prioritise featured listings first, then apply the chosen sort.
+      query = query.order("is_featured", { ascending: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
