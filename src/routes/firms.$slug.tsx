@@ -106,6 +106,7 @@ function FirmProfile() {
               {firm.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {firm.city}, {firm.province}</span>}
               {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
               {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
+              {firm.email && <a href={`mailto:${firm.email}`} className="flex items-center gap-1.5 hover:text-gold"><Mail className="h-4 w-4" /> {firm.email}</a>}
             </div>
             {canEdit && (
               <Link
