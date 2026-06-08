@@ -410,6 +410,7 @@ function SearchPage() {
                           <KindIcon className="h-3 w-3" strokeWidth={2} />
                           {badgeLabel}
                         </span>
+                        {l.is_featured && <FeaturedBadge />}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {[
