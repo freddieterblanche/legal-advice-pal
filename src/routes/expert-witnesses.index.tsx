@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Microscope, MapPin, BookOpen } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
+import { applyBooleanSearch, BOOLEAN_SEARCH_HINT } from "../lib/boolean-search";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
@@ -57,9 +58,17 @@ function ExpertWitnessSearch() {
         .select("*, provider_disciplines(expert_disciplines(name, slug, parent_category)), case_service_providers(id)", { count: "exact" })
         .eq("provider_type", "expert")
         .in("status", ["trial", "active"]);
-      if (search.q) {
-        query = query.or(`first_name.ilike.%${search.q}%,last_name.ilike.%${search.q}%,employer.ilike.%${search.q}%`);
-      }
+      query = applyBooleanSearch(query, search.q, [
+        "first_name",
+        "last_name",
+        "employer",
+        "company_name",
+        "city",
+        "province",
+        "job_title",
+        "name_title",
+        "registration_body",
+      ]);
       if (search.province) query = query.eq("province", search.province);
       if (search.independent === "yes") query = query.eq("is_independent", true);
       if (search.independent === "no") query = query.eq("is_independent", false);
@@ -123,8 +132,8 @@ function ExpertWitnessSearch() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name or employer…"
-              maxLength={120}
+              placeholder="Search — supports AND / OR / NOT…"
+              maxLength={240}
               className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
             <select
@@ -151,6 +160,7 @@ function ExpertWitnessSearch() {
               Search
             </button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 

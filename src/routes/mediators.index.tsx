@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Handshake, MapPin } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
+import { applyBooleanSearch, BOOLEAN_SEARCH_HINT } from "../lib/boolean-search";
 import { MEDIATION_SECTORS, MEDIATION_ACCREDITATIONS, MEDIATION_STYLES } from "../lib/expert-constants";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { FeaturedBadge } from "../components/FeaturedBadge";
@@ -54,7 +55,16 @@ function MediatorSearch() {
         .from("lawyer_search_view")
         .select("*", { count: "exact" })
         .eq("is_mediator", true);
-      if (search.q) query = query.ilike("full_name", `%${search.q}%`);
+      query = applyBooleanSearch(query, search.q, [
+        "full_name",
+        "first_name",
+        "last_name",
+        "firm_name",
+        "city",
+        "province",
+        "mediator_accreditation",
+        "mediator_style",
+      ]);
       if (search.province) query = query.eq("province", search.province);
       if (search.style) query = query.eq("mediator_style", search.style);
       if (search.accreditation) query = query.ilike("mediator_accreditation", `%${search.accreditation}%`);
@@ -99,8 +109,8 @@ function MediatorSearch() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by mediator name…"
-              maxLength={120}
+              placeholder="Search — supports AND / OR / NOT…"
+              maxLength={240}
               className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
             <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
@@ -113,6 +123,7 @@ function MediatorSearch() {
             </select>
             <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
           </form>
+          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
