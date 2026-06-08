@@ -1223,12 +1223,14 @@ export type Database = {
           created_at: string | null
           designation: string | null
           exclude_from_lawyer_listing: boolean | null
+          featured_since: string | null
           firm_name: string | null
           firm_slug: string | null
           first_name: string | null
           full_name: string | null
           id: string | null
           is_arbitrator: boolean | null
+          is_featured: boolean | null
           is_mediator: boolean | null
           is_senior_counsel: boolean | null
           languages: string[] | null
