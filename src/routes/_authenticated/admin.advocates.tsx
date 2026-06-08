@@ -606,8 +606,9 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="Mobile" type="tel" value={form.mobile_phone} onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-            <div />
+            <input placeholder="Website URL (e.g. https://chambers.co.za/advocate)" type="url" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} maxLength={500} className="rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
+
 
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
