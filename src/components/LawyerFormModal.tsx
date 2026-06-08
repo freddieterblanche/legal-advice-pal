@@ -1115,10 +1115,20 @@ export function LawyerFormModal({
               )}
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">{saving ? "Saving…" : isEdit ? "Save Changes" : "Add Lawyer"}</button>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            {currentLawyerId && (
+              <span className="mr-auto text-xs text-muted-foreground">
+                {autoSaving ? "Autosaving…" : lastSavedAt ? `Saved ${lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Autosave on"}
+              </span>
+            )}
+            <button type="button" onClick={() => { if (currentLawyerId) onSaved(); else onClose(); }} className="rounded px-4 py-2 text-sm">
+              {currentLawyerId ? "Done" : "Cancel"}
+            </button>
+            <button type="submit" disabled={saving} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+              {saving ? "Saving…" : currentLawyerId ? "Save now" : "Add Lawyer"}
+            </button>
           </div>
+
         </form>
         </div>
       </div>
