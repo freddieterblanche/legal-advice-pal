@@ -46,6 +46,7 @@ type FormState = {
   // cross flags
   is_mediator: boolean;
   is_arbitrator: boolean;
+  website_url: string;
 };
 
 const EMPTY: FormState = {
