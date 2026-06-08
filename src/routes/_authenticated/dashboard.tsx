@@ -692,6 +692,7 @@ function SettingsTab({ firm }: { firm: any }) {
     province: firm.province ?? "Gauteng",
     logo_url: firm.logo_url ?? "",
     logo_accent_color: firm.logo_accent_color ?? "",
+    services: (firm.services ?? []) as string[],
   });
 
   const save = useMutation({
@@ -700,6 +701,7 @@ function SettingsTab({ firm }: { firm: any }) {
         ...form,
         description: sanitizeBioHtml(form.description),
         logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
+        services: form.services.length ? form.services : null,
       };
       const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
