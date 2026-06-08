@@ -89,7 +89,8 @@ function SearchPage() {
   });
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["search", search],
+    queryKey: ["search", search, (areas ?? []).length],
+    enabled: !search.q || !!areas,
     queryFn: async () => {
       let query = supabase.from("lawyer_search_view").select("*", { count: "exact" });
       query = query.eq("exclude_from_lawyer_listing", false);
