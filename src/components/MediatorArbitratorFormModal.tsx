@@ -27,6 +27,7 @@ type FormState = {
   avatar_url: string;
   city: string;
   province: string;
+  country: string;
   email: string;
   office_phone: string;
   mobile_phone: string;
