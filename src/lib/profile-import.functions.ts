@@ -269,21 +269,21 @@ function mapAiError(err: unknown): Error {
 // ---------- Expert witness import ----------
 
 const expertExtractionSchema = z.object({
-  first_name: z.string().max(80).default(""),
-  last_name: z.string().max(80).default(""),
-  name_title: z.string().max(20).default(""),
-  job_title: z.string().max(120).default(""),
-  qualifications: z.string().max(10000).default(""),
-  registration_body: z.string().max(200).default(""),
-  bio: z.string().max(10000).default(""),
-  city: z.string().max(80).default(""),
-  province: z.string().max(40).default(""),
-  company_name: z.string().max(200).default(""),
-  photo_url: z.string().max(2000).default(""),
-  email: z.string().max(200).default(""),
-  office_phone: z.string().max(60).default(""),
-  mobile_phone: z.string().max(60).default(""),
-  services: z.array(z.string().max(120)).max(20).default([]),
+  first_name: sText,
+  last_name: sText,
+  name_title: sText,
+  job_title: sText,
+  qualifications: sText,
+  registration_body: sText,
+  bio: sText,
+  city: sText,
+  province: sText,
+  company_name: sText,
+  photo_url: sText,
+  email: sText,
+  office_phone: sText,
+  mobile_phone: sText,
+  services: sStrArr,
 });
 
 export const importExpertProfile = createServerFn({ method: "POST" })
