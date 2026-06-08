@@ -421,6 +421,7 @@ export const importMediatorArbitratorProfile = createServerFn({ method: "POST" }
       arbitrator_accreditation: extracted.arbitrator_accreditation.trim().slice(0, 200),
       arbitrator_types: extracted.arbitrator_types.map((s) => s.trim()).filter(Boolean).slice(0, 15),
       arbitrator_experience_years: extracted.arbitrator_experience_years,
+      website_url: data.url.slice(0, 500),
     };
   });
 
