@@ -134,6 +134,11 @@ function ExpertWitnessProfile() {
                       <Mail className="h-4 w-4" /> {expert.contact_email}
                     </a>
                   )}
+                  {expert.website_url && (
+                    <a href={expert.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                      <Globe className="h-4 w-4" /> Visit website
+                    </a>
+                  )}
                 </div>
               )}
             </div>

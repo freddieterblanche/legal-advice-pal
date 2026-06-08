@@ -253,6 +253,7 @@ function AdminExpertFormModal({
     mobile_phone: "",
     contact_email: "",
     services: [] as string[],
+    website_url: "",
   });
   const [hydrated, setHydrated] = useState(!isEdit);
   const [saving, setSaving] = useState(false);
@@ -281,6 +282,7 @@ function AdminExpertFormModal({
       mobile_phone: (e.mobile_phone as string) ?? "",
       contact_email: (e.contact_email as string) ?? "",
       services: Array.isArray(e.services) ? (e.services as string[]) : [],
+      website_url: (e.website_url as string) ?? "",
     }));
     setHydrated(true);
   }, [existing, isEdit, hydrated]);
@@ -314,6 +316,7 @@ function AdminExpertFormModal({
         mobile_phone: form.mobile_phone?.trim() || null,
         contact_email: form.contact_email?.trim() || null,
         services: form.services.length ? form.services : null,
+        website_url: form.website_url?.trim() || null,
       };
       if (isEdit && expert) {
         const { error } = await supabase
@@ -369,6 +372,7 @@ function AdminExpertFormModal({
                 mobile_phone: d.mobile_phone || f.mobile_phone,
                 contact_email: d.contact_email || f.contact_email,
                 services: d.services.length ? d.services : f.services,
+                website_url: d.website_url || f.website_url,
               }))}
               placeholder="https://example.co.za/team/jane-doe"
               helpText="Paste a link to the expert's bio on their firm or personal site and AI will fill the form."
@@ -417,6 +421,9 @@ function AdminExpertFormModal({
           </div>
           <AField label="Contact email">
             <input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="eric@example.co.za" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </AField>
+          <AField label="Website URL (deep link to this profile on the expert's own site)">
+            <input type="url" value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} placeholder="https://example.co.za/team/jane-doe" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Qualifications">
             <RichTextEditor value={form.qualifications} onChange={(html) => setForm({ ...form, qualifications: html })} placeholder="LLB, MBChB, FCS(SA)… use bullets for each qualification." />

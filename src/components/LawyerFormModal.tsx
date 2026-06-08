@@ -64,6 +64,7 @@ export const lawyerSchema = z.object({
   office_phone: z.string().trim().max(60).optional(),
   mobile_phone: z.string().trim().max(60).optional(),
   linkedin_url: z.string().trim().max(500).optional(),
+  website_url: z.string().trim().max(500).optional(),
   is_mediator: z.boolean().optional(),
   is_arbitrator: z.boolean().optional(),
   mediator_accreditation: z.string().trim().max(120).nullable().optional(),
@@ -104,6 +105,7 @@ export type LawyerRow = {
   office_phone: string | null;
   mobile_phone: string | null;
   linkedin_url: string | null;
+  website_url?: string | null;
   status: string | null;
   trial_end_date: string | null;
   profile_views: number | null;
@@ -168,6 +170,7 @@ export function LawyerFormModal({
     office_phone: lawyer?.office_phone ?? "",
     mobile_phone: lawyer?.mobile_phone ?? lawyer?.phone ?? "",
     linkedin_url: lawyer?.linkedin_url ?? "",
+    website_url: lawyer?.website_url ?? "",
     is_mediator: !!lawyer?.is_mediator,
     is_arbitrator: !!lawyer?.is_arbitrator,
     mediator_accreditation: lawyer?.mediator_accreditation ?? "",
@@ -390,6 +393,7 @@ export function LawyerFormModal({
         phone: res.phone || f.phone,
         mobile_phone: res.phone || f.mobile_phone,
         linkedin_url: res.linkedin_url || f.linkedin_url,
+        website_url: res.website_url || f.website_url,
       }));
       // If imported designation_custom is set, switch the "Other" toggle on
       if (res.designation_custom && !res.designation_code) setOtherDesignation(true);
@@ -977,6 +981,18 @@ export function LawyerFormModal({
                   value={form.linkedin_url}
                   onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
                   className="rounded border border-border bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  Website URL (link visitors directly to this profile on the lawyer's firm/personal site)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://example.co.za/people/jane-doe"
+                  value={form.website_url}
+                  onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                 />
               </div>
             </div>

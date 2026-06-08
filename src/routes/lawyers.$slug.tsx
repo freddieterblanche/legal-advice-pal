@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { ExternalLink, MapPin, Building2, BookOpen, Mail, Pencil, Phone, Linkedin } from "lucide-react";
+import { ExternalLink, MapPin, Building2, BookOpen, Mail, Pencil, Phone, Linkedin, Globe } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -156,6 +156,11 @@ function LawyerProfile() {
                 {lawyer.linkedin_url && (
                   <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
                     <Linkedin className="h-4 w-4" /> LinkedIn
+                  </a>
+                )}
+                {lawyer.website_url && (
+                  <a href={lawyer.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                    <Globe className="h-4 w-4" /> Visit website
                   </a>
                 )}
               </div>

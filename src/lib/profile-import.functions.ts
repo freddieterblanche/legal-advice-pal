@@ -212,6 +212,7 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       email,
       phone,
       linkedin_url,
+      website_url: data.url.slice(0, 500),
       practice_areas: practiceAreaIds,
     };
   });
@@ -335,6 +336,7 @@ export const importExpertProfile = createServerFn({ method: "POST" })
       office_phone: cleanPhone(extracted.office_phone),
       mobile_phone: cleanPhone(extracted.mobile_phone),
       services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      website_url: data.url.slice(0, 500),
     };
   });
 
@@ -419,6 +421,7 @@ export const importMediatorArbitratorProfile = createServerFn({ method: "POST" }
       arbitrator_accreditation: extracted.arbitrator_accreditation.trim().slice(0, 200),
       arbitrator_types: extracted.arbitrator_types.map((s) => s.trim()).filter(Boolean).slice(0, 15),
       arbitrator_experience_years: extracted.arbitrator_experience_years,
+      website_url: data.url.slice(0, 500),
     };
   });
 

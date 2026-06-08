@@ -46,6 +46,7 @@ type FormState = {
   // cross flags
   is_mediator: boolean;
   is_arbitrator: boolean;
+  website_url: string;
 };
 
 const EMPTY: FormState = {
@@ -71,6 +72,7 @@ const EMPTY: FormState = {
   arbitrator_experience_years: "",
   is_mediator: false,
   is_arbitrator: false,
+  website_url: "",
 };
 
 export function MediatorArbitratorFormModal({
@@ -128,6 +130,7 @@ export function MediatorArbitratorFormModal({
         row.arbitrator_experience_years != null ? String(row.arbitrator_experience_years) : "",
       is_mediator: !!row.is_mediator,
       is_arbitrator: !!row.is_arbitrator,
+      website_url: (row as any).website_url ?? "",
     });
     setHydrated(true);
   }, [row, hydrated]);
@@ -196,6 +199,7 @@ export function MediatorArbitratorFormModal({
         form.is_arbitrator && form.arbitrator_experience_years
           ? Number(form.arbitrator_experience_years)
           : null,
+      website_url: form.website_url.trim() || null,
     };
     const { error } = await supabase.from("service_providers").update(payload).eq("id", id);
     setSaving(false);
@@ -251,6 +255,7 @@ export function MediatorArbitratorFormModal({
                 arbitrator_types: d.arbitrator_types.length ? d.arbitrator_types : f.arbitrator_types,
                 arbitrator_experience_years:
                   d.arbitrator_experience_years != null ? String(d.arbitrator_experience_years) : f.arbitrator_experience_years,
+                website_url: d.website_url || f.website_url,
               }))}
               placeholder="https://example.co.za/people/jane-doe"
               helpText={`Paste a link to the ${role}'s public profile and AI will refresh the fields below.`}
@@ -315,6 +320,17 @@ export function MediatorArbitratorFormModal({
                   onChange={(e) => setForm({ ...form, mobile_phone: e.target.value })} />
               </Field>
             </div>
+
+            <Field label="Website URL (link visitors to this profile on the practitioner's own site)">
+              <input
+                type="url"
+                className={inputCls}
+                placeholder="https://example.co.za/people/jane-doe"
+                value={form.website_url}
+                onChange={(e) => setForm({ ...form, website_url: e.target.value })}
+              />
+            </Field>
+
 
             {/* Description / bio */}
             <Field label="Description / Bio">
