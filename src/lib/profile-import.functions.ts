@@ -466,7 +466,7 @@ export const importFirmProfile = createServerFn({ method: "POST" })
     let extracted: z.infer<typeof firmExtractionSchema>;
     try {
       const { experimental_output } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
+        model: gateway("google/gemini-3.1-pro-preview"),
         experimental_output: Output.object({ schema: firmExtractionSchema }),
         system:
           "You extract a South African law firm profile from the firm's website (typically the home / about / contact / offices page). " +
