@@ -8,6 +8,7 @@ import { ARBITRATION_TYPES, ARBITRATION_ACCREDITATIONS } from "../lib/expert-con
 import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type SortField = "surname" | "experience" | "listed";
 type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
