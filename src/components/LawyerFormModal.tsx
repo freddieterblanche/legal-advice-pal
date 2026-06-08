@@ -64,6 +64,7 @@ export const lawyerSchema = z.object({
   office_phone: z.string().trim().max(60).optional(),
   mobile_phone: z.string().trim().max(60).optional(),
   linkedin_url: z.string().trim().max(500).optional(),
+  website_url: z.string().trim().max(500).optional(),
   is_mediator: z.boolean().optional(),
   is_arbitrator: z.boolean().optional(),
   mediator_accreditation: z.string().trim().max(120).nullable().optional(),
