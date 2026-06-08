@@ -69,26 +69,34 @@ function FirmsIndex() {
   const { data, isLoading } = useQuery({
     queryKey: ["firms-index", search, pageSize],
     queryFn: async () => {
-      // Pre-resolve province/town filters by also checking firm_branches
       let branchFirmIds: string[] | null = null;
       const provName = search.province ? provinces?.find((p) => p.slug === search.province)?.name : undefined;
       const townName = search.town ? towns?.find((t) => t.slug === search.town)?.name : undefined;
+      type MatchedBranch = { firm_id: string; name: string | null; city: string | null; province: string | null; country: string | null };
+      const matchedByFirm: Record<string, MatchedBranch[]> = {};
+      const addMatch = (rows: any[] | null | undefined) => {
+        (rows ?? []).forEach((r: any) => {
+          if (!r.firm_id) return;
+          (matchedByFirm[r.firm_id] ||= []).push(r as MatchedBranch);
+        });
+      };
       if (provName || townName) {
-        let bq = supabase.from("firm_branches").select("firm_id");
+        let bq = supabase.from("firm_branches").select("firm_id, name, city, province, country");
         if (provName) bq = bq.eq("province", provName);
         if (townName) bq = bq.ilike("city", townName);
         const { data: branchRows } = await bq;
         branchFirmIds = Array.from(new Set((branchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
+        addMatch(branchRows);
       }
 
-      // Pre-resolve free-text q against firm_branches so that branch cities/names match too
       let qBranchFirmIds: string[] | null = null;
       if (search.q) {
         const { data: qBranchRows } = await supabase
           .from("firm_branches")
-          .select("firm_id")
+          .select("firm_id, name, city, province, country")
           .or(`city.ilike.%${search.q}%,name.ilike.%${search.q}%,province.ilike.%${search.q}%,country.ilike.%${search.q}%`);
         qBranchFirmIds = Array.from(new Set((qBranchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
+        addMatch(qBranchRows);
       }
 
       let query = supabase
@@ -112,7 +120,6 @@ function FirmsIndex() {
         if (orParts.length > 0) {
           query = query.or(orParts.join(","));
         } else {
-          // No firm matches via main fields and no branch matches → force empty
           query = query.eq("id", "00000000-0000-0000-0000-000000000000");
         }
       }
@@ -129,7 +136,18 @@ function FirmsIndex() {
       }
       const { data, count, error } = await query;
       if (error) throw error;
-      return { rows: data ?? [], total: count ?? 0 };
+
+      const qLower = (search.q ?? "").trim().toLowerCase();
+      const pickedByFirm: Record<string, MatchedBranch> = {};
+      for (const [firmId, branches] of Object.entries(matchedByFirm)) {
+        const preferred = qLower
+          ? branches.find((b) =>
+              [b.city, b.name, b.province, b.country].some((v) => v && v.toLowerCase().includes(qLower))
+            )
+          : undefined;
+        pickedByFirm[firmId] = preferred ?? branches[0];
+      }
+      return { rows: data ?? [], total: count ?? 0, matchedBranch: pickedByFirm };
     },
     enabled: !!provinces || !search.province,
   });
