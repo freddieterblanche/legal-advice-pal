@@ -162,6 +162,7 @@ export function LawyerFormModal({
     sector_head_area: lawyer?.sector_head_area ?? "",
     city: lawyer?.city ?? "",
     province: lawyer?.province ?? "Gauteng",
+    country: lawyer?.country ?? "South Africa",
     bio: lawyer?.bio ?? "",
     overview: lawyer?.overview ?? lawyer?.bio ?? "",
     qualifications: lawyer?.qualifications ?? "",
