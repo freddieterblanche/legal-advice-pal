@@ -192,11 +192,14 @@ function ArbitratorSearch() {
                 </TableHeader>
                 <TableBody>
                   {results?.rows.map((l: any) => (
-                    <TableRow key={l.id}>
+                    <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
                       <TableCell className="font-medium">
-                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
-                          {l.full_name}{l.is_senior_counsel ? " SC" : ""}
-                        </Link>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
+                            {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                          </Link>
+                          {l.is_featured && <FeaturedBadge />}
+                        </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{l.arbitrator_accreditation ?? "—"}</TableCell>
                       <TableCell className="text-right text-muted-foreground">{l.arbitrator_experience_years ?? "—"}</TableCell>
