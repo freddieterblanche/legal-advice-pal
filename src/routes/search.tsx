@@ -165,20 +165,10 @@ function SearchPage() {
 
   return (
     <div className="bg-cream">
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          <form onSubmit={onSearchSubmit} className="flex flex-wrap gap-2">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name or firm…"
-              maxLength={120}
-              className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <button type="submit" className="rounded-lg bg-ink px-6 py-2 text-sm font-semibold text-white hover:bg-ink/90">Search</button>
-          </form>
+      <section className="bg-ink py-12 text-cream">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           {/* Type tabs */}
-          <div className="mt-4 inline-flex rounded-full border border-border bg-background p-1">
+          <div className="mb-6 inline-flex rounded-full border border-cream/20 bg-ink/40 p-1">
             {([
               { key: "attorney" as const, label: "Attorneys" },
               { key: "advocate" as const, label: "Advocates" },
@@ -192,10 +182,8 @@ function SearchPage() {
                     active
                       ? t.key === "advocate"
                         ? "bg-forest text-white"
-                        : t.key === "attorney"
-                        ? "bg-gold text-white"
-                        : "bg-ink text-white"
-                      : "text-muted-foreground hover:text-ink"
+                        : "bg-gold text-white"
+                      : "text-cream/70 hover:text-cream"
                   }`}
                 >
                   {t.label}
@@ -203,8 +191,41 @@ function SearchPage() {
               );
             })}
           </div>
+          <div className="flex items-center gap-3">
+            {search.type === "advocate" ? (
+              <Scale className="h-7 w-7 text-gold" />
+            ) : (
+              <Briefcase className="h-7 w-7 text-gold" />
+            )}
+            <h1 className="font-heading text-3xl md:text-4xl">
+              {search.type === "advocate" ? "Find an Advocate" : "Find an Attorney"}
+            </h1>
+          </div>
+          <p className="mt-2 max-w-2xl text-cream/70">
+            {search.type === "advocate"
+              ? "Members of the Bar across South Africa — filter by chambers, province and seniority."
+              : "Search South African attorneys by name, firm, practice area and province."}
+          </p>
+          <form
+            onSubmit={onSearchSubmit}
+            className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_auto]"
+          >
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by name or firm…"
+              maxLength={120}
+              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90"
+            >
+              Search
+            </button>
+          </form>
         </div>
-      </div>
+      </section>
 
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
         {/* Sidebar */}
