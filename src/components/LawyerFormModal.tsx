@@ -1051,34 +1051,16 @@ export function LawyerFormModal({
             </div>
           </div>
 
-          {/* Location — free-typed city with suggestions filtered by province */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Province</label>
-              <select
-                value={form.province}
-                onChange={(e) => setForm({ ...form, province: e.target.value, city: "" })}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-              >
-                <option value="">Select province</option>
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">City / town</label>
-              <input
-                list="lawyer-city-suggestions"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                placeholder={form.province ? "Type or pick a city/town…" : "Select a province first…"}
-                disabled={!form.province}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm disabled:opacity-50"
-              />
-              <datalist id="lawyer-city-suggestions">
-                {cityOptions.map((c) => <option key={c} value={c} />)}
-              </datalist>
-            </div>
-          </div>
+          {/* Location — country, then province + city. Non-SA records swap
+              the province dropdown / town suggestions for free-text inputs. */}
+          <LocationFields
+            country={form.country}
+            province={form.province}
+            city={form.city}
+            cityOptions={cityOptions}
+            onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+          />
+
 
           {firmBranches.length > 0 && (
             <div>
