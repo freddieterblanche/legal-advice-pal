@@ -23,6 +23,7 @@ type FirmRow = {
   province: string | null;
   status: string | null;
   logo_url: string | null;
+  logo_accent_color: string | null;
   services: string[] | null;
 };
 
