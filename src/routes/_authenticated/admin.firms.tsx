@@ -215,6 +215,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     logo_accent_color: firm?.logo_accent_color ?? "",
     services: (firm?.services ?? []) as string[],
   });
+  const [importedBranches, setImportedBranches] = useState<Array<{ name: string; address: string; city: string; province: string; country: string; phone: string; email: string; is_head_office: boolean }>>([]);
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
 
