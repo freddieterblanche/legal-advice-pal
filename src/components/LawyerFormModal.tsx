@@ -15,6 +15,7 @@ import { TagInput } from "./TagInput";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
+import { useFeaturedToggle, FEATURED_CAP } from "./FeaturedToggle";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
@@ -118,6 +119,7 @@ export type LawyerRow = {
   arbitrator_experience_years?: number | null;
   availability_notes?: string | null;
   services?: string[] | null;
+  is_featured?: boolean | null;
   firm_id: string | null;
 };
 
@@ -203,6 +205,11 @@ export function LawyerFormModal({
   // Autosave state — once the lawyer row exists (either editing, or after the
   // first manual "Add"), we persist updates in the background without closing.
   const [currentLawyerId, setCurrentLawyerId] = useState<string | null>(lawyer?.id ?? null);
+  const [isFeatured, setIsFeatured] = useState<boolean>(!!lawyer?.is_featured);
+  const featuredMut = useFeaturedToggle(
+    { table: "service_providers", key: (form?.provider_type === "advocate" ? "advocate" : "attorney") as "advocate" | "attorney" },
+    [["lawyers"], ["service_providers"], ["search"]]
+  );
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaving, setAutoSaving] = useState(false);
   const skipFirstAutosave = useRef(true);
@@ -664,6 +671,36 @@ export function LawyerFormModal({
                   ))}
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">Suspended profiles are hidden from public listings and search.</p>
+              </div>
+            )}
+
+            {isEdit && currentLawyerId && (
+              <div className="rounded-md border border-amber-300/60 bg-amber-50/40 p-3">
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-amber-800">Featured listing</label>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[12px] text-muted-foreground">
+                    Premium placement at the top of the {form.provider_type === "advocate" ? "advocates" : "attorneys"} category. R10 000 / month. Max {FEATURED_CAP} per category.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={featuredMut.isPending}
+                    onClick={() => {
+                      const next = !isFeatured;
+                      featuredMut.mutate(
+                        { id: currentLawyerId, value: next },
+                        { onSuccess: () => setIsFeatured(next) }
+                      );
+                    }}
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ring-1 transition disabled:opacity-50 ${
+                      isFeatured
+                        ? "bg-amber-400/90 text-ink ring-amber-600/60 hover:bg-amber-300"
+                        : "bg-transparent text-amber-700 ring-amber-400/50 hover:bg-amber-50"
+                    }`}
+                  >
+                    <Star className={`h-3.5 w-3.5 ${isFeatured ? "fill-ink" : ""}`} />
+                    {isFeatured ? "Featured" : "Mark as Featured"}
+                  </button>
+                </div>
               </div>
             )}
 
