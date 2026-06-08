@@ -8,6 +8,7 @@ import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { FeaturedBadge } from "../components/FeaturedBadge";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
