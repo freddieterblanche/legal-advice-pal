@@ -265,7 +265,7 @@ function SearchPage() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name or firm…"
+              placeholder="Search by name, firm, practice area, city, town or province…"
               maxLength={120}
               className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
             />
