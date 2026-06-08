@@ -941,6 +941,7 @@ export type Database = {
           city: string | null
           company_name: string | null
           contact_email: string | null
+          country: string
           courts_accepted_in: string[] | null
           created_at: string | null
           cv_url: string | null
@@ -1013,6 +1014,7 @@ export type Database = {
           city?: string | null
           company_name?: string | null
           contact_email?: string | null
+          country?: string
           courts_accepted_in?: string[] | null
           created_at?: string | null
           cv_url?: string | null
@@ -1085,6 +1087,7 @@ export type Database = {
           city?: string | null
           company_name?: string | null
           contact_email?: string | null
+          country?: string
           courts_accepted_in?: string[] | null
           created_at?: string | null
           cv_url?: string | null

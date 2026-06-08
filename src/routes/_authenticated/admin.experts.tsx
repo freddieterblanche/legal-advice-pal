@@ -244,6 +244,7 @@ function AdminExpertFormModal({
     registration_body: "",
     city: expert?.city ?? "",
     province: (expert?.province ?? "Gauteng") as string,
+    country: ((expert as any)?.country ?? "South Africa") as string,
     bio: "",
     avatar_url: "",
     firm_id: expert?.firm_id ?? "",
@@ -273,6 +274,7 @@ function AdminExpertFormModal({
       registration_body: (e.registration_body as string) ?? "",
       city: (e.city as string) ?? f.city,
       province: (e.province as string) ?? f.province,
+      country: (e.country as string) ?? f.country,
       bio: (e.bio as string) ?? "",
       avatar_url: (e.avatar_url as string) ?? "",
       firm_id: (e.firm_id as string) ?? f.firm_id,
@@ -307,6 +309,7 @@ function AdminExpertFormModal({
         registration_body: form.registration_body || null,
         city: form.city || null,
         province: form.province || null,
+        country: form.country || "South Africa",
         bio: form.bio ? sanitizeBioHtml(form.bio) : null,
         avatar_url: form.avatar_url?.trim() || null,
         firm_id: form.firm_id || null,
@@ -432,9 +435,11 @@ function AdminExpertFormModal({
             <input value={form.registration_body} onChange={(e) => setForm({ ...form, registration_body: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
-            <div className="grid gap-3 md:grid-cols-2">
+            <p className="text-xs font-medium text-muted-foreground">Country, Province &amp; City</p>
+            <div className="grid gap-3 md:grid-cols-3">
               <ProvinceCityFields
+                country={form.country}
+                onCountry={(v: string) => setForm({ ...form, country: v })}
                 province={form.province}
                 city={form.city}
                 onProvince={(v: string) => setForm({ ...form, province: v })}

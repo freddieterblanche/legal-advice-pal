@@ -27,6 +27,7 @@ type FormState = {
   avatar_url: string;
   city: string;
   province: string;
+  country: string;
   email: string;
   office_phone: string;
   mobile_phone: string;
@@ -57,6 +58,7 @@ const EMPTY: FormState = {
   avatar_url: "",
   city: "",
   province: "",
+  country: "South Africa",
   email: "",
   office_phone: "",
   mobile_phone: "",
@@ -115,6 +117,7 @@ export function MediatorArbitratorFormModal({
       avatar_url: row.avatar_url ?? "",
       city: row.city ?? "",
       province: row.province ?? "",
+      country: (row as any).country ?? "South Africa",
       email: row.email ?? "",
       office_phone: row.office_phone ?? "",
       mobile_phone: row.mobile_phone ?? "",
@@ -181,6 +184,7 @@ export function MediatorArbitratorFormModal({
       avatar_url: form.avatar_url.trim() || null,
       city: form.city.trim() || null,
       province: form.province.trim() || null,
+      country: form.country.trim() || "South Africa",
       email: form.email.trim() || null,
       office_phone: form.office_phone.trim() || null,
       mobile_phone: form.mobile_phone.trim() || null,
@@ -308,9 +312,11 @@ export function MediatorArbitratorFormModal({
 
             {/* Location */}
             <div className="space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Province &amp; City</p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <p className="text-xs font-medium text-muted-foreground">Country, Province &amp; City</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <ProvinceCityFields
+                  country={form.country}
+                  onCountry={(v: string) => setForm({ ...form, country: v })}
                   province={form.province}
                   city={form.city}
                   onProvince={(v: string) => setForm({ ...form, province: v })}
@@ -318,6 +324,7 @@ export function MediatorArbitratorFormModal({
                 />
               </div>
             </div>
+
 
             {/* Contact */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
