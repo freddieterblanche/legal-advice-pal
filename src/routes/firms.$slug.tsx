@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { FirmLogo } from "../components/FirmLogo";
 
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
