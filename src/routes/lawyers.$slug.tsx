@@ -158,6 +158,11 @@ function LawyerProfile() {
                     <Linkedin className="h-4 w-4" /> LinkedIn
                   </a>
                 )}
+                {lawyer.website_url && (
+                  <a href={lawyer.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                    <Globe className="h-4 w-4" /> Visit website
+                  </a>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
