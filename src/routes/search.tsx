@@ -10,6 +10,7 @@ import { SortBar, type SortDir } from "../components/SortBar";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
+type ViewMode = "cards" | "list";
 type Search = {
   q?: string;
   area?: string;
@@ -20,6 +21,7 @@ type Search = {
   page?: number;
   sort?: SortField;
   dir?: SortDir;
+  view?: ViewMode;
 };
 
 export const Route = createFileRoute("/search")({
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/search")({
       ? s.sort
       : "surname",
     dir: s.dir === "desc" ? "desc" : "asc",
+    view: s.view === "list" ? "list" : "cards",
   }),
   head: () => ({
     meta: [
