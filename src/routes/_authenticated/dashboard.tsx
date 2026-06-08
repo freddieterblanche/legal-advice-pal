@@ -422,6 +422,7 @@ type ExpertRow = {
   office_phone: string | null;
   mobile_phone: string | null;
   contact_email: string | null;
+  website_url?: string | null;
 };
 
 const expertSchema = z.object({
