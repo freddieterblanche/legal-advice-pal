@@ -327,6 +327,7 @@ export type Database = {
           address: string | null
           city: string | null
           created_at: string
+          email: string | null
           firm_id: string
           id: string
           is_head_office: boolean
@@ -339,6 +340,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string
+          email?: string | null
           firm_id: string
           id?: string
           is_head_office?: boolean
@@ -351,6 +353,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string
+          email?: string | null
           firm_id?: string
           id?: string
           is_head_office?: boolean
@@ -389,6 +392,7 @@ export type Database = {
           city: string | null
           created_at: string | null
           description: string | null
+          email: string | null
           id: string
           logo_url: string | null
           name: string
@@ -404,6 +408,7 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           description?: string | null
+          email?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -419,6 +424,7 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           description?: string | null
+          email?: string | null
           id?: string
           logo_url?: string | null
           name?: string

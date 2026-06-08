@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Globe, Phone, Building2, Star, Pencil } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 
@@ -106,6 +106,7 @@ function FirmProfile() {
               {firm.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {firm.city}, {firm.province}</span>}
               {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
               {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
+              {firm.email && <a href={`mailto:${firm.email}`} className="flex items-center gap-1.5 hover:text-gold"><Mail className="h-4 w-4" /> {firm.email}</a>}
             </div>
             {canEdit && (
               <Link
@@ -160,6 +161,11 @@ function FirmProfile() {
                   {b.phone && (
                     <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
                       <Phone className="h-3 w-3" /> {b.phone}
+                    </a>
+                  )}
+                  {b.email && (
+                    <a href={`mailto:${b.email}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                      <Mail className="h-3 w-3" /> {b.email}
                     </a>
                   )}
                 </div>

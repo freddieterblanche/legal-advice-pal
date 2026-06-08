@@ -16,6 +16,7 @@ type FirmRow = {
   description: string | null;
   website: string | null;
   phone: string | null;
+  email: string | null;
   address: string | null;
   city: string | null;
   province: string | null;
@@ -189,6 +190,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     description: firm?.description ?? "",
     website: firm?.website ?? "",
     phone: firm?.phone ?? "",
+    email: firm?.email ?? "",
     address: firm?.address ?? "",
     city: firm?.city ?? "",
     province: firm?.province ?? "Gauteng",
@@ -233,6 +235,7 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
             city: form.city || null,
             province: form.province || null,
             phone: form.phone || null,
+            email: form.email || null,
             is_head_office: true,
           });
         }
@@ -313,7 +316,10 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
               </div>
 
               <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-              <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                <input type="email" placeholder="Contact email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={255} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+              </div>
               <input placeholder="Main address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-3">
                 <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
@@ -377,6 +383,7 @@ type BranchRow = {
   city: string | null;
   province: string | null;
   phone: string | null;
+  email: string | null;
   is_head_office: boolean;
 };
 
@@ -396,7 +403,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
     },
   });
 
-  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+  const [draft, setDraft] = useState({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
   const [busy, setBusy] = useState(false);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["firm-branches", firmId] });
@@ -412,10 +419,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
         city: draft.city || null,
         province: draft.province || null,
         phone: draft.phone || null,
+        email: draft.email || null,
         is_head_office: draft.is_head_office,
       });
       if (error) throw error;
-      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", is_head_office: false });
+      setDraft({ name: "", address: "", city: "", province: "Gauteng", phone: "", email: "", is_head_office: false });
       refresh();
       toast.success("Branch added");
     } catch (e) {
@@ -451,6 +459,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <input value={b.name} onChange={(e) => updateBranch(b.id, { name: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Branch name" />
                 <input value={b.phone ?? ""} onChange={(e) => updateBranch(b.id, { phone: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Phone" />
+                <input type="email" value={b.email ?? ""} onChange={(e) => updateBranch(b.id, { email: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Email" />
                 <input value={b.address ?? ""} onChange={(e) => updateBranch(b.id, { address: e.target.value })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
                 <input value={b.city ?? ""} onChange={(e) => updateBranch(b.id, { city: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
                 <select value={b.province ?? ""} onChange={(e) => updateBranch(b.id, { province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
@@ -477,6 +486,7 @@ function BranchesEditor({ firmId }: { firmId: string }) {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="New branch name" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} placeholder="Phone" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
+              <input type="email" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
