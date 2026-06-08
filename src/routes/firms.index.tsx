@@ -305,8 +305,12 @@ function FirmsIndex() {
                             {f.is_featured && <FeaturedBadge />}
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{f.city ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{f.province ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {(data?.matchedBranch?.[f.id]?.city) ?? f.city ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {(data?.matchedBranch?.[f.id]?.province) ?? f.province ?? "—"}
+                        </TableCell>
                         <TableCell className="text-right text-muted-foreground">{lawyerCount}</TableCell>
                         <TableCell className="text-right">
                           <Link
