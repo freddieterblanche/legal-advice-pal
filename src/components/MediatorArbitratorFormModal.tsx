@@ -7,6 +7,8 @@ import { RichTextEditor } from "./RichTextEditor";
 import { TagInput } from "./TagInput";
 import { ProvinceCityFields } from "./ProvinceCityFields";
 import { sanitizeBioHtml } from "../lib/sanitize";
+import { ProfileImportBar } from "./ProfileImportBar";
+import { importMediatorArbitratorProfile } from "../lib/profile-import.functions";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
@@ -223,6 +225,36 @@ export function MediatorArbitratorFormModal({
           <div className="p-10 text-center text-sm text-muted-foreground">Loading…</div>
         ) : (
           <form onSubmit={submit} className="space-y-5 p-5">
+            <ProfileImportBar
+              serverFn={importMediatorArbitratorProfile}
+              onImported={(d) => setForm((f) => ({
+                ...f,
+                first_name: d.first_name || f.first_name,
+                last_name: d.last_name || f.last_name,
+                avatar_url: d.avatar_url || f.avatar_url,
+                city: d.city || f.city,
+                province: d.province || f.province,
+                email: d.email || f.email,
+                office_phone: d.office_phone || f.office_phone,
+                mobile_phone: d.mobile_phone || f.mobile_phone,
+                bio: d.bio || f.bio,
+                languages: d.languages.length ? d.languages : f.languages,
+                services: d.services.length ? d.services : f.services,
+                daily_rate_range: d.daily_rate_range || f.daily_rate_range,
+                availability_notes: d.availability_notes || f.availability_notes,
+                is_mediator: f.is_mediator || d.is_mediator,
+                is_arbitrator: f.is_arbitrator || d.is_arbitrator,
+                mediator_accreditation: d.mediator_accreditation || f.mediator_accreditation,
+                mediator_style: d.mediator_style || f.mediator_style,
+                mediator_sectors: d.mediator_sectors.length ? d.mediator_sectors : f.mediator_sectors,
+                arbitrator_accreditation: d.arbitrator_accreditation || f.arbitrator_accreditation,
+                arbitrator_types: d.arbitrator_types.length ? d.arbitrator_types : f.arbitrator_types,
+                arbitrator_experience_years:
+                  d.arbitrator_experience_years != null ? String(d.arbitrator_experience_years) : f.arbitrator_experience_years,
+              }))}
+              placeholder="https://example.co.za/people/jane-doe"
+              helpText={`Paste a link to the ${role}'s public profile and AI will refresh the fields below.`}
+            />
             {/* Basic */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="First name *">

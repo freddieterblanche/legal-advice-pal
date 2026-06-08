@@ -201,3 +201,269 @@ export const importLawyerProfile = createServerFn({ method: "POST" })
       practice_areas: practiceAreaIds,
     };
   });
+
+// ---------- Shared helpers ----------
+
+async function scrapeMarkdown(url: string): Promise<string> {
+  const firecrawlKey = process.env.FIRECRAWL_API_KEY;
+  if (!firecrawlKey) throw new Error("Firecrawl is not configured. Please connect Firecrawl in Connectors.");
+  const { default: Firecrawl } = await import("@mendable/firecrawl-js");
+  const fc = new Firecrawl({ apiKey: firecrawlKey });
+  let markdown = "";
+  try {
+    const result = await fc.scrape(url, { formats: ["markdown"], onlyMainContent: true });
+    markdown = (result as { markdown?: string }).markdown
+      ?? (result as { data?: { markdown?: string } }).data?.markdown
+      ?? "";
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to fetch the page: ${msg}`);
+  }
+  if (!markdown.trim()) throw new Error("Could not extract any text from that page. Try a different URL.");
+  return markdown.slice(0, 15000);
+}
+
+function resolveAbsoluteUrl(maybe: string, base: string, max = 2000): string {
+  const raw = maybe.trim();
+  if (!raw) return "";
+  try {
+    const u = new URL(raw, base);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return "";
+    return u.toString().slice(0, max);
+  } catch {
+    return "";
+  }
+}
+
+function cleanEmail(value: string): string {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+    ? value.trim().toLowerCase().slice(0, 200)
+    : "";
+}
+
+function cleanPhone(value: string, max = 60): string {
+  return value.trim().replace(/[^\d+()\-\s]/g, "").slice(0, max);
+}
+
+function mapAiError(err: unknown): Error {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes("402")) return new Error("AI credits exhausted. Please add credits in workspace settings.");
+  if (msg.includes("429")) return new Error("AI is rate-limited. Please try again in a moment.");
+  return new Error(`AI extraction failed: ${msg}`);
+}
+
+// ---------- Expert witness import ----------
+
+const expertExtractionSchema = z.object({
+  first_name: z.string().max(80).default(""),
+  last_name: z.string().max(80).default(""),
+  name_title: z.string().max(20).default(""),
+  job_title: z.string().max(120).default(""),
+  qualifications: z.string().max(10000).default(""),
+  registration_body: z.string().max(200).default(""),
+  bio: z.string().max(10000).default(""),
+  city: z.string().max(80).default(""),
+  province: z.string().max(40).default(""),
+  company_name: z.string().max(200).default(""),
+  photo_url: z.string().max(2000).default(""),
+  email: z.string().max(200).default(""),
+  office_phone: z.string().max(60).default(""),
+  mobile_phone: z.string().max(60).default(""),
+  services: z.array(z.string().max(120)).max(20).default([]),
+});
+
+export const importExpertProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const trimmed = await scrapeMarkdown(data.url);
+    const { createLovableAiGateway } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGateway();
+    let extracted: z.infer<typeof expertExtractionSchema>;
+    try {
+      const { experimental_output } = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        experimental_output: Output.object({ schema: expertExtractionSchema }),
+        system:
+          "You extract a South African expert-witness or consultant profile from a webpage. " +
+          "If a field is not present, use an empty string (or empty array as appropriate). Do not invent information. " +
+          "first_name / last_name: REQUIRED. Strip titles (Dr, Prof, Mr, Mrs). " +
+          "name_title: an honorific like 'Dr', 'Prof', 'Adv' if used in front of the name; empty otherwise. " +
+          "job_title: their job title (e.g. 'Forensic Accountant', 'Civil Engineer'). " +
+          "qualifications: HTML using <p>, <ul>, <li>, <strong>, <em> only — list degrees, designations, registrations. " +
+          "registration_body: any professional body they are registered with (e.g. SAICA, ECSA, HPCSA). " +
+          "bio: HTML overview of who they are and what they do, using only <p>, <ul>, <li>, <strong>, <em>. " +
+          `Allowed province values: ${PROVINCES.join(", ")}. ` +
+          "company_name: the firm/practice they belong to if shown. " +
+          "services: short labels of the services they offer (max ~12 items). " +
+          "photo_url: URL of their headshot. Resolve relative URLs against the source URL. " +
+          "email / office_phone / mobile_phone: their direct contact details if shown.",
+        prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
+      });
+      extracted = experimental_output;
+    } catch (err) {
+      throw mapAiError(err);
+    }
+    const province = (PROVINCES as readonly string[]).includes(extracted.province) ? extracted.province : "";
+    return {
+      first_name: extracted.first_name,
+      last_name: extracted.last_name,
+      name_title: extracted.name_title.trim().slice(0, 20),
+      job_title: extracted.job_title.trim().slice(0, 120),
+      qualifications: sanitizeBioHtml(extracted.qualifications),
+      registration_body: extracted.registration_body.trim().slice(0, 200),
+      bio: sanitizeBioHtml(extracted.bio),
+      city: extracted.city.trim().slice(0, 80),
+      province,
+      company_name: extracted.company_name.trim().slice(0, 200),
+      avatar_url: resolveAbsoluteUrl(extracted.photo_url, data.url),
+      contact_email: cleanEmail(extracted.email),
+      office_phone: cleanPhone(extracted.office_phone),
+      mobile_phone: cleanPhone(extracted.mobile_phone),
+      services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+    };
+  });
+
+// ---------- Mediator / Arbitrator import ----------
+
+const medArbExtractionSchema = z.object({
+  first_name: z.string().max(80).default(""),
+  last_name: z.string().max(80).default(""),
+  photo_url: z.string().max(2000).default(""),
+  city: z.string().max(80).default(""),
+  province: z.string().max(40).default(""),
+  email: z.string().max(200).default(""),
+  office_phone: z.string().max(60).default(""),
+  mobile_phone: z.string().max(60).default(""),
+  bio: z.string().max(10000).default(""),
+  languages: z.array(z.string().max(40)).max(15).default([]),
+  services: z.array(z.string().max(120)).max(20).default([]),
+  daily_rate_range: z.string().max(120).default(""),
+  availability_notes: z.string().max(500).default(""),
+  is_mediator: z.boolean().default(false),
+  is_arbitrator: z.boolean().default(false),
+  mediator_accreditation: z.string().max(200).default(""),
+  mediator_style: z.string().max(200).default(""),
+  mediator_sectors: z.array(z.string().max(80)).max(15).default([]),
+  arbitrator_accreditation: z.string().max(200).default(""),
+  arbitrator_types: z.array(z.string().max(80)).max(15).default([]),
+  arbitrator_experience_years: z.number().int().min(0).max(80).nullable().default(null),
+});
+
+export const importMediatorArbitratorProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const trimmed = await scrapeMarkdown(data.url);
+    const { createLovableAiGateway } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGateway();
+    let extracted: z.infer<typeof medArbExtractionSchema>;
+    try {
+      const { experimental_output } = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        experimental_output: Output.object({ schema: medArbExtractionSchema }),
+        system:
+          "You extract a South African mediator and/or arbitrator profile from a webpage. " +
+          "If a field is not present, use an empty string / empty array / null / false. Do not invent information. " +
+          "first_name / last_name REQUIRED. Strip honorifics. " +
+          "is_mediator: true if the page describes them as a mediator/conflict-resolution practitioner. " +
+          "is_arbitrator: true if the page describes them as an arbitrator. Either or both can be true. " +
+          `Allowed province values: ${PROVINCES.join(", ")}. ` +
+          "bio: HTML overview using only <p>, <ul>, <li>, <strong>, <em>. " +
+          "languages: simple language names (English, Afrikaans, Zulu, etc.). " +
+          "services: short service labels (max ~12). " +
+          "mediator_accreditation / mediator_style / mediator_sectors: only if is_mediator. " +
+          "arbitrator_accreditation / arbitrator_types / arbitrator_experience_years: only if is_arbitrator. " +
+          "photo_url: URL of headshot. Resolve relative URLs against source URL. " +
+          "email / office_phone / mobile_phone: direct contact details if shown.",
+        prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
+      });
+      extracted = experimental_output;
+    } catch (err) {
+      throw mapAiError(err);
+    }
+    const province = (PROVINCES as readonly string[]).includes(extracted.province) ? extracted.province : "";
+    return {
+      first_name: extracted.first_name,
+      last_name: extracted.last_name,
+      avatar_url: resolveAbsoluteUrl(extracted.photo_url, data.url),
+      city: extracted.city.trim().slice(0, 80),
+      province,
+      email: cleanEmail(extracted.email),
+      office_phone: cleanPhone(extracted.office_phone),
+      mobile_phone: cleanPhone(extracted.mobile_phone),
+      bio: sanitizeBioHtml(extracted.bio),
+      languages: extracted.languages.map((l) => l.trim()).filter(Boolean).slice(0, 15),
+      services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      daily_rate_range: extracted.daily_rate_range.trim().slice(0, 120),
+      availability_notes: extracted.availability_notes.trim().slice(0, 500),
+      is_mediator: !!extracted.is_mediator,
+      is_arbitrator: !!extracted.is_arbitrator,
+      mediator_accreditation: extracted.mediator_accreditation.trim().slice(0, 200),
+      mediator_style: extracted.mediator_style.trim().slice(0, 200),
+      mediator_sectors: extracted.mediator_sectors.map((s) => s.trim()).filter(Boolean).slice(0, 15),
+      arbitrator_accreditation: extracted.arbitrator_accreditation.trim().slice(0, 200),
+      arbitrator_types: extracted.arbitrator_types.map((s) => s.trim()).filter(Boolean).slice(0, 15),
+      arbitrator_experience_years: extracted.arbitrator_experience_years,
+    };
+  });
+
+// ---------- Firm import ----------
+
+const firmExtractionSchema = z.object({
+  name: z.string().max(200).default(""),
+  registration_number: z.string().max(60).default(""),
+  description: z.string().max(15000).default(""),
+  website: z.string().max(500).default(""),
+  phone: z.string().max(60).default(""),
+  email: z.string().max(200).default(""),
+  address: z.string().max(300).default(""),
+  city: z.string().max(80).default(""),
+  province: z.string().max(40).default(""),
+  logo_url: z.string().max(2000).default(""),
+  services: z.array(z.string().max(120)).max(20).default([]),
+});
+
+export const importFirmProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .handler(async ({ data }) => {
+    const trimmed = await scrapeMarkdown(data.url);
+    const { createLovableAiGateway } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGateway();
+    let extracted: z.infer<typeof firmExtractionSchema>;
+    try {
+      const { experimental_output } = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        experimental_output: Output.object({ schema: firmExtractionSchema }),
+        system:
+          "You extract a South African law firm profile from the firm's website (typically the home / about page). " +
+          "If a field is not present, use an empty string or empty array. Do not invent information. " +
+          "name: REQUIRED. The firm/practice name as displayed on the site. " +
+          "description: HTML overview of the firm using ONLY <p>, <ul>, <li>, <strong>, <em>. No headings. " +
+          `Allowed province values: ${PROVINCES.join(", ")}. ` +
+          "services / practice areas: short labels (max ~12 items). " +
+          "logo_url: URL of the firm's logo image. Prefer SVG/PNG. Resolve relative URLs against source URL. " +
+          "phone / email / address / city: the firm's main contact details if shown. " +
+          "website: the firm's primary website URL if different from the source URL.",
+        prompt: `Source URL: ${data.url}\n\nPage content (markdown):\n\n${trimmed}`,
+      });
+      extracted = experimental_output;
+    } catch (err) {
+      throw mapAiError(err);
+    }
+    const province = (PROVINCES as readonly string[]).includes(extracted.province) ? extracted.province : "";
+    return {
+      name: extracted.name.trim().slice(0, 200),
+      registration_number: extracted.registration_number.trim().slice(0, 60),
+      description: sanitizeBioHtml(extracted.description),
+      website: resolveAbsoluteUrl(extracted.website || data.url, data.url, 500),
+      phone: cleanPhone(extracted.phone),
+      email: cleanEmail(extracted.email),
+      address: extracted.address.trim().slice(0, 300),
+      city: extracted.city.trim().slice(0, 80),
+      province,
+      logo_url: resolveAbsoluteUrl(extracted.logo_url, data.url),
+      services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+    };
+  });
