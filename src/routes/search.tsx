@@ -606,7 +606,99 @@ function SearchPage() {
             </div>
           )}
         </div>
+
+        <DiscoverLinks type={search.type} />
       </div>
     </div>
   );
 }
+
+function DiscoverLinks({ type }: { type: LawyerType }) {
+  const { data: majorTowns } = useQuery({
+    queryKey: ["discover-major-towns"],
+    enabled: type === "attorney",
+    queryFn: async () =>
+      (
+        await supabase
+          .from("towns")
+          .select("name, slug")
+          .eq("is_major_city", true)
+          .order("name")
+      ).data ?? [],
+  });
+
+  const { data: chambers } = useQuery({
+    queryKey: ["discover-chambers"],
+    enabled: type === "advocate",
+    queryFn: async () =>
+      (
+        await supabase
+          .from("chambers")
+          .select("id, name, slug, city")
+          .order("city")
+          .order("name")
+      ).data ?? [],
+  });
+
+  if (type === "attorney") {
+    if (!majorTowns?.length) return null;
+    return (
+      <section className="mt-12 border-t border-border pt-8">
+        <h2 className="font-heading text-xl text-ink">Attorneys in major South African cities</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Browse attorneys by city — quick jumps to the major legal hubs across South Africa.
+        </p>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {majorTowns.map((t) => (
+            <li key={t.slug}>
+              <Link
+                to="/search"
+                search={{ type: "attorney", town: t.slug }}
+                className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-sm text-ink hover:border-gold hover:bg-gold/10"
+              >
+                Attorneys in {t.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
+
+  if (!chambers?.length) return null;
+  const byCity = chambers.reduce<Record<string, typeof chambers>>((acc, c) => {
+    const city = c.city ?? "Other";
+    (acc[city] ||= []).push(c);
+    return acc;
+  }, {});
+
+  return (
+    <section className="mt-12 border-t border-border pt-8">
+      <h2 className="font-heading text-xl text-ink">Advocates by chambers</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Find members of the Bar grouped by city and their chambers.
+      </p>
+      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Object.entries(byCity).map(([city, list]) => (
+          <div key={city}>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-ink/70">{city}</h3>
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {list.map((c) => (
+                <li key={c.id}>
+                  <Link
+                    to="/search"
+                    search={{ type: "advocate", chambers: c.slug }}
+                    className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-1 text-xs text-ink hover:border-forest hover:bg-forest/10"
+                  >
+                    {c.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
