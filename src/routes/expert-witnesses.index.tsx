@@ -233,6 +233,7 @@ function ExpertWitnessSearch() {
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
+      <div ref={sentinelRef} aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>
