@@ -1094,13 +1094,19 @@ export function LawyerFormModal({
             <RichTextEditor value={form.overview} onChange={(html) => setForm({ ...form, overview: html })} placeholder="Brief introduction…" />
           </Section>
 
-          <Section title="Services" hint="Type a service and press Enter to add it as a tag.">
-            <TagInput
-              value={form.services}
-              onChange={(next) => setForm({ ...form, services: next })}
-              placeholder="e.g. Trust formation — press Enter"
-            />
-          </Section>
+          <div className="rounded-md border border-gold/40 bg-gold/5 p-4">
+            <h4 className="font-heading text-sm font-semibold text-ink">Services offered</h4>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Add each service this {form.provider_type === "advocate" ? "advocate" : "attorney"} offers as a tag. Type and press Enter (or comma) to add.
+            </p>
+            <div className="mt-2">
+              <TagInput
+                value={form.services}
+                onChange={(next) => setForm({ ...form, services: next })}
+                placeholder="e.g. Trust formation — press Enter"
+              />
+            </div>
+          </div>
 
 
           <Section title="Qualifications" hint="Degrees, admissions, memberships.">
