@@ -450,6 +450,11 @@ const firmExtractionSchema = z.object({
   province: sText,
   logo_url: sText,
   services: sStrArr,
+  linkedin_url: sText,
+  facebook_url: sText,
+  twitter_url: sText,
+  instagram_url: sText,
+  youtube_url: sText,
   branches: z.preprocess(
     (v) => (Array.isArray(v) ? v : []),
     z.array(firmBranchSchema),
