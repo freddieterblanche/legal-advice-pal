@@ -236,8 +236,55 @@ function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const page = search.page ?? 1;
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+
+  const compactFilters = (
+    <>
+      <div className="w-44">
+        <Combobox
+          value={search.area ?? ""}
+          onChange={(v) => update({ area: v || undefined })}
+          options={(areas ?? []).map((a) => ({ value: a.slug, label: a.name }))}
+          placeholder="Practice area"
+        />
+      </div>
+      <div className="w-40">
+        <Combobox
+          value={search.province ?? ""}
+          onChange={(v) => update({ province: v || undefined, town: undefined })}
+          options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
+          placeholder="Province"
+        />
+      </div>
+      <div className="w-40">
+        <Combobox
+          value={search.town ?? ""}
+          onChange={(v) => update({ town: v || undefined })}
+          options={(towns ?? []).map((t) => ({ value: t.slug, label: t.name }))}
+          placeholder={search.province ? "Town" : "Pick province"}
+        />
+      </div>
+      <div className="w-40">
+        <Combobox
+          value={search.designation ?? ""}
+          onChange={(v) => update({ designation: v || undefined })}
+          options={DESIGNATIONS.map((d) => ({ value: d, label: d }))}
+          placeholder="Designation"
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSearchSubmit}
+        placeholder="Search by name, firm, practice area, city, town or province…"
+        filters={compactFilters}
+      />
       <section className="relative overflow-hidden bg-ink py-12 text-cream">
         {search.type === "attorney" && (
           <>
