@@ -9,6 +9,8 @@ import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { FeaturedBadge } from "../components/FeaturedBadge";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 import advocateHero from "../assets/advocate-hero.jpg.asset.json";
 
