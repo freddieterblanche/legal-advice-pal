@@ -257,11 +257,11 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
           className={`w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 ${ringClass}`}
         />
         <div className="grid gap-2 sm:grid-cols-2">
-          <select value={area} onChange={(e) => setArea(e.target.value)} className={`rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
+          <select value={area} onChange={(e) => setArea(e.target.value)} className={`w-full min-w-0 rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
             <option value="">All practice areas</option>
             {practiceAreas.map((p) => <option key={p.id} value={p.slug}>{p.name}</option>)}
           </select>
-          <select value={province} onChange={(e) => setProvince(e.target.value)} className={`rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
+          <select value={province} onChange={(e) => setProvince(e.target.value)} className={`w-full min-w-0 rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
             <option value="">All provinces</option>
             {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
