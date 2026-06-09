@@ -530,6 +530,11 @@ export const importFirmProfile = createServerFn({ method: "POST" })
       province,
       logo_url: resolveAbsoluteUrl(extracted.logo_url, data.url),
       services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      linkedin_url: resolveAbsoluteUrl(extracted.linkedin_url, data.url, 500),
+      facebook_url: resolveAbsoluteUrl(extracted.facebook_url, data.url, 500),
+      twitter_url: resolveAbsoluteUrl(extracted.twitter_url, data.url, 500),
+      instagram_url: resolveAbsoluteUrl(extracted.instagram_url, data.url, 500),
+      youtube_url: resolveAbsoluteUrl(extracted.youtube_url, data.url, 500),
       branches,
     };
   });
