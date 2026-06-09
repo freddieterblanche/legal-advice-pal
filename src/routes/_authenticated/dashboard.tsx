@@ -826,6 +826,19 @@ function SettingsTab({ firm }: { firm: any }) {
         </div>
         <p className="text-xs text-muted-foreground">City and province auto-apply to lawyers linked only to the head office.</p>
 
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Social media</label>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input type="url" value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} placeholder="LinkedIn page URL" maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <input type="url" value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} placeholder="Facebook page URL" maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <input type="url" value={form.twitter_url} onChange={(e) => setForm({ ...form, twitter_url: e.target.value })} placeholder="X (Twitter) URL" maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <input type="url" value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} placeholder="Instagram URL" maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+            <input type="url" value={form.youtube_url} onChange={(e) => setForm({ ...form, youtube_url: e.target.value })} placeholder="YouTube channel URL" maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Paste full URLs (e.g. https://www.linkedin.com/company/your-firm). Leave blank for any channels the firm doesn't have.</p>
+        </div>
+
+
         <button type="submit" disabled={save.isPending} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">
           {save.isPending ? "Saving…" : "Save Changes"}
         </button>
