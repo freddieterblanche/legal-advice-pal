@@ -18,8 +18,7 @@ export function Combobox({
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] =
-    useState<CSSProperties | null>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -118,9 +117,7 @@ export function Combobox({
               {allLabel}
             </button>
             {filtered.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                No matches
-              </div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
             ) : (
               filtered.map((o) => (
                 <button
