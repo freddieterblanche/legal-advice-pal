@@ -179,8 +179,10 @@ function SearchPage() {
           query = query.eq("province_slug", search.province);
         }
       }
+      if (search.chambers) query = query.eq("chambers_slug", search.chambers);
       if (search.area) query = query.contains("practice_area_slugs", [search.area]);
       if (search.designation) query = query.eq("designation", search.designation);
+
       // Push type filter to SQL so pagination works correctly.
       // Prefer structured provider_type; fall back to designation parsing for legacy rows.
       if (search.type === "advocate") {
