@@ -51,7 +51,7 @@ export function Combobox({
         className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
       />
       {open && (
-        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border bg-card shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-md border border-border bg-card shadow-lg">
           <button
             type="button"
             onClick={() => { onChange(""); setOpen(false); setQuery(""); }}
