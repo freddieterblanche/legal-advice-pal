@@ -140,7 +140,7 @@ function ArbitratorSearch() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Experienced arbitrators for commercial, construction, labour and international disputes.
           </p>
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg">
+          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg [&_input]:text-ink [&_select]:text-ink [&_input]:placeholder:text-muted-foreground">
             <form
               onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
               className="grid gap-2 sm:grid-cols-[1fr_220px_180px_auto]"
