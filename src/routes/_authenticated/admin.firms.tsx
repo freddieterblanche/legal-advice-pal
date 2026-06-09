@@ -219,6 +219,11 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     logo_url: firm?.logo_url ?? "",
     logo_accent_color: firm?.logo_accent_color ?? "",
     services: (firm?.services ?? []) as string[],
+    linkedin_url: firm?.linkedin_url ?? "",
+    facebook_url: firm?.facebook_url ?? "",
+    twitter_url: firm?.twitter_url ?? "",
+    instagram_url: firm?.instagram_url ?? "",
+    youtube_url: firm?.youtube_url ?? "",
   });
   const [importedBranches, setImportedBranches] = useState<Array<{ name: string; address: string; city: string; province: string; country: string; phone: string; email: string; is_head_office: boolean }>>([]);
   const [saving, setSaving] = useState(false);
