@@ -8,6 +8,8 @@ import { applyBooleanSearch, BOOLEAN_SEARCH_HINT } from "../lib/boolean-search";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 
 type SortField = "surname" | "cases" | "listed";
 type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
