@@ -29,6 +29,11 @@ type FirmRow = {
   logo_url: string | null;
   logo_accent_color: string | null;
   services: string[] | null;
+  linkedin_url: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  instagram_url: string | null;
+  youtube_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/firms")({
