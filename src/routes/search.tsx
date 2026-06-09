@@ -349,7 +349,7 @@ function SearchPage() {
               ? "Members of the Bar across South Africa — filter by chambers, province and seniority."
               : "Search South African attorneys by name, firm, practice area and province."}
           </p>
-          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg">
             <form onSubmit={onSearchSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
               <input
                 value={q}
