@@ -22,6 +22,7 @@ type Search = {
   area?: string;
   province?: string;
   town?: string;
+  chambers?: string;
   designation?: string;
   type: LawyerType;
   page?: number;
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/search")({
     area: typeof s.area === "string" ? s.area : undefined,
     province: typeof s.province === "string" ? s.province : undefined,
     town: typeof s.town === "string" ? s.town : undefined,
+    chambers: typeof s.chambers === "string" ? s.chambers : undefined,
     designation: typeof s.designation === "string" ? s.designation : undefined,
     type: s.type === "advocate" ? "advocate" : "attorney",
     page: typeof s.page === "number" ? s.page : s.page ? Number(s.page) : 1,
@@ -45,6 +47,7 @@ export const Route = createFileRoute("/search")({
     dir: s.dir === "desc" ? "desc" : "asc",
     view: s.view === "list" ? "list" : "cards",
   }),
+
   head: () => ({
     meta: [
       { title: "Find Attorneys & Advocates — Lawexpert.co.za" },
