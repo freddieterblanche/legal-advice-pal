@@ -710,6 +710,11 @@ function SettingsTab({ firm }: { firm: any }) {
         logo_accent_color: form.logo_accent_color?.trim() ? form.logo_accent_color.trim() : null,
         services: form.services.length ? form.services : null,
         email: form.email?.trim() || null,
+        linkedin_url: form.linkedin_url?.trim() || null,
+        facebook_url: form.facebook_url?.trim() || null,
+        twitter_url: form.twitter_url?.trim() || null,
+        instagram_url: form.instagram_url?.trim() || null,
+        youtube_url: form.youtube_url?.trim() || null,
       };
       const { error } = await supabase.from("firms").update(clean).eq("id", firm.id);
       if (error) throw error;
