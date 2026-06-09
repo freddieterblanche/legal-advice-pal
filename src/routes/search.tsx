@@ -169,7 +169,21 @@ function SearchPage() {
         }
       }
       if (search.town) {
-        query = query.eq("town_slug", search.town);
+        // Match linked town_slug OR fall back to legacy text city for rows without town_id
+        const { data: townRow } = await supabase
+          .from("towns")
+          .select("name")
+          .eq("slug", search.town)
+          .maybeSingle();
+        const townName = townRow?.name;
+        if (townName) {
+          const escaped = townName.replace(/"/g, '\\"');
+          query = query.or(
+            `town_slug.eq.${search.town},and(town_id.is.null,city.ilike."%${escaped}%")`,
+          );
+        } else {
+          query = query.eq("town_slug", search.town);
+        }
       } else if (search.province) {
         // Match by linked province OR fall back to legacy text province for rows without town_id
         const provName = provinces?.find((p) => p.slug === search.province)?.name;
