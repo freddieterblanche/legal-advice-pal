@@ -695,6 +695,11 @@ function SettingsTab({ firm }: { firm: any }) {
     logo_accent_color: firm.logo_accent_color ?? "",
     services: (firm.services ?? []) as string[],
     email: firm.email ?? "",
+    linkedin_url: firm.linkedin_url ?? "",
+    facebook_url: firm.facebook_url ?? "",
+    twitter_url: firm.twitter_url ?? "",
+    instagram_url: firm.instagram_url ?? "",
+    youtube_url: firm.youtube_url ?? "",
   });
 
   const save = useMutation({
