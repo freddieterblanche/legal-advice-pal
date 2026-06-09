@@ -342,6 +342,11 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                       province: d.province || f.province,
                       logo_url: d.logo_url || f.logo_url,
                       services: d.services.length ? d.services : f.services,
+                      linkedin_url: d.linkedin_url || f.linkedin_url,
+                      facebook_url: d.facebook_url || f.facebook_url,
+                      twitter_url: d.twitter_url || f.twitter_url,
+                      instagram_url: d.instagram_url || f.instagram_url,
+                      youtube_url: d.youtube_url || f.youtube_url,
                     }));
                     if (d.branches && d.branches.length > 0) {
                       setImportedBranches(d.branches);
