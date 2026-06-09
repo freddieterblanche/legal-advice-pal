@@ -191,8 +191,38 @@ function FirmsIndex() {
     });
   })();
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const compactFilters = (
+    <>
+      <div className="w-40">
+        <Combobox
+          value={search.province ?? ""}
+          onChange={(v) => update({ province: v || undefined })}
+          options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
+          placeholder="Province"
+        />
+      </div>
+      <div className="w-40">
+        <Combobox
+          value={search.town ?? ""}
+          onChange={(v) => update({ town: v || undefined })}
+          options={townOptions.map((t) => ({ value: t.slug, label: t.name }))}
+          placeholder={search.province ? "Town" : "Pick province"}
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search firms by name or city…"
+        filters={compactFilters}
+      />
       <section className="relative overflow-hidden bg-ink py-12 text-cream">
         <img
           src={attorneysHero.url}
