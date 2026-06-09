@@ -102,57 +102,60 @@ function MediatorSearch() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Accredited mediators across commercial, family, labour and construction disputes.
           </p>
-          <form
-            onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
-            className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_220px_180px_auto]"
-          >
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search — supports AND / OR / NOT…"
-              maxLength={240}
-              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-              <option value="">All sectors</option>
-              {MEDIATION_SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-              <option value="">All provinces</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
-          </form>
+          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+            <form
+              onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
+              className="grid gap-2 sm:grid-cols-[1fr_220px_180px_auto]"
+            >
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search — supports AND / OR / NOT…"
+                maxLength={240}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="">All sectors</option>
+                {MEDIATION_SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="">All provinces</option>
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
+            </form>
+            <div className="mt-3 space-y-2 border-t border-border pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Accreditation:</span>
+                {MEDIATION_ACCREDITATIONS.map((a) => {
+                  const active = search.accreditation === a;
+                  return (
+                    <button key={a} type="button" onClick={() => update({ accreditation: active ? undefined : a })}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      {a}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Style:</span>
+                {MEDIATION_STYLES.map((s) => {
+                  const active = search.style === s;
+                  return (
+                    <button key={s} type="button" onClick={() => update({ style: active ? undefined : s })}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-6">
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Accreditation</h3>
-            <div className="mt-3 space-y-1 text-sm">
-              {MEDIATION_ACCREDITATIONS.map((a) => (
-                <button key={a} onClick={() => update({ accreditation: search.accreditation === a ? undefined : a })}
-                  className={`block w-full rounded px-2 py-1 text-left ${search.accreditation === a ? "bg-gold/15 text-ink font-medium" : "hover:bg-muted"}`}>
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Style</h3>
-            <div className="mt-3 space-y-1 text-sm">
-              {MEDIATION_STYLES.map((s) => (
-                <button key={s} onClick={() => update({ style: search.style === s ? undefined : s })}
-                  className={`block w-full rounded px-2 py-1 text-left ${search.style === s ? "bg-gold/15 text-ink font-medium" : "hover:bg-muted"}`}>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-heading text-2xl text-ink">

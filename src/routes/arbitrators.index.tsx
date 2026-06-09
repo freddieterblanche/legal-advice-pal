@@ -105,61 +105,64 @@ function ArbitratorSearch() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Experienced arbitrators for commercial, construction, labour and international disputes.
           </p>
-          <form
-            onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
-            className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_220px_180px_auto]"
-          >
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search — supports AND / OR / NOT…"
-              maxLength={240}
-              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-              <option value="">All types</option>
-              {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-              <option value="">All provinces</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
-          </form>
+          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+            <form
+              onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
+              className="grid gap-2 sm:grid-cols-[1fr_220px_180px_auto]"
+            >
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search — supports AND / OR / NOT…"
+                maxLength={240}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="">All types</option>
+                {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <option value="">All provinces</option>
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
+            </form>
+            <div className="mt-3 space-y-2 border-t border-border pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Accreditation:</span>
+                {ARBITRATION_ACCREDITATIONS.map((a) => {
+                  const active = search.accreditation === a;
+                  return (
+                    <button key={a} type="button" onClick={() => update({ accreditation: active ? undefined : a })}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      {a}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Experience:</span>
+                {([
+                  { v: "0-5" as const, label: "0–5 years" },
+                  { v: "5-10" as const, label: "5–10 years" },
+                  { v: "10+" as const, label: "10+ years" },
+                ]).map((o) => {
+                  const active = search.experience === o.v;
+                  return (
+                    <button key={o.v} type="button" onClick={() => update({ experience: active ? undefined : o.v })}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-6">
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Accreditation</h3>
-            <div className="mt-3 space-y-1 text-sm">
-              {ARBITRATION_ACCREDITATIONS.map((a) => (
-                <button key={a} onClick={() => update({ accreditation: search.accreditation === a ? undefined : a })}
-                  className={`block w-full rounded px-2 py-1 text-left ${search.accreditation === a ? "bg-gold/15 text-ink font-medium" : "hover:bg-muted"}`}>
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Experience</h3>
-            <div className="mt-3 space-y-1 text-sm">
-              {([
-                { v: "0-5" as const, label: "0–5 years" },
-                { v: "5-10" as const, label: "5–10 years" },
-                { v: "10+" as const, label: "10+ years" },
-              ]).map((o) => (
-                <button key={o.v} onClick={() => update({ experience: search.experience === o.v ? undefined : o.v })}
-                  className={`block w-full rounded px-2 py-1 text-left ${search.experience === o.v ? "bg-gold/15 text-ink font-medium" : "hover:bg-muted"}`}>
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-heading text-2xl text-ink">

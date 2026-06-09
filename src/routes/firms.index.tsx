@@ -204,46 +204,36 @@ function FirmsIndex() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Search verified South African law firms by name, city and province.
           </p>
-          <form onSubmit={onSubmit} className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_auto]">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search firms by name or city…"
-              maxLength={120}
-              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
-          </form>
-        </div>
-      </section>
-
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
-        {/* Sidebar */}
-        <aside className="space-y-6">
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Province</h3>
-            <div className="mt-3">
+          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+            <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search firms by name or city…"
+                maxLength={120}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
+            </form>
+            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2">
               <Combobox
                 value={search.province ?? ""}
                 onChange={(v) => update({ province: v || undefined })}
                 options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
-                placeholder="Type a province…"
+                placeholder="Province"
               />
-            </div>
-          </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town</h3>
-            <div className="mt-3">
               <Combobox
                 value={search.town ?? ""}
                 onChange={(v) => update({ town: v || undefined })}
                 options={townOptions.map((t) => ({ value: t.slug, label: t.name }))}
-                placeholder={search.province ? "Type a town…" : "Select a province first…"}
+                placeholder={search.province ? "Town" : "Pick a province first"}
               />
             </div>
           </div>
-        </aside>
+        </div>
+      </section>
 
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {/* Results */}
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">

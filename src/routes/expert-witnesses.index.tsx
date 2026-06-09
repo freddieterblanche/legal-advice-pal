@@ -125,85 +125,70 @@ function ExpertWitnessSearch() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Specialists across medicine, engineering, forensics, finance and more — with linked case appearances.
           </p>
-          <form
-            onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
-            className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_240px_180px_auto]"
-          >
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search — supports AND / OR / NOT…"
-              maxLength={240}
-              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <select
-              value={search.discipline ?? ""}
-              onChange={(e) => update({ discipline: e.target.value || undefined })}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+            <form
+              onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
+              className="grid gap-2 sm:grid-cols-[1fr_240px_180px_auto]"
             >
-              <option value="">All disciplines</option>
-              {Object.entries(groupedDisciplines).map(([cat, list]) => (
-                <optgroup key={cat} label={cat}>
-                  {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
-                </optgroup>
-              ))}
-            </select>
-            <select
-              value={search.province ?? ""}
-              onChange={(e) => update({ province: e.target.value || undefined })}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">All provinces</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-            <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">
-              Search
-            </button>
-          </form>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search — supports AND / OR / NOT…"
+                maxLength={240}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <select
+                value={search.discipline ?? ""}
+                onChange={(e) => update({ discipline: e.target.value || undefined })}
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">All disciplines</option>
+                {Object.entries(groupedDisciplines).map(([cat, list]) => (
+                  <optgroup key={cat} label={cat}>
+                    {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+              <select
+                value={search.province ?? ""}
+                onChange={(e) => update({ province: e.target.value || undefined })}
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">All provinces</option>
+                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">
+                Search
+              </button>
+            </form>
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Practice:</span>
+              {[
+                { v: undefined, label: "All" },
+                { v: "yes" as const, label: "Independent" },
+                { v: "no" as const, label: "Employed" },
+              ].map((o) => {
+                const active = search.independent === o.v;
+                return (
+                  <button
+                    key={o.label}
+                    type="button"
+                    onClick={() => update({ independent: o.v })}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                      active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"
+                    }`}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-6">
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Practice Status</h3>
-            <div className="mt-3 space-y-2 text-sm">
-              {[
-                { v: undefined, label: "All experts" },
-                { v: "yes" as const, label: "Independent" },
-                { v: "no" as const, label: "Employed" },
-              ].map((o) => (
-                <label key={o.label} className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="radio"
-                    name="ind"
-                    checked={search.independent === o.v}
-                    onChange={() => update({ independent: o.v })}
-                  />
-                  <span>{o.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Provinces</h3>
-            <div className="mt-3 space-y-1 text-sm">
-              {PROVINCES.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => update({ province: search.province === p ? undefined : p })}
-                  className={`block w-full rounded px-2 py-1 text-left transition-colors ${
-                    search.province === p ? "bg-gold/15 text-ink font-medium" : "hover:bg-muted"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-heading text-2xl text-ink">

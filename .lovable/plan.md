@@ -1,23 +1,59 @@
-## Show matched branch on firm search results
+## Move filters under the search box (Property24-style)
 
-When a user's search matches a firm via one of its branches (e.g. "yzerfontein"), the result card currently still shows the firm's head-office city ("Stellenbosch, Western Cape"), which looks wrong. We will surface the matching branch under the firm name so the result makes sense.
+Right now the search/listing pages put filters in a **left sidebar** beside the results, while the search box lives up in the dark hero band. Users have to look in two different places to refine a query. We'll move the filters into a **horizontal filter row attached directly under the main search input**, so search + refine + results read top-to-bottom in one column — matching the Property24 pattern.
 
-### Changes (frontend only — `src/routes/firms.index.tsx`)
+### Pages affected
 
-1. **Fetch matched branches alongside firms.**
-   When `search.q`, `search.province`, or `search.town` is set, also fetch the matching `firm_branches` rows (id, firm_id, name, city, province, country) — reuse the same filters already used to compute `branchFirmIds` / `qBranchFirmIds`. Return a `Record<firm_id, MatchedBranch[]>` from the same `useQuery`.
+All five listing/search pages share the same sidebar pattern and will be updated consistently:
 
-2. **Pick a "matched branch" per firm card.**
-   For each firm row, if a matched branch exists for that firm, pick the first one. Prefer a branch whose `city`/`name`/`province`/`country` actually contains `search.q` (case-insensitive) over a town/province filter match.
+1. `src/routes/search.tsx` — Attorneys/Advocates (the page in the screenshot)
+2. `src/routes/firms.index.tsx` — Law Firms
+3. `src/routes/expert-witnesses.index.tsx` — Expert Witnesses
+4. `src/routes/mediators.index.tsx` — Mediators
+5. `src/routes/arbitrators.index.tsx` — Arbitrators
 
-3. **Render the branch location instead of the head-office location** on both the card and list views when a matched branch is present:
-   - Card subtitle: `📍 {branch.city}, {branch.province}` (fallback to country if no province), with a small muted suffix like `— branch of {firm.name}` is NOT needed; just show the branch location.
-   - List view: replace the City and Province cells with the branch's city/province when a matched branch exists.
-   - When no branch match (pure name/city match on the firm itself), keep the existing head-office display unchanged.
+The **home page** (`src/routes/index.tsx`) already stacks practice-area + province dropdowns directly below the search input inside each profession panel, which is already Property24-style — no change needed there unless you want a different layout. (Flag if you'd like me to tweak it too.)
 
-4. **No backend, schema, or search-logic changes.** The existing branch-aware search already returns Cliffe Dekker for "Yzerfontein"; this plan only fixes the displayed location.
+### New layout (per page)
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│  HERO BAND (dark)                                        │
+│   Title + tagline                                        │
+│   ┌─────────────────────────────────────────────────┐   │
+│   │  🔍  Search by name, firm, area…   [ Search ]  │   │
+│   ├─────────────────────────────────────────────────┤   │
+│   │  [Practice Area ▾] [Province ▾] [Town ▾] [Desig ▾] │
+│   └─────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  RESULTS (full width)                                    │
+│   28 attorneys found       Sort by ▾   [Cards|List]      │
+│   ┌──────────────────────────────────────────────────┐  │
+│   │  Lawyer card                                     │  │
+│   └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Behaviour & details
+
+- The filter row sits **inside the same white card** as the search input (one rounded panel: input on top, filter chips/dropdowns underneath, separated by a divider) so it visually belongs to the search.
+- On desktop: filters render as a horizontal row of dropdowns (`flex flex-wrap gap-2`), each using the existing `Combobox` component.
+- On mobile: the row wraps to 2 columns; on very small screens it stacks. No "Filters" modal — keeping it inline is simpler and matches Property24.
+- An **"Active filters"** strip with removable chips appears below the row when any filter is set (e.g. `Practice Area: Tax ✕`, `Yzerfontein ✕`), plus a `Clear all` link. This compensates for losing the always-visible sidebar labels.
+- The sidebar `<aside>` and the `lg:grid-cols-[260px_1fr]` wrapper are removed; results become full-width (`max-w-7xl`).
+- Sort bar + Cards/List toggle stay exactly where they are (above the results list).
+- Each page keeps its own filter set:
+  - search: Practice Area, Province, Town, Designation
+  - firms: Province, Town (+ existing firm-specific filters)
+  - experts: Specialisation, Province, Town
+  - mediators / arbitrators: Practice Area, Province, Town
+- URL search-param wiring, query keys, sort, pagination, and result rendering are **unchanged** — this is purely a layout move of the same filter controls.
 
 ### Out of scope
-- Showing multiple branches per card.
-- Changing sort/filter behaviour.
-- Any edits to firm detail pages.
+
+- No changes to search logic, ranking, or branch-aware matching.
+- No changes to the home page profession panels (already Property24-like).
+- No changes to admin/dashboard pages or profile detail pages.
+- No new "Filters" modal/drawer — filters stay inline.
