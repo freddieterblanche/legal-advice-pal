@@ -116,8 +116,52 @@ function ExpertWitnessSearch() {
     return acc;
   }, {});
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
+  const compactFilters = (
+    <>
+      <select
+        value={search.discipline ?? ""}
+        onChange={(e) => update({ discipline: e.target.value || undefined })}
+        className="w-44 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All disciplines</option>
+        {Object.entries(groupedDisciplines).map(([cat, list]) => (
+          <optgroup key={cat} label={cat}>
+            {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
+          </optgroup>
+        ))}
+      </select>
+      <select
+        value={search.province ?? ""}
+        onChange={(e) => update({ province: e.target.value || undefined })}
+        className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All provinces</option>
+        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+      <select
+        value={search.independent ?? ""}
+        onChange={(e) => update({ independent: (e.target.value || undefined) as Search["independent"] })}
+        className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All experts</option>
+        <option value="yes">Independent</option>
+        <option value="no">Employed</option>
+      </select>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search experts — supports AND / OR / NOT…"
+        filters={compactFilters}
+      />
       <section className="bg-ink py-12 text-cream">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
