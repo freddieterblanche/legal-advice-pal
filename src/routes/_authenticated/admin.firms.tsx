@@ -438,6 +438,17 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                 <p className="mt-1 text-xs text-muted-foreground">Pick an accent colour for the logo tile shown on listing cards. Leave empty to use the default light tile.</p>
               </div>
 
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Social media</label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <input type="url" placeholder="LinkedIn page URL" value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="Facebook page URL" value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="X (Twitter) URL" value={form.twitter_url} onChange={(e) => setForm({ ...form, twitter_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="Instagram URL" value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="YouTube channel URL" value={form.youtube_url} onChange={(e) => setForm({ ...form, youtube_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                </div>
+              </div>
+
               <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <input placeholder="Main phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
