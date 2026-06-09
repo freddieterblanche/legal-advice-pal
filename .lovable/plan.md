@@ -1,48 +1,76 @@
-## Sticky search bar on scroll
+## Goal
 
-When the user scrolls past the dark hero search band on a listing page, a slim sticky bar slides in at the top of the viewport with the search input + the same filter controls, so they can refine without scrolling back up — matching the Property24 pattern in the screenshot.
+Add contextual, dynamic link lists to `/search` to help users (and Google) discover lawyers by location, and advocates by city → chambers.
 
-### Pages affected
+- **Attorneys tab (`/search?type=attorney`)**: a "Attorneys in major cities" block listing the top South African cities/towns where we have attorney listings, each linking to the filtered search.
+- **Advocates tab (`/search?type=advocate`)**: a "Advocates by chambers" block grouped by city (Cape Town, Johannesburg, Durban, Pretoria, Bloemfontein, Gqeberha, etc.) with each chambers under that city as a link.
 
-Same five pages we just updated:
+Both lists are rendered inside the main content flow (below the results, above the footer), not in a sidebar — so they read as contextual on-page links rather than sitewide boilerplate.
 
-1. `src/routes/search.tsx` — Attorneys / Advocates
-2. `src/routes/firms.index.tsx` — Law Firms
-3. `src/routes/expert-witnesses.index.tsx` — Expert Witnesses
-4. `src/routes/mediators.index.tsx` — Mediators
-5. `src/routes/arbitrators.index.tsx` — Arbitrators
+## Where it goes
 
-### Visual & behaviour
+`src/routes/search.tsx` — append a new `<DiscoverLinks />` section after the results grid, switching content by `search.type`.
 
-```text
-─── scrolled state ─────────────────────────────────
-│ [ 🔍 search input ……………… ]  [Area ▾] [Prov ▾] [Town ▾]  [Search] │
-────────────────────────────────────────────────────
-```
+## Data
 
-- A condensed bar pinned to the top (`fixed top-0 inset-x-0 z-40`), full viewport width, with a navy/ink background that matches the existing site nav and a subtle bottom shadow.
-- Inside: search input on the left (flex-1), the same filter controls used in the hero (dropdowns / chips collapsed into dropdowns) on the right, and a `Search` button. Same state, same URL params — just a second render of the existing controls.
-- **Trigger**: appears once the user scrolls past the hero search card. Implemented with an `IntersectionObserver` on a sentinel `<div>` placed right after the hero card. When the sentinel leaves the viewport, the sticky bar fades/slides in (`transition-transform translate-y-0` from `-translate-y-full`).
-- **Hide trigger**: when the sentinel scrolls back into view (user scrolled back near the top), the bar slides out.
-- Sits **below the existing site navbar** (the navbar in `__root.tsx` is not currently sticky, so the new bar takes the top spot during scroll — no overlap risk). If the navbar is later made sticky, we can stack via z-index.
-- Mobile: on narrow screens the bar collapses to just the search input + a single `Filters` toggle button that opens a small dropdown panel containing the filter controls. Keeps the bar usable on phones.
-- The bar reuses the same `update()` / `onSubmit` handlers already in each page — no new state, no new query keys, no change to search logic.
+Driven by live DB queries (TanStack Query, public via the existing browser supabase client; both `towns` and `chambers` are already publicly readable for the site).
 
-### Implementation
+1. **Attorney cities** — count active attorneys per town:
+   ```sql
+   select town_slug, town_name, count(*)
+   from service_providers
+   where (provider_type = 'attorney'
+          or (provider_type is null and designation not ilike '%advocate%'))
+     and town_slug is not null
+   group by town_slug, town_name
+   order by count(*) desc
+   limit 24;
+   ```
+   Render as a responsive grid of pills: `City (count)` → `/search?type=attorney&town={slug}`.
 
-- New shared component `src/components/StickySearchBar.tsx` that takes:
-  - `q`, `setQ`, `onSubmit` (search input + submit)
-  - `filters: React.ReactNode` (the filter controls — each page passes its own dropdowns/chips so we don't have to model every filter shape)
-  - `placeholder` string
-- New small hook `src/hooks/use-sticky-trigger.ts` wrapping `IntersectionObserver` → returns `isStuck: boolean` for a sentinel ref.
-- Each listing page:
-  - Renders `<div ref={sentinelRef} />` immediately after the hero `<section>`.
-  - Renders `<StickySearchBar isVisible={isStuck} … />` once near the top of the JSX. CSS handles the slide/fade so it's mounted but hidden when `!isStuck`.
-  - The hero search card stays exactly as it is; the sticky bar is purely additive.
+2. **Advocate chambers** — fetch chambers grouped by city, with counts:
+   ```sql
+   select c.id, c.name, c.slug, c.city, count(sp.id) as n
+   from chambers c
+   left join service_providers sp on sp.chambers_id = c.id
+   group by c.id
+   having count(sp.id) > 0
+   order by c.city, c.name;
+   ```
+   Render grouped by `city`:
+   ```
+   Cape Town
+     Leeuwen Chambers · Huguenot Chambers · 50 Keerom Street Chambers · …
+   Johannesburg
+     Maisels Group · Pitje Chambers · Schreiner Chambers (Group 3) · …
+   ```
 
-### Out of scope
+## New filter: chambers
 
-- No changes to the home page (no long results list to scroll past).
-- No changes to admin/dashboard pages.
-- No change to the existing site navbar's stickiness — only the sticky **search** bar is added.
-- No new URL params, sort, or pagination changes.
+`src/routes/search.tsx` currently filters by `province` and `town` but not by chambers. To make the chamber links functional we add a `chambers` search param:
+
+- Extend `validateSearch` with `chambers?: string` (slug).
+- In the query builder add `if (search.chambers) query = query.eq("chambers_slug", search.chambers);` (column already exists alongside `town_slug`; confirm in the existing select list and add if missing).
+- Show an active-filter chip with the chambers name + clear (×) when set, matching the existing province/town chip pattern.
+
+Each chambers link → `/search?type=advocate&chambers={slug}`.
+
+## UX details
+
+- Section heading: `<h2>` with semantic styling (`text-lg font-semibold`), matching site typography.
+- Use `<Link>` from `@tanstack/react-router` (not `<a>`) for client-side nav + preloading.
+- Skip the section entirely when the underlying query returns 0 rows (no empty headings).
+- Mobile: pills wrap; chambers list collapses to single column.
+- Styling: reuse existing `TypePill`/muted card surfaces — no new color tokens.
+
+## SEO
+
+- Real anchor text (`Attorneys in Cape Town`, `Leeuwen Chambers`) — good internal-link signal.
+- Lives in main content (not sidebar boilerplate), so Google weights it.
+- Each target URL already has unique title/description via the search route's `head()`; no additional metadata work needed for this change.
+
+## Out of scope
+
+- No new routes — everything funnels through the existing `/search` filters.
+- No changes to other listing pages (firms, mediators, arbitrators, experts).
+- No sidebar widget.
