@@ -300,24 +300,49 @@ function SearchPage() {
               ? "Members of the Bar across South Africa — filter by chambers, province and seniority."
               : "Search South African attorneys by name, firm, practice area and province."}
           </p>
-          <form
-            onSubmit={onSearchSubmit}
-            className="mt-6 grid gap-2 rounded-xl bg-card p-3 text-ink sm:grid-cols-[1fr_auto]"
-          >
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name, firm, practice area, city, town or province…"
-              maxLength={120}
-              className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90"
-            >
-              Search
-            </button>
-          </form>
+          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+            <form onSubmit={onSearchSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name, firm, practice area, city, town or province…"
+                maxLength={120}
+                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90"
+              >
+                Search
+              </button>
+            </form>
+            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Combobox
+                value={search.area ?? ""}
+                onChange={(v) => update({ area: v || undefined })}
+                options={(areas ?? []).map((a) => ({ value: a.slug, label: a.name }))}
+                placeholder="Practice area"
+              />
+              <Combobox
+                value={search.province ?? ""}
+                onChange={(v) => update({ province: v || undefined, town: undefined })}
+                options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
+                placeholder="Province"
+              />
+              <Combobox
+                value={search.town ?? ""}
+                onChange={(v) => update({ town: v || undefined })}
+                options={(towns ?? []).map((t) => ({ value: t.slug, label: t.name }))}
+                placeholder={search.province ? "Town / City" : "Pick a province first"}
+              />
+              <Combobox
+                value={search.designation ?? ""}
+                onChange={(v) => update({ designation: v || undefined })}
+                options={DESIGNATIONS.map((d) => ({ value: d, label: d }))}
+                placeholder="Designation"
+              />
+            </div>
+          </div>
           <p className="mt-2 text-xs text-cream/60">
             Tip: combine terms with <span className="font-semibold text-cream/80">OR</span> and{" "}
             <span className="font-semibold text-cream/80">NOT</span> — e.g. <em>insolvency OR tax NOT labour</em>.
@@ -325,62 +350,7 @@ function SearchPage() {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[260px_1fr]">
-        {/* Sidebar */}
-        <aside className="space-y-6">
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Practice Area</h3>
-            <div className="mt-3">
-              <Combobox
-                value={search.area ?? ""}
-                onChange={(v) => update({ area: v || undefined })}
-                options={(areas ?? []).map((a) => ({ value: a.slug, label: a.name }))}
-                placeholder="Type a practice area…"
-              />
-            </div>
-          </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Province</h3>
-            <div className="mt-3">
-              <Combobox
-                value={search.province ?? ""}
-                onChange={(v) => update({ province: v || undefined, town: undefined })}
-                options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
-                placeholder="Type a province…"
-              />
-            </div>
-          </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Town / City</h3>
-            <div className="mt-3">
-              {search.province ? (
-                <Combobox
-                  value={search.town ?? ""}
-                  onChange={(v) => update({ town: v || undefined })}
-                  options={(towns ?? []).map((t) => ({ value: t.slug, label: t.name }))}
-                  placeholder={towns ? "Type a town…" : "Loading towns…"}
-                />
-              ) : (
-                <p className="text-xs italic text-muted-foreground">Pick a province first</p>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Designation</h3>
-            <div className="mt-3">
-              <Combobox
-                value={search.designation ?? ""}
-                onChange={(v) => update({ designation: v || undefined })}
-                options={DESIGNATIONS.map((d) => ({ value: d, label: d }))}
-                placeholder="Type a designation…"
-              />
-            </div>
-          </div>
-        </aside>
-
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {/* Results */}
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
