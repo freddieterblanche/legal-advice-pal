@@ -96,8 +96,41 @@ function ArbitratorSearch() {
   const total = results?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
+  const compactFilters = (
+    <>
+      <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All types</option>
+        {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All provinces</option>
+        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+      <select value={search.accreditation ?? ""} onChange={(e) => update({ accreditation: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any accreditation</option>
+        {ARBITRATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+      </select>
+      <select value={search.experience ?? ""} onChange={(e) => update({ experience: (e.target.value || undefined) as Search["experience"] })} className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any experience</option>
+        <option value="0-5">0–5 years</option>
+        <option value="5-10">5–10 years</option>
+        <option value="10+">10+ years</option>
+      </select>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search arbitrators — supports AND / OR / NOT…"
+        filters={compactFilters}
+      />
       <section className="bg-ink py-12 text-cream">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
