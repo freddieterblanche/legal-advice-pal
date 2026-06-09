@@ -264,6 +264,7 @@ function FirmsIndex() {
           </div>
         </div>
       </section>
+      <div ref={sentinelRef} aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {/* Results */}
