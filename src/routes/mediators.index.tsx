@@ -93,8 +93,39 @@ function MediatorSearch() {
   const total = results?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
+  const compactFilters = (
+    <>
+      <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All sectors</option>
+        {MEDIATION_SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All provinces</option>
+        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+      <select value={search.accreditation ?? ""} onChange={(e) => update({ accreditation: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any accreditation</option>
+        {MEDIATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+      </select>
+      <select value={search.style ?? ""} onChange={(e) => update({ style: e.target.value || undefined })} className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any style</option>
+        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
+      </select>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search mediators — supports AND / OR / NOT…"
+        filters={compactFilters}
+      />
       <section className="bg-ink py-12 text-cream">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
