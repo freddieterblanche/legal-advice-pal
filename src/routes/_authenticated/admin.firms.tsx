@@ -29,6 +29,11 @@ type FirmRow = {
   logo_url: string | null;
   logo_accent_color: string | null;
   services: string[] | null;
+  linkedin_url: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  instagram_url: string | null;
+  youtube_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/firms")({
@@ -214,6 +219,11 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
     logo_url: firm?.logo_url ?? "",
     logo_accent_color: firm?.logo_accent_color ?? "",
     services: (firm?.services ?? []) as string[],
+    linkedin_url: firm?.linkedin_url ?? "",
+    facebook_url: firm?.facebook_url ?? "",
+    twitter_url: firm?.twitter_url ?? "",
+    instagram_url: firm?.instagram_url ?? "",
+    youtube_url: firm?.youtube_url ?? "",
   });
   const [importedBranches, setImportedBranches] = useState<Array<{ name: string; address: string; city: string; province: string; country: string; phone: string; email: string; is_head_office: boolean }>>([]);
   const [saving, setSaving] = useState(false);
@@ -332,6 +342,11 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                       province: d.province || f.province,
                       logo_url: d.logo_url || f.logo_url,
                       services: d.services.length ? d.services : f.services,
+                      linkedin_url: d.linkedin_url || f.linkedin_url,
+                      facebook_url: d.facebook_url || f.facebook_url,
+                      twitter_url: d.twitter_url || f.twitter_url,
+                      instagram_url: d.instagram_url || f.instagram_url,
+                      youtube_url: d.youtube_url || f.youtube_url,
                     }));
                     if (d.branches && d.branches.length > 0) {
                       setImportedBranches(d.branches);
@@ -426,6 +441,17 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
                   )}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">Pick an accent colour for the logo tile shown on listing cards. Leave empty to use the default light tile.</p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Social media</label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <input type="url" placeholder="LinkedIn page URL" value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="Facebook page URL" value={form.facebook_url} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="X (Twitter) URL" value={form.twitter_url} onChange={(e) => setForm({ ...form, twitter_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="Instagram URL" value={form.instagram_url} onChange={(e) => setForm({ ...form, instagram_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                  <input type="url" placeholder="YouTube channel URL" value={form.youtube_url} onChange={(e) => setForm({ ...form, youtube_url: e.target.value })} maxLength={500} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+                </div>
               </div>
 
               <input placeholder="Website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />

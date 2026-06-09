@@ -450,6 +450,11 @@ const firmExtractionSchema = z.object({
   province: sText,
   logo_url: sText,
   services: sStrArr,
+  linkedin_url: sText,
+  facebook_url: sText,
+  twitter_url: sText,
+  instagram_url: sText,
+  youtube_url: sText,
   branches: z.preprocess(
     (v) => (Array.isArray(v) ? v : []),
     z.array(firmBranchSchema),
@@ -478,6 +483,8 @@ export const importFirmProfile = createServerFn({ method: "POST" })
           "logo_url: URL of the firm's logo image. Prefer SVG/PNG. Resolve relative URLs against source URL. " +
           "phone / email / address / city: the firm's MAIN (head office) contact details if shown. " +
           "website: the firm's primary website URL if different from the source URL. " +
+          "linkedin_url / facebook_url / twitter_url / instagram_url / youtube_url: the firm's social media page URLs if linked from the page (look in headers, footers, contact sections, social icons). " +
+          "Use the full absolute URL (e.g. https://www.linkedin.com/company/xyz). Leave empty for any platform the firm does not have. " +
           // Branches
           "branches: an array of EVERY office/branch location of the firm mentioned on the page (Cape Town office, Johannesburg office, Stellenbosch office, Nairobi office, etc.). " +
           "Include the head office as one of the branches with is_head_office=true. For each branch include: " +
@@ -523,6 +530,11 @@ export const importFirmProfile = createServerFn({ method: "POST" })
       province,
       logo_url: resolveAbsoluteUrl(extracted.logo_url, data.url),
       services: extracted.services.map((s) => s.trim()).filter(Boolean).slice(0, 20),
+      linkedin_url: resolveAbsoluteUrl(extracted.linkedin_url, data.url, 500),
+      facebook_url: resolveAbsoluteUrl(extracted.facebook_url, data.url, 500),
+      twitter_url: resolveAbsoluteUrl(extracted.twitter_url, data.url, 500),
+      instagram_url: resolveAbsoluteUrl(extracted.instagram_url, data.url, 500),
+      youtube_url: resolveAbsoluteUrl(extracted.youtube_url, data.url, 500),
       branches,
     };
   });

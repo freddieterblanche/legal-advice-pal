@@ -420,9 +420,12 @@ export type Database = {
           created_at: string | null
           description: string | null
           email: string | null
+          facebook_url: string | null
           featured_since: string | null
           id: string
+          instagram_url: string | null
           is_featured: boolean
+          linkedin_url: string | null
           logo_accent_color: string | null
           logo_url: string | null
           name: string
@@ -432,7 +435,9 @@ export type Database = {
           services: string[] | null
           slug: string
           status: string | null
+          twitter_url: string | null
           website: string | null
+          youtube_url: string | null
         }
         Insert: {
           address?: string | null
@@ -440,9 +445,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           featured_since?: string | null
           id?: string
+          instagram_url?: string | null
           is_featured?: boolean
+          linkedin_url?: string | null
           logo_accent_color?: string | null
           logo_url?: string | null
           name: string
@@ -452,7 +460,9 @@ export type Database = {
           services?: string[] | null
           slug: string
           status?: string | null
+          twitter_url?: string | null
           website?: string | null
+          youtube_url?: string | null
         }
         Update: {
           address?: string | null
@@ -460,9 +470,12 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email?: string | null
+          facebook_url?: string | null
           featured_since?: string | null
           id?: string
+          instagram_url?: string | null
           is_featured?: boolean
+          linkedin_url?: string | null
           logo_accent_color?: string | null
           logo_url?: string | null
           name?: string
@@ -472,7 +485,9 @@ export type Database = {
           services?: string[] | null
           slug?: string
           status?: string | null
+          twitter_url?: string | null
           website?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil, Linkedin, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { FirmLogo } from "../components/FirmLogo";
@@ -117,6 +117,15 @@ function FirmProfile() {
               {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
               {firm.email && <a href={`mailto:${firm.email}`} className="flex items-center gap-1.5 hover:text-gold"><Mail className="h-4 w-4" /> {firm.email}</a>}
             </div>
+            {(firm.linkedin_url || firm.facebook_url || firm.twitter_url || firm.instagram_url || firm.youtube_url) && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {firm.linkedin_url && <a href={firm.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Linkedin className="h-4 w-4" /></a>}
+                {firm.facebook_url && <a href={firm.facebook_url} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Facebook className="h-4 w-4" /></a>}
+                {firm.twitter_url && <a href={firm.twitter_url} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Twitter className="h-4 w-4" /></a>}
+                {firm.instagram_url && <a href={firm.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Instagram className="h-4 w-4" /></a>}
+                {firm.youtube_url && <a href={firm.youtube_url} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Youtube className="h-4 w-4" /></a>}
+              </div>
+            )}
             {canEdit && (
               <Link
                 to="/dashboard"
