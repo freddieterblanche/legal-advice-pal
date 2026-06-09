@@ -10,6 +10,8 @@ import { SortBar, type SortDir } from "../components/SortBar";
 import { FeaturedBadge } from "../components/FeaturedBadge";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 
 type SortField = "surname" | "listed";
 type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
