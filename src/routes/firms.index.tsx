@@ -9,6 +9,8 @@ import { FeaturedBadge } from "../components/FeaturedBadge";
 import { FirmLogo } from "../components/FirmLogo";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 type SortField = "name" | "lawyers" | "listed";
