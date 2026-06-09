@@ -8,6 +8,8 @@ import { applyBooleanSearch, BOOLEAN_SEARCH_HINT } from "../lib/boolean-search";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 
 type SortField = "surname" | "cases" | "listed";
 type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -114,8 +116,52 @@ function ExpertWitnessSearch() {
     return acc;
   }, {});
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
+  const compactFilters = (
+    <>
+      <select
+        value={search.discipline ?? ""}
+        onChange={(e) => update({ discipline: e.target.value || undefined })}
+        className="w-44 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All disciplines</option>
+        {Object.entries(groupedDisciplines).map(([cat, list]) => (
+          <optgroup key={cat} label={cat}>
+            {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
+          </optgroup>
+        ))}
+      </select>
+      <select
+        value={search.province ?? ""}
+        onChange={(e) => update({ province: e.target.value || undefined })}
+        className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All provinces</option>
+        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+      <select
+        value={search.independent ?? ""}
+        onChange={(e) => update({ independent: (e.target.value || undefined) as Search["independent"] })}
+        className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
+      >
+        <option value="">All experts</option>
+        <option value="yes">Independent</option>
+        <option value="no">Employed</option>
+      </select>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search experts — supports AND / OR / NOT…"
+        filters={compactFilters}
+      />
       <section className="bg-ink py-12 text-cream">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -187,6 +233,7 @@ function ExpertWitnessSearch() {
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
+      <div ref={sentinelRef} aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>

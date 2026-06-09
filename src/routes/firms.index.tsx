@@ -9,6 +9,8 @@ import { FeaturedBadge } from "../components/FeaturedBadge";
 import { FirmLogo } from "../components/FirmLogo";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 type SortField = "name" | "lawyers" | "listed";
@@ -189,8 +191,38 @@ function FirmsIndex() {
     });
   })();
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const compactFilters = (
+    <>
+      <div className="w-40">
+        <Combobox
+          value={search.province ?? ""}
+          onChange={(v) => update({ province: v || undefined })}
+          options={(provinces ?? []).map((p) => ({ value: p.slug, label: p.name }))}
+          placeholder="Province"
+        />
+      </div>
+      <div className="w-40">
+        <Combobox
+          value={search.town ?? ""}
+          onChange={(v) => update({ town: v || undefined })}
+          options={townOptions.map((t) => ({ value: t.slug, label: t.name }))}
+          placeholder={search.province ? "Town" : "Pick province"}
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search firms by name or city…"
+        filters={compactFilters}
+      />
       <section className="relative overflow-hidden bg-ink py-12 text-cream">
         <img
           src={attorneysHero.url}
@@ -232,6 +264,7 @@ function FirmsIndex() {
           </div>
         </div>
       </section>
+      <div ref={sentinelRef} aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         {/* Results */}

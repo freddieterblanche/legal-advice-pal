@@ -10,6 +10,8 @@ import { SortBar, type SortDir } from "../components/SortBar";
 import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { FeaturedBadge } from "../components/FeaturedBadge";
+import { StickySearchBar } from "../components/StickySearchBar";
+import { useStickyTrigger } from "../hooks/use-sticky-trigger";
 
 type SortField = "surname" | "experience" | "listed";
 type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -94,8 +96,41 @@ function ArbitratorSearch() {
   const total = results?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const { ref: sentinelRef, isStuck } = useStickyTrigger();
+  const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
+  const compactFilters = (
+    <>
+      <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All types</option>
+        {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">All provinces</option>
+        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+      </select>
+      <select value={search.accreditation ?? ""} onChange={(e) => update({ accreditation: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any accreditation</option>
+        {ARBITRATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
+      </select>
+      <select value={search.experience ?? ""} onChange={(e) => update({ experience: (e.target.value || undefined) as Search["experience"] })} className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
+        <option value="">Any experience</option>
+        <option value="0-5">0–5 years</option>
+        <option value="5-10">5–10 years</option>
+        <option value="10+">10+ years</option>
+      </select>
+    </>
+  );
+
   return (
     <div className="bg-cream">
+      <StickySearchBar
+        visible={isStuck}
+        q={q}
+        setQ={setQ}
+        onSubmit={onSubmit}
+        placeholder="Search arbitrators — supports AND / OR / NOT…"
+        filters={compactFilters}
+      />
       <section className="bg-ink py-12 text-cream">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -161,6 +196,7 @@ function ArbitratorSearch() {
           <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
+      <div ref={sentinelRef} aria-hidden="true" />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div>
