@@ -443,7 +443,46 @@ function FirmsIndex() {
             </div>
           )}
         </div>
+
+        <FirmDiscoverLinks />
       </div>
     </div>
+  );
+}
+
+function FirmDiscoverLinks() {
+  const { data: majorTowns } = useQuery({
+    queryKey: ["firm-discover-major-towns"],
+    queryFn: async () =>
+      (
+        await supabase
+          .from("towns")
+          .select("name, slug")
+          .eq("is_major_city", true)
+          .order("name")
+      ).data ?? [],
+  });
+
+  if (!majorTowns?.length) return null;
+  return (
+    <section className="mt-12 border-t border-border pt-8">
+      <h2 className="font-heading text-xl text-ink">Law firms in major South African cities</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Browse law firms by city — quick jumps to the major legal hubs across South Africa.
+      </p>
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {majorTowns.map((t) => (
+          <li key={t.slug}>
+            <Link
+              to="/firms"
+              search={{ town: t.slug }}
+              className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-sm text-ink hover:border-gold hover:bg-gold/10"
+            >
+              Law firms in {t.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
