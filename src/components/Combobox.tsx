@@ -18,12 +18,13 @@ export function Combobox({
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | null>(null);
+  const [dropdownStyle, setDropdownStyle] =
+    useState<CSSProperties | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selected = options.find((o) => o.value === value);
-  const display = open ? query : selected?.label ?? "";
+  const display = open ? query : (selected?.label ?? "");
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -54,7 +55,10 @@ export function Combobox({
       const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
       const spaceAbove = rect.top - viewportPadding;
       const openAbove = spaceBelow < 180 && spaceAbove > spaceBelow;
-      const maxHeight = Math.max(160, Math.min(320, openAbove ? spaceAbove - gap : spaceBelow - gap));
+      const maxHeight = Math.max(
+        160,
+        Math.min(320, openAbove ? spaceAbove - gap : spaceBelow - gap),
+      );
 
       setDropdownStyle({
         position: "fixed",
@@ -94,32 +98,48 @@ export function Combobox({
         placeholder={placeholder}
         className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
       />
-      {open && dropdownStyle && createPortal(
-        <div ref={dropdownRef} style={dropdownStyle} className="z-[9999] overflow-auto rounded-md border border-border bg-card shadow-lg">
-          <button
-            type="button"
-            onClick={() => { onChange(""); setOpen(false); setQuery(""); }}
-            className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${!value ? "bg-muted font-medium" : ""}`}
+      {open &&
+        dropdownStyle &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            style={dropdownStyle}
+            className="z-[9999] overflow-auto rounded-md border border-border bg-card shadow-lg"
           >
-            {allLabel}
-          </button>
-          {filtered.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
-          ) : (
-            filtered.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                onClick={() => { onChange(o.value); setOpen(false); setQuery(""); }}
-                className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${value === o.value ? "bg-muted font-medium" : ""}`}
-              >
-                {o.label}
-              </button>
-            ))
-          )}
-        </div>,
-        document.body
-      )}
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setOpen(false);
+                setQuery("");
+              }}
+              className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${!value ? "bg-muted font-medium" : ""}`}
+            >
+              {allLabel}
+            </button>
+            {filtered.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">
+                No matches
+              </div>
+            ) : (
+              filtered.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                    setQuery("");
+                  }}
+                  className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${value === o.value ? "bg-muted font-medium" : ""}`}
+                >
+                  {o.label}
+                </button>
+              ))
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
