@@ -171,7 +171,7 @@ function ExpertWitnessSearch() {
           <p className="mt-2 max-w-2xl text-cream/70">
             Specialists across medicine, engineering, forensics, finance and more — with linked case appearances.
           </p>
-          <div className="mt-6 rounded-xl bg-card p-3 text-ink">
+          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg">
             <form
               onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
               className="grid gap-2 sm:grid-cols-[1fr_240px_180px_auto]"
