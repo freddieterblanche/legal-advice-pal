@@ -199,6 +199,7 @@ export type Database = {
           phone: string | null
           province: string | null
           slug: string
+          town_id: string | null
           updated_at: string
           website: string | null
         }
@@ -212,6 +213,7 @@ export type Database = {
           phone?: string | null
           province?: string | null
           slug: string
+          town_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -225,6 +227,7 @@ export type Database = {
           phone?: string | null
           province?: string | null
           slug?: string
+          town_id?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -234,6 +237,13 @@ export type Database = {
             columns: ["bar_id"]
             isOneToOne: false
             referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chambers_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
             referencedColumns: ["id"]
           },
         ]
@@ -435,6 +445,7 @@ export type Database = {
           services: string[] | null
           slug: string
           status: string | null
+          town_id: string | null
           twitter_url: string | null
           website: string | null
           youtube_url: string | null
@@ -460,6 +471,7 @@ export type Database = {
           services?: string[] | null
           slug: string
           status?: string | null
+          town_id?: string | null
           twitter_url?: string | null
           website?: string | null
           youtube_url?: string | null
@@ -485,11 +497,20 @@ export type Database = {
           services?: string[] | null
           slug?: string
           status?: string | null
+          town_id?: string | null
           twitter_url?: string | null
           website?: string | null
           youtube_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "firms_town_id_fkey"
+            columns: ["town_id"]
+            isOneToOne: false
+            referencedRelation: "towns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       practice_areas: {
         Row: {
