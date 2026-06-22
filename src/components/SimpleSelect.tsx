@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 
 type Option = { value: string; label: string };
@@ -28,7 +28,7 @@ export function SimpleSelect({
     onChange(next);
     setOpen(false);
   };
-  const chooseFromEvent = (event: React.SyntheticEvent<HTMLDivElement>) => {
+  const chooseFromEvent = (event: SyntheticEvent<HTMLDivElement>) => {
     const option = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-simple-select-value]");
     if (!option || !menuRef.current?.contains(option)) return;
     event.preventDefault();
