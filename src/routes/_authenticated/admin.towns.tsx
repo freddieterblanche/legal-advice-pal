@@ -6,6 +6,7 @@ import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "../../lib/constants";
 import { Combobox } from "../../components/Combobox";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type TownRow = {
   id: string;
@@ -96,10 +97,7 @@ function AdminTownsPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-4 flex flex-wrap gap-3">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search towns…" className="w-full max-w-sm rounded border border-border bg-background px-3 py-2 text-sm" />
-          <select value={filterProvince} onChange={(e) => setFilterProvince(e.target.value)} className="rounded border border-border bg-background px-3 py-2 text-sm">
-            <option value="">All provinces</option>
-            {(provinces ?? []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <SimpleSelect value={filterProvince} onChange={setFilterProvince} options={(provinces ?? []).map((p) => ({ value: p.id, label: p.name }))} placeholder="All provinces" className="rounded border border-border bg-background px-3 py-2 text-sm" />
           <span className="ml-auto self-center text-xs text-muted-foreground">{filtered.length} town{filtered.length === 1 ? "" : "s"}</span>
         </div>
         <div className="overflow-x-auto rounded-md border border-border bg-card">
