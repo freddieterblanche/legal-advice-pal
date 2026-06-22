@@ -5,6 +5,7 @@ import { Plus, Trash2, Pencil, ArrowLeft } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type BarRow = { id: string; name: string; slug: string; province: string | null };
 
@@ -143,10 +144,7 @@ function BarFormModal({ bar, onClose, onSaved }: { bar?: BarRow; onClose: () => 
         <h3 className="font-heading text-xl text-ink">{isEdit ? "Edit Bar" : "Add Bar"}</h3>
         <form onSubmit={submit} className="mt-4 space-y-3">
           <input required placeholder="Bar name (e.g. Johannesburg Bar)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-            <option value="">Province (optional)</option>
-            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province (optional)" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm text-muted-foreground hover:text-ink">Cancel</button>
             <button type="submit" disabled={saving} className="rounded bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>

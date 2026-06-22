@@ -12,6 +12,7 @@ import {
   registerExpertForCurrentUser,
 } from "../lib/registration.functions";
 import { ProvinceCityFields } from "../components/ProvinceCityFields";
+import { SimpleSelect } from "../components/SimpleSelect";
 import { RichTextEditor } from "../components/RichTextEditor";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { TypePill } from "../components/TypePill";
@@ -431,10 +432,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
                 <input type="checkbox" checked={form.is_senior_counsel} onChange={(e) => setForm({ ...form, is_senior_counsel: e.target.checked })} />
                 Senior Counsel (SC)
               </label>
-              <select value={form.bar_id} onChange={(e) => setForm({ ...form, bar_id: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-                <option value="">Select your Bar…</option>
-                {bars?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+              <SimpleSelect value={form.bar_id} onChange={(bar_id) => setForm({ ...form, bar_id })} options={(bars ?? []).map((b) => ({ value: b.id, label: b.name }))} placeholder="Select your Bar…" className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm" />
 
               <div className="rounded border border-border p-3">
                 <div className="mb-2 flex gap-4 text-sm">
@@ -448,10 +446,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
                   </label>
                 </div>
                 {form.chambers_mode === "existing" ? (
-                  <select value={form.chambers_id} onChange={(e) => setForm({ ...form, chambers_id: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-                    <option value="">Select chambers…</option>
-                    {chambers?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                  <SimpleSelect value={form.chambers_id} onChange={(chambers_id) => setForm({ ...form, chambers_id })} options={(chambers ?? []).map((c) => ({ value: c.id, label: c.name }))} placeholder="Select chambers…" className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm" />
                 ) : (
                   <Input placeholder="New chambers name" value={form.new_chambers_name} onChange={(v) => setForm({ ...form, new_chambers_name: v })} />
                 )}
@@ -461,14 +456,8 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
 
           {kind === "mediator" && (
             <>
-              <select value={form.mediator_accreditation} onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-                <option value="">Accreditation (optional)</option>
-                {MEDIATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
-              <select value={form.mediator_style} onChange={(e) => setForm({ ...form, mediator_style: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-                <option value="">Style (optional)</option>
-                {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <SimpleSelect value={form.mediator_accreditation} onChange={(mediator_accreditation) => setForm({ ...form, mediator_accreditation })} options={MEDIATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Accreditation (optional)" className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm" />
+              <SimpleSelect value={form.mediator_style} onChange={(mediator_style) => setForm({ ...form, mediator_style })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="Style (optional)" className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm" />
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Sectors</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -484,10 +473,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
 
           {kind === "arbitrator" && (
             <>
-              <select value={form.arbitrator_accreditation} onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm">
-                <option value="">Accreditation (optional)</option>
-                {ARBITRATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
+              <SimpleSelect value={form.arbitrator_accreditation} onChange={(arbitrator_accreditation) => setForm({ ...form, arbitrator_accreditation })} options={ARBITRATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Accreditation (optional)" className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm" />
               <Input type="number" placeholder="Years of arbitration experience" value={form.arbitrator_experience_years} onChange={(v) => setForm({ ...form, arbitrator_experience_years: v })} />
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Arbitration types</p>

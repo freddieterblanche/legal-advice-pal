@@ -12,6 +12,7 @@ import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { StickySearchBar } from "../components/StickySearchBar";
 import { useStickyTrigger } from "../hooks/use-sticky-trigger";
+import { SimpleSelect } from "../components/SimpleSelect";
 
 type SortField = "surname" | "listed";
 type Search = { q?: string; sector?: string; province?: string; style?: string; accreditation?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -97,22 +98,10 @@ function MediatorSearch() {
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
     <>
-      <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">All sectors</option>
-        {MEDIATION_SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
-      <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">All provinces</option>
-        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <select value={search.accreditation ?? ""} onChange={(e) => update({ accreditation: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">Any accreditation</option>
-        {MEDIATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
-      </select>
-      <select value={search.style ?? ""} onChange={(e) => update({ style: e.target.value || undefined })} className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">Any style</option>
-        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
+      <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.accreditation ?? ""} onChange={(accreditation) => update({ accreditation: accreditation || undefined })} options={MEDIATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Any accreditation" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.style ?? ""} onChange={(style) => update({ style: style || undefined })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="Any style" className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
     </>
   );
 
@@ -147,14 +136,8 @@ function MediatorSearch() {
                 maxLength={240}
                 className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
               />
-              <select value={search.sector ?? ""} onChange={(e) => update({ sector: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-                <option value="">All sectors</option>
-                {MEDIATION_SECTORS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-                <option value="">All provinces</option>
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
+              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
               <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
             </form>
             <div className="mt-3 space-y-2 border-t border-border pt-3">

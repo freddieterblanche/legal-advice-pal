@@ -6,6 +6,7 @@ import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { LawyerFormModal, type LawyerRow } from "../../components/LawyerFormModal";
 import { StatusCell } from "../../components/StatusCell";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type AttorneyRow = LawyerRow & { created_at: string | null };
 
@@ -238,10 +239,7 @@ function AddAttorneyFirmPicker({ firms, onCancel, onPicked }: { firms: { id: str
           <button onClick={onCancel} aria-label="Close" className="text-muted-foreground hover:text-ink"><X className="h-5 w-5" /></button>
         </div>
         <p className="mb-3 text-sm text-muted-foreground">Which firm does this attorney belong to?</p>
-        <select value={firmId} onChange={(e) => setFirmId(e.target.value)} className="mb-4 w-full rounded border border-border bg-background px-3 py-2 text-sm">
-          <option value="">Select a firm…</option>
-          {firms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-        </select>
+        <SimpleSelect value={firmId} onChange={setFirmId} options={firms.map((f) => ({ value: f.id, label: f.name }))} placeholder="Select a firm…" className="mb-4 w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <div className="flex justify-end gap-2">
           <button onClick={onCancel} className="rounded px-3 py-2 text-sm">Cancel</button>
           <button onClick={() => firmId && onPicked(firmId)} disabled={!firmId} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue</button>

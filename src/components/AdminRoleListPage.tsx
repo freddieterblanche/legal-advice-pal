@@ -6,6 +6,7 @@ import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { MediatorArbitratorFormModal } from "./MediatorArbitratorFormModal";
 import { StatusCell } from "./StatusCell";
+import { SimpleSelect } from "./SimpleSelect";
 
 type Role = "mediator" | "arbitrator";
 
@@ -391,11 +392,7 @@ function CreateNewPersonForm({ role, column, onSaved }: {
       </div>
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-ink">Background</span>
-        <select value={background} onChange={(e) => setBackground(e.target.value as typeof background)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-          <option value="retired_advocate">Retired advocate</option>
-          <option value="retired_attorney">Retired attorney</option>
-          <option value="other">Other</option>
-        </select>
+        <SimpleSelect value={background} onChange={(value) => setBackground(value as typeof background)} options={[{ value: "retired_advocate", label: "Retired advocate" }, { value: "retired_attorney", label: "Retired attorney" }, { value: "other", label: "Other" }]} placeholder="Background" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">

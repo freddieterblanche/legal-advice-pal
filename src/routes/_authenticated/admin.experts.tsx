@@ -14,6 +14,7 @@ import { ProfileImportBar } from "../../components/ProfileImportBar";
 import { importExpertProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { StatusCell } from "../../components/StatusCell";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 export const Route = createFileRoute("/_authenticated/admin/experts")({
   head: () => ({ meta: [{ title: "Admin · Expert Witnesses — Lawexpert.co.za" }] }),
@@ -391,9 +392,7 @@ function AdminExpertFormModal({
           </AField>
           <div className="grid gap-3 md:grid-cols-[7rem_1fr_1fr]">
             <AField label="Title">
-              <select value={form.name_title} onChange={(e) => setForm({ ...form, name_title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                {NAME_TITLES.map((t) => <option key={t} value={t}>{t || "— none —"}</option>)}
-              </select>
+              <SimpleSelect value={form.name_title} onChange={(name_title) => setForm({ ...form, name_title })} options={NAME_TITLES.map((t) => ({ value: t, label: t || "— none —" }))} placeholder="— none —" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </AField>
             <AField label="First name *">
               <input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
@@ -403,10 +402,7 @@ function AdminExpertFormModal({
             </AField>
           </div>
           <AField label="Firm (leave blank for independent expert)">
-            <select value={form.firm_id} onChange={(e) => setForm({ ...form, firm_id: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-              <option value="">— Independent —</option>
-              {firms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-            </select>
+            <SimpleSelect value={form.firm_id} onChange={(firm_id) => setForm({ ...form, firm_id })} options={firms.map((f) => ({ value: f.id, label: f.name }))} placeholder="— Independent —" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </AField>
           <AField label="Professional title (e.g. Orthopaedic Surgeon, Chartered Accountant)">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
@@ -449,13 +445,7 @@ function AdminExpertFormModal({
           </div>
           {isEdit && (
             <AField label="Status">
-              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                <option value="trial">Trial</option>
-                <option value="active">Active</option>
-                <option value="pending_payment">Pending payment</option>
-                <option value="suspended">Suspended</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              <SimpleSelect value={form.status} onChange={(status) => setForm({ ...form, status })} options={[{ value: "trial", label: "Trial" }, { value: "active", label: "Active" }, { value: "pending_payment", label: "Pending payment" }, { value: "suspended", label: "Suspended" }, { value: "inactive", label: "Inactive" }]} placeholder="Select status" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </AField>
           )}
           <AField label="Bio / experience">

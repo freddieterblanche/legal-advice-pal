@@ -18,6 +18,7 @@ import { ExpertWorkSamples } from "../../components/ExpertWorkSamples";
 import { ExpertPhotoField } from "../../components/ExpertPhotoField";
 import { LawyerFormModal, type LawyerRow } from "../../components/LawyerFormModal";
 import { TagInput } from "../../components/TagInput";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type Branch = {
   id: string;
@@ -620,9 +621,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           </Field>
           <div className="grid gap-3 md:grid-cols-[7rem_1fr_1fr]">
             <Field label="Title">
-              <select value={form.name_title} onChange={(e) => setForm({ ...form, name_title: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                {EXPERT_NAME_TITLES.map((t) => <option key={t} value={t}>{t || "— none —"}</option>)}
-              </select>
+              <SimpleSelect value={form.name_title} onChange={(name_title) => setForm({ ...form, name_title })} options={EXPERT_NAME_TITLES.map((t) => ({ value: t, label: t || "— none —" }))} placeholder="— none —" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </Field>
             <Field label="First name *"><input required value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Last name *"><input required value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
@@ -642,9 +641,7 @@ function ExpertFormModal({ firmId, expert, onClose, onSaved }: { firmId: string;
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="City"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" /></Field>
             <Field label="Province">
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
             </Field>
           </div>
           <Field label="Bio / experience">
@@ -820,9 +817,7 @@ function SettingsTab({ firm }: { firm: any }) {
         <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Main address" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         <div className="grid grid-cols-2 gap-3">
           <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
         </div>
         <p className="text-xs text-muted-foreground">City and province auto-apply to lawyers linked only to the head office.</p>
 
@@ -1005,16 +1000,12 @@ function BranchFormModal({
           <input placeholder="Street address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Country</label>
-            <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-              {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-            </select>
+            <SimpleSelect value={form.country} onChange={(country) => setForm({ ...form, country })} options={(countries ?? [{ name: "South Africa" }]).map((c) => ({ value: c.name, label: c.name }))} placeholder="Country…" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             {isSA ? (
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="rounded border border-border bg-background px-3 py-2 text-sm" />
             ) : (
               <input placeholder="State / region (optional)" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             )}

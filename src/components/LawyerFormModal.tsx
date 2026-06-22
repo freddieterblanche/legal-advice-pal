@@ -16,6 +16,7 @@ import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
 import { useFeaturedToggle, FEATURED_CAP } from "./FeaturedToggle";
+import { SimpleSelect } from "./SimpleSelect";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
@@ -749,10 +750,9 @@ export function LawyerFormModal({
               <div className="space-y-3">
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Designation</label>
-                  <select
+                  <SimpleSelect
                     value={otherDesignation ? "__other__" : form.designation_code}
-                    onChange={(e) => {
-                      const v = e.target.value;
+                    onChange={(v) => {
                       if (v === "__other__") {
                         setOtherDesignation(true);
                         setForm({ ...form, designation_code: "" });
@@ -761,12 +761,10 @@ export function LawyerFormModal({
                         setForm({ ...form, designation_code: v, designation_custom: "" });
                       }
                     }}
+                    options={[...ATTORNEY_DESIGNATIONS.map((d) => ({ value: d, label: d })), { value: "__other__", label: "Other (specify)" }]}
+                    placeholder="Select…"
                     className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
-                  >
-                    <option value="">Select…</option>
-                    {ATTORNEY_DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-                    <option value="__other__">Other (specify)</option>
-                  </select>
+                  />
                 </div>
                 {otherDesignation && (
                   <input
@@ -864,25 +862,11 @@ export function LawyerFormModal({
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-xs font-medium text-muted-foreground">
                       Accreditation
-                      <select
-                        value={form.mediator_accreditation}
-                        onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {MEDIATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.mediator_accreditation} onChange={(mediator_accreditation) => setForm({ ...form, mediator_accreditation })} options={MEDIATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                     <label className="block text-xs font-medium text-muted-foreground">
                       Style
-                      <select
-                        value={form.mediator_style}
-                        onChange={(e) => setForm({ ...form, mediator_style: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.mediator_style} onChange={(mediator_style) => setForm({ ...form, mediator_style })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                   </div>
                   <div>
@@ -905,14 +889,7 @@ export function LawyerFormModal({
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-xs font-medium text-muted-foreground">
                       Accreditation
-                      <select
-                        value={form.arbitrator_accreditation}
-                        onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {ARBITRATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.arbitrator_accreditation} onChange={(arbitrator_accreditation) => setForm({ ...form, arbitrator_accreditation })} options={ARBITRATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                     <label className="block text-xs font-medium text-muted-foreground">
                       Years of experience
@@ -1374,32 +1351,25 @@ function LocationFields({
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div>
         <label className="mb-1 block text-xs text-muted-foreground">Country</label>
-        <select
+        <SimpleSelect
           value={country}
-          onChange={(e) => {
-            const next = e.target.value;
+          onChange={(next) => {
+            if (!next) return;
             // Wipe province/city when switching country group so SA values
             // don't linger on non-SA records and vice versa.
             const reset = (next === "South Africa") !== isSA;
             onChange({ country: next, ...(reset ? { province: "", city: "" } : {}) });
           }}
+          options={options.map((c) => ({ value: c, label: c }))}
+          placeholder="Country…"
           className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-        >
-          {options.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        />
       </div>
       {isSA ? (
         <>
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">Province</label>
-            <select
-              value={province}
-              onChange={(e) => onChange({ province: e.target.value, city: "" })}
-              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Select province</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <SimpleSelect value={province} onChange={(province) => onChange({ province, city: "" })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Select province" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">City / town</label>
