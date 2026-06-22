@@ -37,6 +37,28 @@ export function SimpleSelect({
   };
 
   useEffect(() => {
+    if (!open) return;
+    const menu = menuRef.current;
+    if (!menu) return;
+    const onOptionEvent = (event: Event) => {
+      const option = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>("[data-simple-select-value]");
+      if (!option || !menu.contains(option)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onChange(option.dataset.simpleSelectValue ?? "");
+      setOpen(false);
+    };
+    ["pointerdown", "mousedown", "touchstart", "click"].forEach((type) =>
+      menu.addEventListener(type, onOptionEvent, { capture: true }),
+    );
+    return () => {
+      ["pointerdown", "mousedown", "touchstart", "click"].forEach((type) =>
+        menu.removeEventListener(type, onOptionEvent, { capture: true }),
+      );
+    };
+  }, [open, onChange]);
+
+  useEffect(() => {
     const onDocPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
       if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
