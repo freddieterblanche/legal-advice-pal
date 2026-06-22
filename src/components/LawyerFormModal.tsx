@@ -1351,32 +1351,25 @@ function LocationFields({
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div>
         <label className="mb-1 block text-xs text-muted-foreground">Country</label>
-        <select
+        <SimpleSelect
           value={country}
-          onChange={(e) => {
-            const next = e.target.value;
+          onChange={(next) => {
+            if (!next) return;
             // Wipe province/city when switching country group so SA values
             // don't linger on non-SA records and vice versa.
             const reset = (next === "South Africa") !== isSA;
             onChange({ country: next, ...(reset ? { province: "", city: "" } : {}) });
           }}
+          options={options.map((c) => ({ value: c, label: c }))}
+          placeholder="Country…"
           className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-        >
-          {options.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
+        />
       </div>
       {isSA ? (
         <>
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">Province</label>
-            <select
-              value={province}
-              onChange={(e) => onChange({ province: e.target.value, city: "" })}
-              className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Select province</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <SimpleSelect value={province} onChange={(province) => onChange({ province, city: "" })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Select province" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
           <div>
             <label className="mb-1 block text-xs text-muted-foreground">City / town</label>
