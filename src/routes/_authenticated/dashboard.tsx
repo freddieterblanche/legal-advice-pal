@@ -1000,16 +1000,12 @@ function BranchFormModal({
           <input placeholder="Street address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">Country</label>
-            <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-              {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-            </select>
+            <SimpleSelect value={form.country} onChange={(country) => setForm({ ...form, country })} options={(countries ?? [{ name: "South Africa" }]).map((c) => ({ value: c.name, label: c.name }))} placeholder="Country…" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             {isSA ? (
-              <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="rounded border border-border bg-background px-3 py-2 text-sm" />
             ) : (
               <input placeholder="State / region (optional)" value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
             )}
