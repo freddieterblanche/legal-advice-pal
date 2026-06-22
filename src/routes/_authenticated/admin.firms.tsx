@@ -664,16 +664,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
                   <input value={current.address} onChange={(e) => setBranchField(b.id, { address: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="Address" />
                   <input value={current.city} onChange={(e) => setBranchField(b.id, { city: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="City" />
                   {current.country === "South Africa" ? (
-                    <select value={current.province} onChange={(e) => { setBranchField(b.id, { province: e.target.value }); updateBranch(b.id, { province: e.target.value }); }} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                      <option value="">Province…</option>
-                      {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-                    </select>
+                    <SimpleSelect value={current.province} onChange={(province) => { setBranchField(b.id, { province }); updateBranch(b.id, { province }); }} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
                   ) : (
                     <input value={current.province} onChange={(e) => setBranchField(b.id, { province: e.target.value })} onBlur={() => saveBranchDraft(b.id)} className="rounded border border-border bg-background px-2 py-1.5 text-sm" placeholder="State / region (optional)" />
                   )}
-                  <select value={current.country} onChange={(e) => { const country = e.target.value; const province = country === "South Africa" ? "Gauteng" : ""; setBranchField(b.id, { country, province }); updateBranch(b.id, { country, province }); }} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
-                    {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  </select>
+                  <SimpleSelect value={current.country} onChange={(country) => { const province = country === "South Africa" ? "Gauteng" : ""; setBranchField(b.id, { country, province }); updateBranch(b.id, { country, province }); }} options={(countries ?? [{ name: "South Africa" }]).map((c) => ({ value: c.name, label: c.name }))} placeholder="Country…" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -699,15 +694,11 @@ function BranchesEditor({ firmId }: { firmId: string }) {
               <input value={draft.address} onChange={(e) => setDraft({ ...draft, address: e.target.value })} placeholder="Address" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
               <input value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} placeholder="City" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               {draft.country === "South Africa" ? (
-                <select value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} className="rounded border border-border bg-background px-2 py-1.5 text-sm">
-                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <SimpleSelect value={draft.province} onChange={(province) => setDraft({ ...draft, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               ) : (
                 <input value={draft.province} onChange={(e) => setDraft({ ...draft, province: e.target.value })} placeholder="State / region (optional)" className="rounded border border-border bg-background px-2 py-1.5 text-sm" />
               )}
-              <select value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value, province: e.target.value === "South Africa" ? "Gauteng" : "" })} className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm">
-                {(countries ?? [{ name: "South Africa" }]).map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-              </select>
+              <SimpleSelect value={draft.country} onChange={(country) => setDraft({ ...draft, country, province: country === "South Africa" ? "Gauteng" : "" })} options={(countries ?? [{ name: "South Africa" }]).map((c) => ({ value: c.name, label: c.name }))} placeholder="Country…" className="sm:col-span-2 rounded border border-border bg-background px-2 py-1.5 text-sm" />
             </div>
             <div className="mt-2 flex items-center justify-between">
               <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
