@@ -56,7 +56,7 @@ export function SimpleSelect({
         menu.removeEventListener(type, onOptionEvent, { capture: true }),
       );
     };
-  }, [open, onChange]);
+  }, [open, style, onChange]);
 
   useEffect(() => {
     const onDocPointerDown = (event: PointerEvent) => {
