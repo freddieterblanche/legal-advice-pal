@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
@@ -28,6 +28,8 @@ export function ProvinceCityFields({
   const showCountry = typeof country === "string" && typeof onCountry === "function";
   const effectiveCountry = country ?? "South Africa";
   const isSA = effectiveCountry === "South Africa";
+  const pendingLocationClearRef = useRef(false);
+  const pendingCityClearRef = useRef(false);
 
   const { data: countries } = useQuery({
     queryKey: ["countries-list"],
@@ -76,6 +78,20 @@ export function ProvinceCityFields({
     [],
   );
 
+  useEffect(() => {
+    if (!pendingLocationClearRef.current) return;
+    pendingLocationClearRef.current = false;
+    pendingCityClearRef.current = true;
+    if (province) onProvince("");
+    else if (city) onCity("");
+  }, [effectiveCountry, province, city, onProvince, onCity]);
+
+  useEffect(() => {
+    if (!pendingCityClearRef.current) return;
+    pendingCityClearRef.current = false;
+    if (city) onCity("");
+  }, [province, city, onCity]);
+
   return (
     <>
       {showCountry && (
@@ -83,11 +99,8 @@ export function ProvinceCityFields({
           value={effectiveCountry}
           onChange={(next) => {
             if (!next) return;
+            if ((next === "South Africa") !== isSA) pendingLocationClearRef.current = true;
             onCountry?.(next);
-            if ((next === "South Africa") !== isSA) {
-              onProvince("");
-              onCity("");
-            }
           }}
           options={countryOptions}
           placeholder=""
@@ -99,8 +112,8 @@ export function ProvinceCityFields({
           <SimpleSelect
             value={province}
             onChange={(v) => {
+              if (v !== province) pendingCityClearRef.current = true;
               onProvince(v);
-              onCity("");
             }}
             options={provinceOptions}
             placeholder="Select province"
