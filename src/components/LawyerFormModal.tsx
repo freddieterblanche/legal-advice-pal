@@ -862,25 +862,11 @@ export function LawyerFormModal({
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-xs font-medium text-muted-foreground">
                       Accreditation
-                      <select
-                        value={form.mediator_accreditation}
-                        onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {MEDIATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.mediator_accreditation} onChange={(mediator_accreditation) => setForm({ ...form, mediator_accreditation })} options={MEDIATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                     <label className="block text-xs font-medium text-muted-foreground">
                       Style
-                      <select
-                        value={form.mediator_style}
-                        onChange={(e) => setForm({ ...form, mediator_style: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.mediator_style} onChange={(mediator_style) => setForm({ ...form, mediator_style })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                   </div>
                   <div>
@@ -903,14 +889,7 @@ export function LawyerFormModal({
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block text-xs font-medium text-muted-foreground">
                       Accreditation
-                      <select
-                        value={form.arbitrator_accreditation}
-                        onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })}
-                        className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink"
-                      >
-                        <option value="">—</option>
-                        {ARBITRATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                      <SimpleSelect value={form.arbitrator_accreditation} onChange={(arbitrator_accreditation) => setForm({ ...form, arbitrator_accreditation })} options={ARBITRATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-sm text-ink" />
                     </label>
                     <label className="block text-xs font-medium text-muted-foreground">
                       Years of experience
