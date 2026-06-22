@@ -111,12 +111,6 @@ function ExpertWitnessSearch() {
   const total = results?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  const groupedDisciplines = (disciplines ?? []).reduce((acc: Record<string, typeof disciplines>, d) => {
-    const k = d.parent_category ?? "Other";
-    (acc[k] ||= [] as never).push(d);
-    return acc;
-  }, {});
-
   const { ref: sentinelRef, isStuck } = useStickyTrigger();
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
