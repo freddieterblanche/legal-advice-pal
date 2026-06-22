@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { FeaturedBadge } from "../components/FeaturedBadge";
 import { StickySearchBar } from "../components/StickySearchBar";
 import { useStickyTrigger } from "../hooks/use-sticky-trigger";
+import { SimpleSelect } from "../components/SimpleSelect";
 
 type SortField = "surname" | "experience" | "listed";
 type Search = { q?: string; atype?: string; province?: string; accreditation?: string; experience?: "0-5" | "5-10" | "10+"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -100,24 +101,10 @@ function ArbitratorSearch() {
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
     <>
-      <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">All types</option>
-        {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-      </select>
-      <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">All provinces</option>
-        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <select value={search.accreditation ?? ""} onChange={(e) => update({ accreditation: e.target.value || undefined })} className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">Any accreditation</option>
-        {ARBITRATION_ACCREDITATIONS.map((a) => <option key={a} value={a}>{a}</option>)}
-      </select>
-      <select value={search.experience ?? ""} onChange={(e) => update({ experience: (e.target.value || undefined) as Search["experience"] })} className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink">
-        <option value="">Any experience</option>
-        <option value="0-5">0–5 years</option>
-        <option value="5-10">5–10 years</option>
-        <option value="10+">10+ years</option>
-      </select>
+      <SimpleSelect value={search.atype ?? ""} onChange={(atype) => update({ atype: atype || undefined })} options={ARBITRATION_TYPES.map((t) => ({ value: t, label: t }))} placeholder="All types" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.accreditation ?? ""} onChange={(accreditation) => update({ accreditation: accreditation || undefined })} options={ARBITRATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Any accreditation" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.experience ?? ""} onChange={(experience) => update({ experience: (experience || undefined) as Search["experience"] })} options={[{ value: "0-5", label: "0–5 years" }, { value: "5-10", label: "5–10 years" }, { value: "10+", label: "10+ years" }]} placeholder="Any experience" className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
     </>
   );
 
@@ -152,14 +139,8 @@ function ArbitratorSearch() {
                 maxLength={240}
                 className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
               />
-              <select value={search.atype ?? ""} onChange={(e) => update({ atype: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-                <option value="">All types</option>
-                {ARBITRATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <select value={search.province ?? ""} onChange={(e) => update({ province: e.target.value || undefined })} className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
-                <option value="">All provinces</option>
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={search.atype ?? ""} onChange={(atype) => update({ atype: atype || undefined })} options={ARBITRATION_TYPES.map((t) => ({ value: t, label: t }))} placeholder="All types" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
+              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
               <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
             </form>
             <div className="mt-3 space-y-2 border-t border-border pt-3">
