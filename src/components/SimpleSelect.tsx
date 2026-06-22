@@ -28,6 +28,13 @@ export function SimpleSelect({
     onChange(next);
     setOpen(false);
   };
+  const chooseFromEvent = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    const option = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-simple-select-value]");
+    if (!option || !menuRef.current?.contains(option)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    choose(option.dataset.simpleSelectValue ?? "");
+  };
 
   useEffect(() => {
     const onDocPointerDown = (event: PointerEvent) => {
@@ -90,11 +97,16 @@ export function SimpleSelect({
           ref={menuRef}
           style={{ ...style, zIndex: 9999, pointerEvents: "auto" }}
           translate="no"
+          onPointerDownCapture={chooseFromEvent}
+          onMouseDownCapture={chooseFromEvent}
+          onTouchStartCapture={chooseFromEvent}
+          onClickCapture={chooseFromEvent}
           className="z-[9999] overflow-auto rounded-md border border-border bg-card text-card-foreground shadow-lg"
         >
           {placeholder ? (
             <button
               type="button"
+              data-simple-select-value=""
               onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
               onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
               onTouchStart={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
@@ -108,6 +120,7 @@ export function SimpleSelect({
             <button
               key={option.value}
               type="button"
+              data-simple-select-value={option.value}
               onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
               onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
               onTouchStart={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
