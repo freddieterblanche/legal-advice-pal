@@ -9,6 +9,7 @@ import { ProvinceCityFields } from "./ProvinceCityFields";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { ProfileImportBar } from "./ProfileImportBar";
 import { importMediatorArbitratorProfile } from "../lib/profile-import.functions";
+import { SimpleSelect } from "./SimpleSelect";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
@@ -385,18 +386,10 @@ export function MediatorArbitratorFormModal({
                 <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-violet-700">Mediator details</legend>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field label="Accreditation">
-                    <select className={inputCls} value={form.mediator_accreditation}
-                      onChange={(e) => setForm({ ...form, mediator_accreditation: e.target.value })}>
-                      <option value="">—</option>
-                      {MEDIATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <SimpleSelect className={inputCls} value={form.mediator_accreditation} onChange={(mediator_accreditation) => setForm({ ...form, mediator_accreditation })} options={MEDIATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" />
                   </Field>
                   <Field label="Style">
-                    <select className={inputCls} value={form.mediator_style}
-                      onChange={(e) => setForm({ ...form, mediator_style: e.target.value })}>
-                      <option value="">—</option>
-                      {MEDIATION_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <SimpleSelect className={inputCls} value={form.mediator_style} onChange={(mediator_style) => setForm({ ...form, mediator_style })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="—" />
                   </Field>
                 </div>
                 <Field label="Sectors">
@@ -418,11 +411,7 @@ export function MediatorArbitratorFormModal({
                 <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-rose-700">Arbitrator details</legend>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field label="Accreditation">
-                    <select className={inputCls} value={form.arbitrator_accreditation}
-                      onChange={(e) => setForm({ ...form, arbitrator_accreditation: e.target.value })}>
-                      <option value="">—</option>
-                      {ARBITRATION_ACCREDITATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <SimpleSelect className={inputCls} value={form.arbitrator_accreditation} onChange={(arbitrator_accreditation) => setForm({ ...form, arbitrator_accreditation })} options={ARBITRATION_ACCREDITATIONS.map((s) => ({ value: s, label: s }))} placeholder="—" />
                   </Field>
                   <Field label="Years of experience">
                     <input type="number" min={0} max={80} className={inputCls}
@@ -472,13 +461,7 @@ export function MediatorArbitratorFormModal({
                   onChange={(e) => setForm({ ...form, daily_rate_range: e.target.value })} />
               </Field>
               <Field label="Status">
-                <select className={inputCls} value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}>
-                  <option value="active">Active</option>
-                  <option value="trial">Trial</option>
-                  <option value="pending_payment">Pending payment</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <SimpleSelect className={inputCls} value={form.status} onChange={(status) => setForm({ ...form, status })} options={[{ value: "active", label: "Active" }, { value: "trial", label: "Trial" }, { value: "pending_payment", label: "Pending payment" }, { value: "inactive", label: "Inactive" }]} placeholder="Select status" />
               </Field>
             </div>
             <Field label="Availability notes">
