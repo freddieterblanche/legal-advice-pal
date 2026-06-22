@@ -16,6 +16,7 @@ import { sanitizeBioHtml } from "../lib/sanitize";
 import { ImageCropModal } from "./ImageCropModal";
 import { ReportedCasesEditor } from "./ReportedCasesEditor";
 import { useFeaturedToggle, FEATURED_CAP } from "./FeaturedToggle";
+import { SimpleSelect } from "./SimpleSelect";
 import {
   MEDIATION_SECTORS,
   MEDIATION_ACCREDITATIONS,
@@ -749,10 +750,9 @@ export function LawyerFormModal({
               <div className="space-y-3">
                 <div>
                   <label className="mb-1 block text-xs text-muted-foreground">Designation</label>
-                  <select
+                  <SimpleSelect
                     value={otherDesignation ? "__other__" : form.designation_code}
-                    onChange={(e) => {
-                      const v = e.target.value;
+                    onChange={(v) => {
                       if (v === "__other__") {
                         setOtherDesignation(true);
                         setForm({ ...form, designation_code: "" });
@@ -761,12 +761,10 @@ export function LawyerFormModal({
                         setForm({ ...form, designation_code: v, designation_custom: "" });
                       }
                     }}
+                    options={[...ATTORNEY_DESIGNATIONS.map((d) => ({ value: d, label: d })), { value: "__other__", label: "Other (specify)" }]}
+                    placeholder="Select…"
                     className="w-full rounded border border-border bg-card px-3 py-2 text-sm"
-                  >
-                    <option value="">Select…</option>
-                    {ATTORNEY_DESIGNATIONS.map((d) => <option key={d} value={d}>{d}</option>)}
-                    <option value="__other__">Other (specify)</option>
-                  </select>
+                  />
                 </div>
                 {otherDesignation && (
                   <input
