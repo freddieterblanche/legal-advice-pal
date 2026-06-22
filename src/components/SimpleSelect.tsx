@@ -9,12 +9,14 @@ export function SimpleSelect({
   options,
   placeholder = "Select…",
   className,
+  disabled = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   options: Option[];
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<CSSProperties | null>(null);
@@ -70,8 +72,9 @@ export function SimpleSelect({
         ref={triggerRef}
         type="button"
         translate="no"
+        disabled={disabled}
         onClick={() => setOpen((current) => !current)}
-        className={`${className ?? ""} flex min-w-0 items-center justify-between gap-2 text-left`}
+        className={`${className ?? ""} flex min-w-0 items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50`}
       >
         <span className={`min-w-0 truncate ${selected ? "" : "text-muted-foreground"}`} translate="no">
           {selected?.label ?? placeholder}
