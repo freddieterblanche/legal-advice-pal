@@ -144,7 +144,7 @@ export function SimpleSelect({
       </button>
       {open && style && createPortal(
         <div
-          ref={menuRef}
+          ref={attachMenu}
           style={{ ...style, zIndex: 9999, pointerEvents: "auto" }}
           translate="no"
           onPointerDownCapture={chooseFromEvent}
