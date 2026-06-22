@@ -11,6 +11,7 @@ import { ProfileImportBar } from "../../components/ProfileImportBar";
 import { importFirmProfile } from "../../lib/profile-import.functions";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { StatusCell } from "../../components/StatusCell";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type FirmRow = {
   id: string;
@@ -462,18 +463,12 @@ function FirmFormModal({ firm, onClose, onSaved }: { firm?: FirmRow; onClose: ()
               <input placeholder="Main address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-3">
                 <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-                <select value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} className="rounded border border-border bg-background px-3 py-2 text-sm">
-                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <SimpleSelect value={form.province} onChange={(province) => setForm({ ...form, province })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="Province…" className="rounded border border-border bg-background px-3 py-2 text-sm" />
               </div>
 
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</label>
-                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm">
-                  <option value="active">Active (public)</option>
-                  <option value="pending">Pending review</option>
-                  <option value="inactive">Inactive (hidden)</option>
-                </select>
+                <SimpleSelect value={form.status} onChange={(status) => setForm({ ...form, status })} options={[{ value: "active", label: "Active (public)" }, { value: "pending", label: "Pending review" }, { value: "inactive", label: "Inactive (hidden)" }]} placeholder="Select status" className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
               </div>
 
               {isEdit && firm && <BranchesEditor firmId={firm.id} />}
