@@ -22,11 +22,39 @@ export function SimpleSelect({
   const [style, setStyle] = useState<CSSProperties | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const onChangeRef = useRef(onChange);
+  const menuCleanupRef = useRef<(() => void) | null>(null);
 
   const selected = options.find((option) => option.value === value);
   const choose = (next: string) => {
     onChange(next);
     setOpen(false);
+  };
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  const attachMenu = (node: HTMLDivElement | null) => {
+    menuCleanupRef.current?.();
+    menuCleanupRef.current = null;
+    menuRef.current = node;
+    if (!node) return;
+    const onOptionEvent = (event: Event) => {
+      const option = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>("[data-simple-select-value]");
+      if (!option || !node.contains(option)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onChangeRef.current(option.dataset.simpleSelectValue ?? "");
+      setOpen(false);
+    };
+    ["pointerdown", "mousedown", "touchstart", "click"].forEach((type) =>
+      node.addEventListener(type, onOptionEvent, { capture: true }),
+    );
+    menuCleanupRef.current = () => {
+      ["pointerdown", "mousedown", "touchstart", "click"].forEach((type) =>
+        node.removeEventListener(type, onOptionEvent, { capture: true }),
+      );
+    };
   };
   const chooseFromEvent = (event: SyntheticEvent<HTMLDivElement>) => {
     const option = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-simple-select-value]");
