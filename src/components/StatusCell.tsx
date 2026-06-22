@@ -3,6 +3,7 @@ import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../integrations/supabase/client";
 import { useFeaturedToggle, type FeaturedCategory } from "./FeaturedToggle";
+import { SimpleSelect } from "./SimpleSelect";
 
 type Option = { value: string; label: string };
 
@@ -74,23 +75,17 @@ export function StatusCell({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <select
+      <SimpleSelect
         value={status ?? ""}
         disabled={setStatus.isPending}
-        onChange={(e) => {
-          const next = e.target.value;
+        onChange={(next) => {
           if (next === "suspended" && !confirm("Suspend this listing? It will be hidden from public listings.")) return;
           setStatus.mutate(next);
         }}
+        options={[...(!opts.some((o) => o.value === (status ?? "")) && status ? [{ value: status, label: status }] : []), ...opts]}
+        placeholder="Status"
         className={selectClass(status)}
-      >
-        {!opts.some((o) => o.value === (status ?? "")) && status && (
-          <option value={status}>{status}</option>
-        )}
-        {opts.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+      />
       <button
         type="button"
         disabled={featuredMut.isPending}
