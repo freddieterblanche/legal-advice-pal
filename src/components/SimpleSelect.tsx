@@ -95,7 +95,10 @@ export function SimpleSelect({
           {placeholder ? (
             <button
               type="button"
-              onClick={() => { onChange(""); setOpen(false); }}
+              onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
+              onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
+              onTouchStart={(event) => { event.preventDefault(); event.stopPropagation(); choose(""); }}
+              onClick={() => choose("")}
               className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${!value ? "bg-muted font-medium" : ""}`}
             >
               {placeholder}
@@ -106,6 +109,8 @@ export function SimpleSelect({
               key={option.value}
               type="button"
               onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
+              onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
+              onTouchStart={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
               onClick={() => choose(option.value)}
               className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${value === option.value ? "bg-muted font-medium" : ""}`}
             >
