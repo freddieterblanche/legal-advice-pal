@@ -10,6 +10,7 @@ import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { StickySearchBar } from "../components/StickySearchBar";
 import { useStickyTrigger } from "../hooks/use-sticky-trigger";
+import { SimpleSelect } from "../components/SimpleSelect";
 
 type SortField = "surname" | "cases" | "listed";
 type Search = { q?: string; discipline?: string; province?: string; independent?: "yes" | "no"; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -120,35 +121,9 @@ function ExpertWitnessSearch() {
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
     <>
-      <select
-        value={search.discipline ?? ""}
-        onChange={(e) => update({ discipline: e.target.value || undefined })}
-        className="w-44 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
-      >
-        <option value="">All disciplines</option>
-        {Object.entries(groupedDisciplines).map(([cat, list]) => (
-          <optgroup key={cat} label={cat}>
-            {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
-          </optgroup>
-        ))}
-      </select>
-      <select
-        value={search.province ?? ""}
-        onChange={(e) => update({ province: e.target.value || undefined })}
-        className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
-      >
-        <option value="">All provinces</option>
-        {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-      </select>
-      <select
-        value={search.independent ?? ""}
-        onChange={(e) => update({ independent: (e.target.value || undefined) as Search["independent"] })}
-        className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink"
-      >
-        <option value="">All experts</option>
-        <option value="yes">Independent</option>
-        <option value="no">Employed</option>
-      </select>
+      <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="w-44 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.independent ?? ""} onChange={(independent) => update({ independent: (independent || undefined) as Search["independent"] })} options={[{ value: "yes", label: "Independent" }, { value: "no", label: "Employed" }]} placeholder="All experts" className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
     </>
   );
 
@@ -183,26 +158,8 @@ function ExpertWitnessSearch() {
                 maxLength={240}
                 className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
               />
-              <select
-                value={search.discipline ?? ""}
-                onChange={(e) => update({ discipline: e.target.value || undefined })}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              >
-                <option value="">All disciplines</option>
-                {Object.entries(groupedDisciplines).map(([cat, list]) => (
-                  <optgroup key={cat} label={cat}>
-                    {list?.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-              <select
-                value={search.province ?? ""}
-                onChange={(e) => update({ province: e.target.value || undefined })}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              >
-                <option value="">All provinces</option>
-                {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
+              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
               <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">
                 Search
               </button>
