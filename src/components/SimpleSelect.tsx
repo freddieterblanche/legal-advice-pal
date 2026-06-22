@@ -24,6 +24,10 @@ export function SimpleSelect({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const selected = options.find((option) => option.value === value);
+  const choose = (next: string) => {
+    onChange(next);
+    setOpen(false);
+  };
 
   useEffect(() => {
     const onDocPointerDown = (event: PointerEvent) => {
@@ -84,7 +88,7 @@ export function SimpleSelect({
       {open && style && createPortal(
         <div
           ref={menuRef}
-          style={style}
+          style={{ ...style, zIndex: 9999, pointerEvents: "auto" }}
           translate="no"
           className="z-[9999] overflow-auto rounded-md border border-border bg-card text-card-foreground shadow-lg"
         >
@@ -101,7 +105,8 @@ export function SimpleSelect({
             <button
               key={option.value}
               type="button"
-              onClick={() => { onChange(option.value); setOpen(false); }}
+              onPointerDown={(event) => { event.preventDefault(); event.stopPropagation(); choose(option.value); }}
+              onClick={() => choose(option.value)}
               className={`block w-full px-3 py-2 text-left text-sm hover:bg-muted ${value === option.value ? "bg-muted font-medium" : ""}`}
             >
               {option.label}
