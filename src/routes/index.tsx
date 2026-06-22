@@ -16,6 +16,7 @@ import {
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { getPracticeAreaIcon } from "../lib/practice-area-icons";
+import { SimpleSelect } from "../components/SimpleSelect";
 import heroLawyer from "../assets/hero-lawyer.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -261,10 +262,13 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
             <option value="">All practice areas</option>
             {practiceAreas.map((p) => <option key={p.id} value={p.slug}>{p.name}</option>)}
           </select>
-          <select value={province} onChange={(e) => setProvince(e.target.value)} className={`w-full min-w-0 rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}>
-            <option value="">All provinces</option>
-            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <SimpleSelect
+            value={province}
+            onChange={setProvince}
+            options={PROVINCES.map((p) => ({ value: p, label: p }))}
+            placeholder="All provinces"
+            className={`w-full min-w-0 rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground focus:outline-none focus:ring-2 ${ringClass}`}
+          />
         </div>
         <button
           type="submit"
