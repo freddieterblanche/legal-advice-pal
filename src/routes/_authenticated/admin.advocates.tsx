@@ -11,6 +11,7 @@ import { ImageCropModal } from "../../components/ImageCropModal";
 import { RichTextEditor } from "../../components/RichTextEditor";
 import { sanitizeBioHtml } from "../../lib/sanitize";
 import { StatusCell } from "../../components/StatusCell";
+import { SimpleSelect } from "../../components/SimpleSelect";
 
 type AdvocateRow = {
   id: string;
