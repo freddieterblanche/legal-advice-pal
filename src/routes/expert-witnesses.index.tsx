@@ -266,18 +266,20 @@ function ExpertWitnessSearch() {
                 const disc: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_service_providers?.length ?? 0;
                 return (
-                  <article key={e.id} className="flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0">
-                    {e.avatar_url ? (
-                      <img
-                        src={e.avatar_url}
-                        alt={`${e.first_name} ${e.last_name}`}
-                        className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top"
-                      />
-                    ) : (
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gold/10 font-heading text-xl text-gold sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl">
-                        {e.first_name?.[0]}{e.last_name?.[0]}
-                      </div>
-                    )}
+                  <article key={e.id} className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-gold/30 sm:px-5">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/30 sm:h-20 sm:w-20">
+                      {e.avatar_url ? (
+                        <img
+                          src={e.avatar_url}
+                          alt={`${e.first_name} ${e.last_name}`}
+                          className="h-full w-full scale-[1.18] object-cover object-top"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gold/10 font-heading text-xl text-gold sm:text-2xl">
+                          {e.first_name?.[0]}{e.last_name?.[0]}
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-baseline gap-3">
