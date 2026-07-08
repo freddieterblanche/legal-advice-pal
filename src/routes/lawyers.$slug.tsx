@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { formatDesignation, headBadges, designationKind } from "../lib/designation";
+import { BrandStrandDivider } from "../components/BrandMark";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
@@ -78,23 +79,30 @@ function LawyerProfile() {
   return (
     <div className="bg-cream">
       {/* Header */}
-      <section className="bg-ink py-16 text-cream">
+      <section className="relative bg-ink py-16 text-cream">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
             {lawyer.avatar_url ? (
               <img
                 src={lawyer.avatar_url}
                 alt={`${lawyer.first_name} ${lawyer.last_name}`}
-                className="h-64 w-52 shrink-0 object-cover object-top sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
+                className="h-64 w-52 shrink-0 rounded-2xl object-cover object-top shadow-lg ring-1 ring-gold/40 sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div className="flex h-64 w-52 shrink-0 items-center justify-center bg-gold/20 font-heading text-5xl text-gold sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
+              <div className="flex h-64 w-52 shrink-0 items-center justify-center rounded-2xl bg-gold/20 font-heading text-5xl text-gold ring-1 ring-gold/40 sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
                 {lawyer.first_name[0]}{lawyer.last_name[0]}
               </div>
             )}
 
             <div className="flex-1">
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.35em] text-gold">
+                {designationKind(lawyer.provider_type === "advocate" ? "advocate" : lawyer.designation) === "advocate"
+                  ? "Verified advocate"
+                  : lawyer.is_mediator || lawyer.is_arbitrator
+                    ? "Verified professional"
+                    : "Verified attorney"}
+              </p>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}{lawyer.is_senior_counsel ? " SC" : ""}</h1>
                 {(() => {
@@ -191,6 +199,7 @@ function LawyerProfile() {
             </div>
           </div>
         </div>
+        <BrandStrandDivider />
       </section>
 
       <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
@@ -200,7 +209,7 @@ function LawyerProfile() {
               <h2 className="font-heading text-xl text-ink">Practice Areas</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {areas.map((a: any) => (
-                  <span key={a.slug} className="rounded bg-ink/10 px-2.5 py-1 text-xs text-ink">{a.name}</span>
+                  <span key={a.slug} className="rounded-full border border-gold/30 bg-gold/[0.06] px-3 py-1 text-xs font-medium text-ink">{a.name}</span>
                 ))}
               </div>
             </section>

@@ -81,7 +81,7 @@ export function formatDesignation(l: StructuredLawyer): string {
   const years = yearsInPractice(l.year_of_admission ?? null);
   return years !== null
     ? `${designation} · ${years} year${years === 1 ? "" : "s"} in practice`
-    : `${designation} · Unspecified years in practice`;
+    : designation;
 }
 
 /**
