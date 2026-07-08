@@ -5,6 +5,7 @@ import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/designation";
+import { BrandStrandDivider } from "../components/BrandMark";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
@@ -334,16 +335,12 @@ function SearchPage() {
               );
             })}
           </div>
-          <div className="flex items-center gap-3">
-            {search.type === "advocate" ? (
-              <Scale className="h-7 w-7 text-gold" />
-            ) : (
-              <Briefcase className="h-7 w-7 text-gold" />
-            )}
-            <h1 className="font-heading text-3xl md:text-4xl">
-              {search.type === "advocate" ? "Find an Advocate" : "Find an Attorney"}
-            </h1>
-          </div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-gold">
+            {search.type === "advocate" ? "Members of the Bar" : "Verified attorneys"}
+          </p>
+          <h1 className="mt-2 font-heading text-3xl md:text-4xl">
+            {search.type === "advocate" ? "Find an Advocate" : "Find an Attorney"}
+          </h1>
           <p className="mt-2 max-w-2xl text-cream/70">
             {search.type === "advocate"
               ? "Members of the Bar across South Africa — filter by chambers, province and seniority."
@@ -397,6 +394,7 @@ function SearchPage() {
             <span className="font-semibold text-cream/80">NOT</span> — e.g. <em>insolvency OR tax NOT labour</em>.
           </p>
         </div>
+        <BrandStrandDivider />
       </section>
       <div ref={sentinelRef} aria-hidden="true" />
 
@@ -520,7 +518,7 @@ function SearchPage() {
                   ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
+                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-gold/30 sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-gold/60" : ""}`}>
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}

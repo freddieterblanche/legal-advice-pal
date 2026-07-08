@@ -1,3 +1,4 @@
+import { BrandMark } from "./BrandMark";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -53,8 +54,11 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-ink">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="font-heading text-2xl font-bold tracking-tight text-white">
-          Lawexpert.co.za
+        <Link to="/" className="flex items-center gap-2.5">
+          <BrandMark size={30} />
+          <span className="font-heading text-xl font-bold tracking-tight text-white">
+            Lawexpert<span className="font-medium text-gold">.co.za</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
