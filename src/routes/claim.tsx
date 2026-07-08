@@ -48,7 +48,7 @@ function ClaimPage() {
     try {
       const res = await accept({ data: { token } });
       toast.success("Profile claimed!");
-      navigate({ to: "/my-profile" });
+      navigate({ to: "/dashboard" });
       void res;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to claim");

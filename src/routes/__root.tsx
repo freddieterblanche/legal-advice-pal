@@ -65,8 +65,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Lawexpert.co.za | South Africa's Legal Directory" },
       { name: "twitter:description", content: "South Africa's legal directory. Verified profiles. Linked cases. Find advocates and attorneys by practice area, province, and reported cases." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cea19f13-f02f-4939-ba3f-18ba12ee2e96/id-preview-00035f69--e3957aed-ade0-4d98-8acf-4fac2ff73866.lovable.app-1780746165840.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cea19f13-f02f-4939-ba3f-18ba12ee2e96/id-preview-00035f69--e3957aed-ade0-4d98-8acf-4fac2ff73866.lovable.app-1780746165840.png" },
+      { property: "og:image", content: "https://lawexpert.co.za/og-image.png" },
+      { name: "twitter:image", content: "https://lawexpert.co.za/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

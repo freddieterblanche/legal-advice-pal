@@ -9,6 +9,22 @@ import { sanitizeBioHtml } from "./sanitize";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Only platform admins and firm admins may run profile imports — these
+// functions consume paid Firecrawl + AI credits, so ordinary authenticated
+// users must not be able to trigger them.
+async function requireImportRole(userId: string): Promise<void> {
+  const { supabaseAdmin } = await import("../integrations/supabase/client.server");
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
+  const role = profile?.role;
+  if (role !== "platform_admin" && role !== "firm_admin") {
+    throw new Error("You do not have permission to import profiles.");
+  }
+}
+
 // Lenient field helpers: the model frequently returns nulls or overlong strings;
 // we accept them at parse time and clamp/sanitize after extraction.
 const sText = z.preprocess((v) => (v == null ? "" : typeof v === "string" ? v : String(v)), z.string()).default("");
@@ -53,7 +69,8 @@ const extractionSchema = z.object({
 export const importLawyerProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await requireImportRole(context.userId);
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     if (!firecrawlKey) throw new Error("Firecrawl is not configured. Please connect Firecrawl in Connectors.");
 
@@ -290,7 +307,8 @@ const expertExtractionSchema = z.object({
 export const importExpertProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await requireImportRole(context.userId);
     const trimmed = await scrapeMarkdown(data.url);
     const { createLovableAiGateway } = await import("./ai-gateway.server");
     const gateway = createLovableAiGateway();
@@ -369,7 +387,8 @@ const medArbExtractionSchema = z.object({
 export const importMediatorArbitratorProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await requireImportRole(context.userId);
     const trimmed = await scrapeMarkdown(data.url);
     const { createLovableAiGateway } = await import("./ai-gateway.server");
     const gateway = createLovableAiGateway();
@@ -464,7 +483,8 @@ const firmExtractionSchema = z.object({
 export const importFirmProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => inputSchema.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await requireImportRole(context.userId);
     const trimmed = await scrapeMarkdown(data.url);
     const { createLovableAiGateway } = await import("./ai-gateway.server");
     const gateway = createLovableAiGateway();

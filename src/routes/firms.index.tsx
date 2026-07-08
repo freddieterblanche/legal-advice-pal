@@ -91,12 +91,17 @@ function FirmsIndex() {
         addMatch(branchRows);
       }
 
+      // Strip characters that break PostgREST .or() filter syntax (commas,
+      // parens, quotes, wildcards) — firm names like "Smith, Tabata & Co"
+      // would otherwise produce a malformed filter and error the search.
+      const safeQ = (search.q ?? "").replace(/[(),"*%]/g, " ").trim();
+
       let qBranchFirmIds: string[] | null = null;
-      if (search.q) {
+      if (safeQ) {
         const { data: qBranchRows } = await supabase
           .from("firm_branches")
           .select("firm_id, name, city, province, country")
-          .or(`city.ilike.%${search.q}%,name.ilike.%${search.q}%,province.ilike.%${search.q}%,country.ilike.%${search.q}%`);
+          .or(`city.ilike.%${safeQ}%,name.ilike.%${safeQ}%,province.ilike.%${safeQ}%,country.ilike.%${safeQ}%`);
         qBranchFirmIds = Array.from(new Set((qBranchRows ?? []).map((r: any) => r.firm_id).filter(Boolean)));
         addMatch(qBranchRows);
       }
@@ -105,8 +110,8 @@ function FirmsIndex() {
         .from("firms")
         .select("id, name, slug, city, province, website, phone, email, description, logo_url, logo_accent_color, created_at, is_featured", { count: "exact" })
         .eq("status", "active");
-      if (search.q) {
-        const qParts = [`name.ilike.%${search.q}%`, `city.ilike.%${search.q}%`, `province.ilike.%${search.q}%`];
+      if (safeQ) {
+        const qParts = [`name.ilike.%${safeQ}%`, `city.ilike.%${safeQ}%`, `province.ilike.%${safeQ}%`];
         if (qBranchFirmIds && qBranchFirmIds.length > 0) {
           qParts.push(`id.in.(${qBranchFirmIds.join(",")})`);
         }
