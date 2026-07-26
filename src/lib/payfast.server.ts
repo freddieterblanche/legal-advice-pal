@@ -53,6 +53,8 @@ export type CheckoutInput = {
   frequency: "monthly" | "annual";
   /** Public profile slug, so return/cancel URLs restore the claim page. */
   providerSlug: string;
+  /** PayFast billing cycles: 0 = until cancelled, 1 = single-term seat. */
+  cycles?: number;
 };
 
 /**
@@ -80,7 +82,7 @@ export function buildSubscriptionCheckout(input: CheckoutInput): {
     ["subscription_type", "1"],
     ["recurring_amount", amount],
     ["frequency", FREQUENCY_CODES[input.frequency]],
-    ["cycles", "0"],
+    ["cycles", String(input.cycles ?? 0)],
   ];
   const signature = pfSignature(pairs, cfg.passphrase);
   const fields = Object.fromEntries(pairs.filter(([, v]) => v !== ""));

@@ -219,6 +219,14 @@ function ClaimProfilePage() {
         )}
         {verifiedTier && (
           <div className="mt-5 space-y-3">
+            {verifiedTier.annualOnly ? (
+              <div className="rounded border border-rule bg-paper-ivory p-3 text-sm text-ink-muted">
+                <span className="font-medium text-ink">{verifiedTier.name} is a 12-month seat</span> — one
+                payment of {formatRands(annualRands(verifiedTier))} covers a fixed annual term. Seats are
+                limited per practice area and province; renewal is a fresh purchase at the then-current
+                price, with a waitlist when your area is full.
+              </div>
+            ) : (
             <div className="flex gap-2">
               {([
                 { key: "monthly" as const, label: `${formatRands(verifiedTier.monthlyRands)} / month` },
@@ -239,12 +247,15 @@ function ClaimProfilePage() {
                 </button>
               ))}
             </div>
+            )}
             <button
               onClick={payNow}
               disabled={busy}
               className="w-full rounded bg-brass px-4 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50"
             >
-              {busy ? "Redirecting to PayFast…" : `Pay ${formatRands(frequency === "annual" ? annualRands(verifiedTier) : verifiedTier.monthlyRands)} with PayFast`}
+              {busy
+                ? "Redirecting to PayFast…"
+                : `Pay ${formatRands(verifiedTier.annualOnly || frequency === "annual" ? annualRands(verifiedTier) : verifiedTier.monthlyRands)} with PayFast`}
             </button>
             <p className="text-xs text-ink-muted">
               Secure recurring billing via PayFast. Cancel any time — your listing stays in the directory.
@@ -320,13 +331,27 @@ function ClaimProfilePage() {
                 }`}
               >
                 <span className="eyebrow text-brand-primary">[{t.name}]</span>
-                <span className="mt-2 font-heading text-2xl text-ink">
-                  {formatRands(t.monthlyRands)}
-                  <span className="font-body text-xs text-ink-muted"> /month</span>
-                </span>
-                <span className="font-mono text-[11px] text-ink-muted">
-                  {formatRands(annualRands(t))}/year
-                </span>
+                {t.annualOnly ? (
+                  <>
+                    <span className="mt-2 font-heading text-2xl text-ink">
+                      {formatRands(annualRands(t))}
+                      <span className="font-body text-xs text-ink-muted"> /12-month seat</span>
+                    </span>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      ≈ {formatRands(t.monthlyRands)}/month · annual only
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="mt-2 font-heading text-2xl text-ink">
+                      {formatRands(t.monthlyRands)}
+                      <span className="font-body text-xs text-ink-muted"> /month</span>
+                    </span>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      {formatRands(annualRands(t))}/year
+                    </span>
+                  </>
+                )}
                 <span className="mt-2 text-xs leading-relaxed text-ink-muted">{t.blurb}</span>
                 <ul className="mt-3 space-y-1.5">
                   {t.features.map((f) => (
