@@ -182,6 +182,47 @@
   .panel-elevated {
     box-shadow: 0 12px 32px -16px rgb(11 33 56 / 0.25);
   }
+
+  /* Editorial list markers for rich-text profile content: brass dashes for
+     bullets, mono bracketed counters for numbered lists. */
+  .prose-editorial ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.75rem 0;
+  }
+  .prose-editorial ul > li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin: 0.55rem 0;
+  }
+  .prose-editorial ul > li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--accent-brass);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .prose-editorial ol {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.75rem 0;
+    counter-reset: prose-item;
+  }
+  .prose-editorial ol > li {
+    position: relative;
+    padding-left: 2.3rem;
+    margin: 0.55rem 0;
+    counter-increment: prose-item;
+  }
+  .prose-editorial ol > li::before {
+    content: "[" counter(prose-item) "]";
+    position: absolute;
+    left: 0;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--brand-primary);
+  }
 }
 
 @layer utilities {

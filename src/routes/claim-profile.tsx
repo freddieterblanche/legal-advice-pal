@@ -128,12 +128,46 @@ function ClaimProfilePage() {
     }
   };
 
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [idDocFile, setIdDocFile] = useState<File | null>(null);
+
+  const MAX_DOC_BYTES = 8 * 1024 * 1024;
+
+  const uploadDoc = async (userId: string, kind: "selfie" | "id-doc", file: File) => {
+    if (file.size > MAX_DOC_BYTES) throw new Error(`${kind === "selfie" ? "Selfie" : "ID document"} is too large (max 8 MB).`);
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `${userId}/${kind}-${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("verification-docs").upload(path, file, {
+      cacheControl: "0",
+      upsert: false,
+      contentType: file.type || undefined,
+    });
+    if (error) throw new Error(`Could not upload ${kind === "selfie" ? "selfie" : "ID document"}: ${error.message}`);
+    return path;
+  };
+
   const doSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!provider) return;
+    if (!phone.trim()) { toast.error("Please add your phone number."); return; }
+    if (!selfieFile) { toast.error("Please attach a selfie."); return; }
+    if (!idDocFile) { toast.error("Please attach your ID document."); return; }
     setBusy(true);
     try {
-      await submit({ data: { service_provider_id: provider.id, phone, message, requested_tier: tier } });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in again.");
+      const selfiePath = await uploadDoc(user.id, "selfie", selfieFile);
+      const idDocPath = await uploadDoc(user.id, "id-doc", idDocFile);
+      await submit({
+        data: {
+          service_provider_id: provider.id,
+          phone,
+          message,
+          requested_tier: tier,
+          selfie_path: selfiePath,
+          id_doc_path: idDocPath,
+        },
+      });
       setSubmitted(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not submit claim");
@@ -219,6 +253,14 @@ function ClaimProfilePage() {
         )}
         {verifiedTier && (
           <div className="mt-5 space-y-3">
+            {verifiedTier.annualOnly ? (
+              <div className="rounded border border-rule bg-paper-ivory p-3 text-sm text-ink-muted">
+                <span className="font-medium text-ink">{verifiedTier.name} is a 12-month seat</span> — one
+                payment of {formatRands(annualRands(verifiedTier))} covers a fixed annual term. Seats are
+                limited per practice area and province; renewal is a fresh purchase at the then-current
+                price, with a waitlist when your area is full.
+              </div>
+            ) : (
             <div className="flex gap-2">
               {([
                 { key: "monthly" as const, label: `${formatRands(verifiedTier.monthlyRands)} / month` },
@@ -239,12 +281,15 @@ function ClaimProfilePage() {
                 </button>
               ))}
             </div>
+            )}
             <button
               onClick={payNow}
               disabled={busy}
               className="w-full rounded bg-brass px-4 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50"
             >
-              {busy ? "Redirecting to PayFast…" : `Pay ${formatRands(frequency === "annual" ? annualRands(verifiedTier) : verifiedTier.monthlyRands)} with PayFast`}
+              {busy
+                ? "Redirecting to PayFast…"
+                : `Pay ${formatRands(verifiedTier.annualOnly || frequency === "annual" ? annualRands(verifiedTier) : verifiedTier.monthlyRands)} with PayFast`}
             </button>
             <p className="text-xs text-ink-muted">
               Secure recurring billing via PayFast. Cancel any time — your listing stays in the directory.
@@ -320,13 +365,27 @@ function ClaimProfilePage() {
                 }`}
               >
                 <span className="eyebrow text-brand-primary">[{t.name}]</span>
-                <span className="mt-2 font-heading text-2xl text-ink">
-                  {formatRands(t.monthlyRands)}
-                  <span className="font-body text-xs text-ink-muted"> /month</span>
-                </span>
-                <span className="font-mono text-[11px] text-ink-muted">
-                  {formatRands(annualRands(t))}/year
-                </span>
+                {t.annualOnly ? (
+                  <>
+                    <span className="mt-2 font-heading text-2xl text-ink">
+                      {formatRands(annualRands(t))}
+                      <span className="font-body text-xs text-ink-muted"> /12-month seat</span>
+                    </span>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      ≈ {formatRands(t.monthlyRands)}/month · annual only
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="mt-2 font-heading text-2xl text-ink">
+                      {formatRands(t.monthlyRands)}
+                      <span className="font-body text-xs text-ink-muted"> /month</span>
+                    </span>
+                    <span className="font-mono text-[11px] text-ink-muted">
+                      {formatRands(annualRands(t))}/year
+                    </span>
+                  </>
+                )}
                 <span className="mt-2 text-xs leading-relaxed text-ink-muted">{t.blurb}</span>
                 <ul className="mt-3 space-y-1.5">
                   {t.features.map((f) => (
@@ -348,17 +407,43 @@ function ClaimProfilePage() {
               <form onSubmit={doSubmit} className="space-y-3">
                 <h3 className="font-heading text-xl text-ink">Submit your claim</h3>
                 <p className="text-sm text-ink-muted">
-                  We review every claim to protect professionals from impersonation — claims from an
-                  email address at your firm's domain are fastest to verify.
+                  To protect professionals from impersonation, we verify every claim against a selfie
+                  and an ID document. Your documents are stored privately and deleted after review.
                 </p>
                 <input
                   type="tel"
-                  placeholder="Phone number (helps us verify faster)"
+                  required
+                  placeholder="Phone number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   maxLength={40}
                   className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 />
+                <label className="block text-sm">
+                  <span className="mb-1 block text-ink">
+                    Selfie <span className="text-ink-muted">(clear photo of your face)</span>
+                  </span>
+                  <input
+                    type="file"
+                    required
+                    accept="image/*"
+                    capture="user"
+                    onChange={(e) => setSelfieFile(e.target.files?.[0] ?? null)}
+                    className="block w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink-muted file:mr-3 file:rounded file:border-0 file:bg-brand-tint file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-primary"
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1 block text-ink">
+                    ID document <span className="text-ink-muted">(SA ID, passport or driver's licence — photo or PDF)</span>
+                  </span>
+                  <input
+                    type="file"
+                    required
+                    accept="image/*,application/pdf"
+                    onChange={(e) => setIdDocFile(e.target.files?.[0] ?? null)}
+                    className="block w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink-muted file:mr-3 file:rounded file:border-0 file:bg-brand-tint file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-primary"
+                  />
+                </label>
                 <textarea
                   rows={3}
                   placeholder="Anything that helps us verify it's you (optional)"
@@ -372,7 +457,7 @@ function ClaimProfilePage() {
                   disabled={busy}
                   className="w-full rounded bg-brass px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50"
                 >
-                  {busy ? "Submitting…" : "Submit claim for review"}
+                  {busy ? "Uploading & submitting…" : "Submit claim for review"}
                 </button>
                 <p className="text-xs text-ink-muted">
                   No payment now — we'll send payment details for your chosen tier once your claim is verified.
@@ -418,8 +503,8 @@ function ClaimProfilePage() {
           <div className="rounded border border-rule bg-paper-white p-6">
             <h3 className="eyebrow text-ink-muted">How claiming works</h3>
             <ol className="mt-4 space-y-3 text-sm text-ink-muted">
-              <li className="flex gap-3"><span className="font-mono text-brand-primary">[1]</span> Pick a tier and submit your claim with your work email.</li>
-              <li className="flex gap-3"><span className="font-mono text-brand-primary">[2]</span> We verify it's really you — usually within one business day.</li>
+              <li className="flex gap-3"><span className="font-mono text-brand-primary">[1]</span> Pick a tier, then submit your claim with your phone number, a selfie and your ID document.</li>
+              <li className="flex gap-3"><span className="font-mono text-brand-primary">[2]</span> We check your documents and verify it's really you — usually within one business day. Documents are deleted after review.</li>
               <li className="flex gap-3"><span className="font-mono text-brand-primary">[3]</span> Pay for your chosen tier to activate full edit access.</li>
               <li className="flex gap-3"><span className="font-mono text-brand-primary">[4]</span> Your profile stays live throughout — you just take the keys.</li>
             </ol>

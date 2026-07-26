@@ -18,6 +18,12 @@ export type Tier = {
   highlight?: boolean;
   /** Elite is deliberately scarce */
   scarce?: boolean;
+  /**
+   * Sold as a fixed 12-month seat: annual billing only, single charge per
+   * term (no silent auto-renewal). Renewal is a fresh purchase at the
+   * then-current price, so seats stay contestable when demand grows.
+   */
+  annualOnly?: boolean;
 };
 
 export const TIERS: Tier[] = [
@@ -79,12 +85,13 @@ export const TIERS: Tier[] = [
     monthlyRands: 2450,
     blurb: "Limited seats per practice area and province.",
     scarce: true,
+    annualOnly: true,
     features: [
       "Everything in Gold",
       "Guaranteed featured slot in your practice area",
       "Homepage featured rotation",
       "First-position placement band",
-      "Limited to a handful of seats per practice area per province",
+      "12-month seat — renewal priced by demand, waitlist when full",
     ],
   },
 ];

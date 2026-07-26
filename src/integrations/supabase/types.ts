@@ -256,9 +256,11 @@ export type Database = {
           decision_note: string | null
           email: string
           id: string
+          id_doc_path: string | null
           message: string | null
           phone: string | null
           requested_tier: string
+          selfie_path: string | null
           service_provider_id: string
           status: string
           user_id: string
@@ -270,9 +272,11 @@ export type Database = {
           decision_note?: string | null
           email: string
           id?: string
+          id_doc_path?: string | null
           message?: string | null
           phone?: string | null
           requested_tier?: string
+          selfie_path?: string | null
           service_provider_id: string
           status?: string
           user_id: string
@@ -284,9 +288,11 @@ export type Database = {
           decision_note?: string | null
           email?: string
           id?: string
+          id_doc_path?: string | null
           message?: string | null
           phone?: string | null
           requested_tier?: string
+          selfie_path?: string | null
           service_provider_id?: string
           status?: string
           user_id?: string
@@ -1421,6 +1427,9 @@ export type Database = {
           designation: string | null
           exclude_from_lawyer_listing: boolean | null
           featured_since: string | null
+          listing_tier: string | null
+          tier_rank: number | null
+          overview_excerpt: string | null
           firm_name: string | null
           firm_slug: string | null
           first_name: string | null

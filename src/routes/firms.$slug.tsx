@@ -138,7 +138,7 @@ function FirmProfile() {
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         {firm.description && (
           <div
-            className="text-foreground/80 leading-relaxed [&_h2]:font-heading [&_h2]:text-xl [&_h2]:text-ink [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:font-heading [&_h3]:text-base [&_h3]:text-ink [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-3 [&_li]:my-1 [&_strong]:font-semibold [&_strong]:text-ink"
+            className="prose-editorial text-foreground/80 leading-relaxed [&_h2]:font-heading [&_h2]:text-xl [&_h2]:text-ink [&_h2]:mt-6 [&_h2]:mb-2 [&_h3]:font-heading [&_h3]:text-base [&_h3]:text-ink [&_h3]:mt-4 [&_h3]:mb-2 [&_p]:my-3 [&_strong]:font-semibold [&_strong]:text-ink"
             dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(firm.description) }}
           />
         )}

@@ -37,7 +37,10 @@ export const createClaimCheckout = createServerFn({ method: "POST" })
 
     const tier = TIER_BY_SLUG[req.requested_tier as TierSlug];
     if (!tier) throw new Error("Unknown tier on this claim.");
-    const amount = data.frequency === "annual" ? annualRands(tier) : tier.monthlyRands;
+    // Elite is a fixed 12-month seat: annual only, one charge per term, so
+    // every renewal goes back through checkout at the then-current price.
+    const frequency = tier.annualOnly ? "annual" : data.frequency;
+    const amount = frequency === "annual" ? annualRands(tier) : tier.monthlyRands;
 
     // Reuse an abandoned pending subscription for this claim if one exists.
     const { data: existing } = await supabaseAdmin
@@ -51,7 +54,7 @@ export const createClaimCheckout = createServerFn({ method: "POST" })
     if (subscriptionId) {
       await supabaseAdmin
         .from("subscriptions")
-        .update({ frequency: data.frequency, amount_rands: amount, tier: tier.slug })
+        .update({ frequency, amount_rands: amount, tier: tier.slug })
         .eq("id", subscriptionId);
     } else {
       const { data: sub, error: sErr } = await supabaseAdmin
@@ -61,7 +64,7 @@ export const createClaimCheckout = createServerFn({ method: "POST" })
           user_id: req.user_id,
           claim_request_id: req.id,
           tier: tier.slug,
-          frequency: data.frequency,
+          frequency,
           amount_rands: amount,
         })
         .select("id")
@@ -79,7 +82,8 @@ export const createClaimCheckout = createServerFn({ method: "POST" })
       firstName: prov?.first_name,
       itemName: `Lawexpert ${tier.name} listing — ${name}`,
       amountRands: amount,
-      frequency: data.frequency,
+      frequency,
       providerSlug: prov?.slug ?? "",
+      cycles: tier.annualOnly ? 1 : 0,
     });
   });
