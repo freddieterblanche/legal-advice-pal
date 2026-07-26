@@ -89,7 +89,7 @@ function ClaimPage() {
       <div className="mx-auto max-w-md px-6 py-20 text-center">
         <h1 className="font-heading text-2xl text-ink">Invite unavailable</h1>
         <p className="mt-2 text-muted-foreground">{error}</p>
-        <Link to="/" className="mt-6 inline-block text-sm text-forest hover:text-gold">Back to home</Link>
+        <Link to="/" className="mt-6 inline-block text-sm text-brand-primary transition-colors hover:text-brand-hover">Back to home</Link>
       </div>
     );
   }
@@ -108,8 +108,8 @@ function ClaimPage() {
         {info.firm_name ? <> at <strong className="text-ink">{info.firm_name}</strong></> : null}.
       </p>
 
-      <div className="mt-6 rounded-md border border-border bg-card p-5">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">Invited email</p>
+      <div className="mt-6 rounded border border-rule bg-paper-white p-5">
+        <p className="eyebrow text-ink-muted">Invited email</p>
         <p className="mt-1 font-medium text-ink">{info.email}</p>
 
         {currentEmail && !emailMatches && (
@@ -119,23 +119,23 @@ function ClaimPage() {
         )}
 
         {emailMatches ? (
-          <button onClick={doAccept} disabled={busy} className="mt-4 w-full rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+          <button onClick={doAccept} disabled={busy} className="mt-4 w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
             {busy ? "Claiming…" : "Claim my profile"}
           </button>
         ) : currentEmail ? null : (
           <form onSubmit={submit} className="mt-4 space-y-3">
             <div className="flex gap-2 text-xs">
-              <button type="button" onClick={() => setMode("signup")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signup" ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>New account</button>
-              <button type="button" onClick={() => setMode("signin")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signin" ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>Existing account</button>
+              <button type="button" onClick={() => setMode("signup")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signup" ? "bg-brand-primary text-white" : "bg-muted text-muted-foreground"}`}>New account</button>
+              <button type="button" onClick={() => setMode("signin")} className={`flex-1 rounded px-3 py-1.5 ${mode === "signin" ? "bg-brand-primary text-white" : "bg-muted text-muted-foreground"}`}>Existing account</button>
             </div>
             {mode === "signup" && (
               <div className="grid grid-cols-2 gap-2">
-                <input required placeholder="First name" value={first} onChange={(e) => setFirst(e.target.value)} maxLength={80} className="rounded border border-border bg-background px-3 py-2 text-sm" />
-                <input required placeholder="Last name" value={last} onChange={(e) => setLast(e.target.value)} maxLength={80} className="rounded border border-border bg-background px-3 py-2 text-sm" />
+                <input required placeholder="First name" value={first} onChange={(e) => setFirst(e.target.value)} maxLength={80} className="rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
+                <input required placeholder="Last name" value={last} onChange={(e) => setLast(e.target.value)} maxLength={80} className="rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
               </div>
             )}
-            <input type="password" required minLength={8} maxLength={72} placeholder={mode === "signup" ? "Choose a password (min 8 chars)" : "Your password"} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-            <button type="submit" disabled={busy} className="w-full rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+            <input type="password" required minLength={8} maxLength={72} placeholder={mode === "signup" ? "Choose a password (min 8 chars)" : "Your password"} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
+            <button type="submit" disabled={busy} className="w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
               {busy ? "Working…" : mode === "signup" ? "Create account & claim" : "Sign in & claim"}
             </button>
           </form>
