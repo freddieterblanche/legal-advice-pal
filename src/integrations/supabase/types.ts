@@ -248,6 +248,59 @@ export type Database = {
           },
         ]
       }
+      claim_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          email: string
+          id: string
+          message: string | null
+          phone: string | null
+          requested_tier: string
+          service_provider_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_tier?: string
+          service_provider_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_tier?: string
+          service_provider_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_requests_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       config: {
         Row: {
           key: string
@@ -997,6 +1050,7 @@ export type Database = {
           id: string
           is_arbitrator: boolean
           is_claimed: boolean | null
+          listing_tier: string
           is_featured: boolean
           is_independent: boolean
           is_mediator: boolean
@@ -1070,6 +1124,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          listing_tier?: string
           is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean
@@ -1143,6 +1198,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          listing_tier?: string
           is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean

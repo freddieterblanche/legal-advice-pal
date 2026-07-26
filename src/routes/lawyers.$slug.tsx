@@ -200,6 +200,23 @@ function LawyerProfile() {
         <BrandStrandDivider />
       </section>
 
+      {!lawyer.is_claimed && !lawyer.profile_id && (
+        <div className="border-b border-rule bg-brand-tint/40">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <p className="text-sm text-ink">
+              Are you <strong>{lawyer.first_name} {lawyer.last_name}</strong>? Take control of this listing.
+            </p>
+            <Link
+              to="/claim-profile"
+              search={{ provider: lawyer.slug ?? "" } as never}
+              className="rounded bg-brand-primary px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-brand-hover"
+            >
+              Claim this profile →
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
           {areas.length > 0 && (
@@ -314,7 +331,7 @@ function LawyerProfile() {
             ) : (
               <ul className="mt-4 divide-y divide-rule rounded border border-rule bg-paper-white">
                 {cases.map((lc: any, i: number) => lc.cases && (
-                  <li key={`linked-${i}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+                  <li key={`linked-${i}`} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-x-4">
                     <div className="min-w-0 flex-1">
                       <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink transition-colors hover:text-brand-hover">
                         {lc.cases.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
@@ -325,17 +342,17 @@ function LawyerProfile() {
                     </div>
                     {(lc.cases.citation || lc.cases.year) && (
                       lc.cases.saflii_url ? (
-                        <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="citation-chip">
+                        <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="citation-chip self-start sm:self-auto">
                           {lc.cases.citation ?? lc.cases.year}
                         </a>
                       ) : (
-                        <span className="citation-chip">{lc.cases.citation ?? lc.cases.year}</span>
+                        <span className="citation-chip self-start sm:self-auto">{lc.cases.citation ?? lc.cases.year}</span>
                       )
                     )}
                   </li>
                 ))}
                 {reportedCases.map((rc: any) => (
-                  <li key={`rep-${rc.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+                  <li key={`rep-${rc.id}`} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-x-4">
                     <div className="min-w-0 flex-1">
                       {rc.url ? (
                         <a href={rc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink transition-colors hover:text-brand-hover">
@@ -352,9 +369,9 @@ function LawyerProfile() {
                     </div>
                     {rc.citation && (
                       rc.url ? (
-                        <a href={rc.url} target="_blank" rel="noopener noreferrer" className="citation-chip">{rc.citation}</a>
+                        <a href={rc.url} target="_blank" rel="noopener noreferrer" className="citation-chip self-start sm:self-auto">{rc.citation}</a>
                       ) : (
-                        <span className="citation-chip">{rc.citation}</span>
+                        <span className="citation-chip self-start sm:self-auto">{rc.citation}</span>
                       )
                     )}
                   </li>

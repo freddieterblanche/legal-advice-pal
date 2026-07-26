@@ -164,6 +164,23 @@ function ExpertWitnessProfile() {
         </div>
       </section>
 
+      {!expert.is_claimed && !expert.profile_id && (
+        <div className="border-b border-rule bg-brand-tint/40">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <p className="text-sm text-ink">
+              Are you <strong>{expert.first_name} {expert.last_name}</strong>? Take control of this listing.
+            </p>
+            <Link
+              to="/claim-profile"
+              search={{ provider: expert.slug ?? "" } as never}
+              className="rounded bg-brand-primary px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-brand-hover"
+            >
+              Claim this profile →
+            </Link>
+          </div>
+        </div>
+      )}
+
 
       <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">

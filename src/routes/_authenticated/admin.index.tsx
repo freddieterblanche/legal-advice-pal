@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Users, BookMarked, Library, Briefcase, MapPin, Stethoscope, Handshake, FileCheck2, BookOpen, Globe } from "lucide-react";
+import { Building2, Users, BookMarked, Library, Briefcase, MapPin, Stethoscope, Handshake, FileCheck2, BookOpen, Globe, UserCheck } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -23,7 +23,8 @@ function AdminHub() {
     queryKey: ["admin-counts"],
     enabled: profile?.role === "platform_admin",
     queryFn: async () => {
-      const [firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns, practiceAreas, countries] = await Promise.all([
+      const [claims, firms, attorneys, advocates, experts, mediators, arbitrators, bars, chambers, towns, practiceAreas, countries] = await Promise.all([
+        supabase.from("claim_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("firms").select("id", { count: "exact", head: true }),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "expert").not("firm_id", "is", null),
         supabase.from("service_providers").select("id", { count: "exact", head: true }).eq("provider_type", "expert").eq("provider_type", "advocate"),
@@ -37,6 +38,7 @@ function AdminHub() {
         supabase.from("countries").select("id", { count: "exact", head: true }),
       ]);
       return {
+        claims: claims.count ?? 0,
         firms: firms.count ?? 0,
         attorneys: attorneys.count ?? 0,
         advocates: advocates.count ?? 0,
@@ -63,6 +65,13 @@ function AdminHub() {
   }
 
   const cards = [
+    {
+      to: "/admin/claims",
+      icon: UserCheck,
+      title: "Profile Claims",
+      desc: "Review and approve claim requests from professionals.",
+      count: counts?.claims,
+    },
     {
       to: "/admin/firms",
       icon: Building2,
