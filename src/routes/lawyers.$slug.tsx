@@ -7,13 +7,13 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { formatDesignation, headBadges, designationKind } from "../lib/designation";
-import { BrandStrandDivider, VerifiedMark } from "../components/BrandMark";
+import { BrandStrandDivider } from "../components/BrandMark";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug.replace(/-/g, " ")} — Lawexpert.co.za` },
-      { name: "description", content: "South African lawyer profile on Lawexpert.co.za with linked reported cases." },
+      { name: "description", content: "South African legal professional profile on Lawexpert.co.za — practice areas, experience and contact details." },
     ],
   }),
   component: LawyerProfile,
@@ -96,13 +96,12 @@ function LawyerProfile() {
             )}
 
             <div className="flex-1">
-              <p className="eyebrow mb-2 flex items-center gap-2 text-paper-ivory/75">
-                <VerifiedMark size={15} color="var(--paper-ivory)" />
+              <p className="eyebrow mb-2 text-paper-ivory/75">
                 {designationKind(lawyer.provider_type === "advocate" ? "advocate" : lawyer.designation) === "advocate"
-                  ? "Verified advocate"
+                  ? "[Advocate]"
                   : lawyer.is_mediator || lawyer.is_arbitrator
-                    ? "Verified professional"
-                    : "Verified attorney"}
+                    ? "[Professional]"
+                    : "[Attorney]"}
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-heading text-3xl md:text-4xl">{lawyer.first_name} {lawyer.last_name}{lawyer.is_senior_counsel ? " SC" : ""}</h1>
@@ -370,7 +369,7 @@ function LawyerProfile() {
             <div className="rounded border border-rule bg-paper-white p-5">
               <h3 className="eyebrow text-ink">Status</h3>
               <p className="mt-2 text-sm capitalize text-foreground/80">
-                {lawyer.status === "trial" ? "Listed (Trial)" : "Verified Listing"}
+                {lawyer.status === "trial" ? "Listed (Trial)" : "Active Listing"}
               </p>
               {lawyer.linkedin_url && (
                 <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-brand-primary transition-colors hover:text-brand-hover">

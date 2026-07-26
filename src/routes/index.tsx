@@ -6,15 +6,14 @@ import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
 import { getPracticeAreaIcon } from "../lib/practice-area-icons";
 import { SimpleSelect } from "../components/SimpleSelect";
-import { VerifiedMark } from "../components/BrandMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Lawexpert.co.za | South Africa's Legal Directory" },
-      { name: "description", content: "Search verified South African attorneys and advocates by practice area, province, and reported cases. Find the right counsel — backed by their case record." },
+      { name: "description", content: "South Africa's comprehensive directory of legal professionals. Search attorneys, advocates, expert witnesses, mediators and arbitrators by expertise, province and name." },
       { property: "og:title", content: "Lawexpert.co.za | South Africa's Legal Directory" },
-      { property: "og:description", content: "Verified profiles. Linked cases. South Africa's legal directory." },
+      { property: "og:description", content: "South Africa's comprehensive directory of legal professionals, searchable by expertise." },
     ],
   }),
   component: HomePage,
@@ -77,13 +76,13 @@ function HomePage() {
       <section className="relative bg-brand-deep">
         <div className="mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 md:pb-24 md:pt-24">
           <p className="eyebrow animate-hero-rise text-paper-ivory/70">
-            Verified profiles · Linked cases
+            Attorneys · Advocates · Experts · Mediators · Arbitrators
           </p>
           <h1
             className="animate-hero-rise mx-auto mt-5 max-w-3xl font-heading leading-[1.15] text-paper-ivory [animation-delay:80ms]"
             style={{ fontSize: "clamp(30px, 4.5vw, 46px)" }}
           >
-            Choose counsel the way the profession does — by the record.
+            Every legal professional in South Africa. Searchable by expertise.
           </h1>
           <p className="animate-hero-rise mx-auto mt-5 max-w-2xl text-base leading-relaxed text-paper-ivory/75 [animation-delay:160ms]">
             South Africa has a split legal profession. Choose who you need — then search a
@@ -97,7 +96,7 @@ function HomePage() {
             className="animate-hero-rise panel-elevated mx-auto mt-9 flex max-w-2xl rounded bg-paper-white p-1.5 [animation-delay:240ms]"
           >
             <label htmlFor="hero-search" className="sr-only">
-              Search by practice area, name, or case citation
+              Search by practice area, name, or location
             </label>
             <input
               id="hero-search"
@@ -105,7 +104,7 @@ function HomePage() {
               value={heroQ}
               onChange={(e) => setHeroQ(e.target.value)}
               maxLength={120}
-              placeholder="Practice area, name, or case citation…"
+              placeholder="Practice area, name, or location…"
               className="min-w-0 flex-1 bg-transparent px-4 py-3 text-[15px] text-ink placeholder:text-ink-muted focus:outline-none"
             />
             <button
@@ -223,7 +222,7 @@ function HomePage() {
           <h2 className="font-heading text-3xl md:text-[34px]">List your firm on Lawexpert.co.za</h2>
           <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-white/75">
             R160 per listing per month. First 3 months free — no credit card required.
-            Build trust with verified profiles and linked reported cases.
+            Put your professionals in front of clients searching by expertise.
           </p>
           <Link
             to="/register"
@@ -303,10 +302,7 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
       </form>
 
       <div className="mt-5 flex items-center justify-between text-xs text-ink-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <VerifiedMark size={14} />
-          Verified profiles · linked cases
-        </span>
+        <span className="font-mono">Every province · every practice area</span>
         <Link
           to="/search"
           search={{ type: kind } as never}

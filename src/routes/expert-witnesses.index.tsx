@@ -31,7 +31,7 @@ export const Route = createFileRoute("/expert-witnesses/")({
       { title: "Find an Expert Witness — Lawexpert.co.za" },
       { name: "description", content: "Search South African expert witnesses across medicine, engineering, forensics, finance and more, with linked case appearances." },
       { property: "og:title", content: "Find an Expert Witness — Lawexpert.co.za" },
-      { property: "og:description", content: "Specialists across 50+ disciplines, with verified registration bodies and linked cases." },
+      { property: "og:description", content: "Specialists across 50+ disciplines, searchable by discipline and province." },
     ],
   }),
   component: ExpertWitnessSearch,

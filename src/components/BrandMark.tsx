@@ -52,7 +52,7 @@ export function LogoLockup({
             className="mt-[0.45em] font-mono uppercase leading-none"
             style={{ color: sub, fontSize: "0.55em", letterSpacing: "0.32em" }}
           >
-            South Africa's Legal Record
+            South Africa's Legal Directory
           </span>
         )}
       </span>
@@ -96,7 +96,7 @@ export function Monogram({ size = 28, className = "" }: { size?: number; classNa
 
 /**
  * Bracketed verification mark — square brackets enclosing a brass check.
- * Used beside "Verified practitioner" on profiles and search results.
+ * Available for future profile badging.
  */
 export function VerifiedMark({
   size = 16,

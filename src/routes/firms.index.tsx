@@ -28,9 +28,9 @@ export const Route = createFileRoute("/firms/")({
   head: () => ({
     meta: [
       { title: "Browse Law Firms — Lawexpert.co.za" },
-      { name: "description", content: "Browse and search verified South African law firms by name, city, and province." },
+      { name: "description", content: "Browse and search South African law firms by name, city, and province." },
       { property: "og:title", content: "Browse Law Firms — Lawexpert.co.za" },
-      { property: "og:description", content: "Search verified South African law firms by name, city, and province." },
+      { property: "og:description", content: "Search South African law firms by name, city, and province." },
     ],
   }),
   component: FirmsIndex,
@@ -232,7 +232,7 @@ function FirmsIndex() {
           <p className="eyebrow text-paper-ivory/70">[Law Firms]</p>
           <h1 className="mt-2 font-heading text-3xl md:text-4xl">Find a Law Firm</h1>
           <p className="mt-2 max-w-2xl text-paper-ivory/75">
-            Search verified South African law firms by name, city and province.
+            Search South African law firms by name, city and province.
           </p>
           <div className="mt-6 panel-elevated rounded bg-paper-white p-3 text-ink">
             <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
