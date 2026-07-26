@@ -75,8 +75,8 @@ function ExpertWitnessProfile() {
   const primary = disciplines[0];
 
   return (
-    <div className="bg-cream">
-      <section className="bg-ink py-16 text-cream">
+    <div className="bg-paper-ivory">
+      <section className="bg-brand-deep py-16 text-paper-ivory">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
             {expert.avatar_url ? (
@@ -87,7 +87,7 @@ function ExpertWitnessProfile() {
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div className="flex h-64 w-52 shrink-0 items-center justify-center bg-gold/20 font-heading text-5xl text-gold sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
+              <div className="flex h-64 w-52 shrink-0 items-center justify-center bg-paper-ivory/10 font-heading text-5xl text-paper-ivory sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
                 {expert.first_name[0]}{expert.last_name[0]}
               </div>
             )}
@@ -106,7 +106,7 @@ function ExpertWitnessProfile() {
                     : (expert.company_name ?? expert.employer ?? "Employed")}
                 </TypePill>
               </div>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-cream/70">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[13px] text-paper-ivory/75">
                 {(expert.city || expert.province) && (
                   <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {[expert.city, expert.province].filter(Boolean).join(", ")}</span>
                 )}
@@ -114,28 +114,28 @@ function ExpertWitnessProfile() {
                   <span className="flex items-center gap-1.5"><Building2 className="h-4 w-4" /> {expert.company_name}</span>
                 )}
                 {expert.registration_body && (
-                  <span className="rounded bg-cream/5 px-2 py-0.5">{expert.registration_body}</span>
+                  <span className="rounded-[3px] bg-paper-ivory/10 px-2 py-0.5 font-mono">{expert.registration_body}</span>
                 )}
               </div>
               {(expert.office_phone || expert.mobile_phone || expert.contact_email) && (
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-cream/80">
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[13px] text-paper-ivory/80">
                   {expert.office_phone && (
-                    <a href={`tel:${expert.office_phone}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <a href={`tel:${expert.office_phone}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                       <Phone className="h-4 w-4" /> {expert.office_phone}
                     </a>
                   )}
                   {expert.mobile_phone && (
-                    <a href={`tel:${expert.mobile_phone}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <a href={`tel:${expert.mobile_phone}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                       <Smartphone className="h-4 w-4" /> {expert.mobile_phone}
                     </a>
                   )}
                   {expert.contact_email && (
-                    <a href={`mailto:${expert.contact_email}`} className="flex items-center gap-1.5 hover:text-gold">
+                    <a href={`mailto:${expert.contact_email}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                       <Mail className="h-4 w-4" /> {expert.contact_email}
                     </a>
                   )}
                   {expert.website_url && (
-                    <a href={expert.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                    <a href={expert.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                       <Globe className="h-4 w-4" /> Visit website
                     </a>
                   )}
@@ -145,16 +145,16 @@ function ExpertWitnessProfile() {
             {(expert.cv_url || canEdit) && (
               <div className="flex flex-col gap-2 self-start">
                 {canEdit && (editSearch ? (
-                  <Link to="/dashboard" search={editSearch} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                  <Link to="/dashboard" search={editSearch} className="rounded bg-paper-ivory/10 px-5 py-2.5 text-sm font-medium text-paper-ivory ring-1 ring-paper-ivory/30 transition-colors hover:bg-paper-ivory/20">
                     <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
                   </Link>
                 ) : isPlatformAdmin ? (
-                  <Link to="/admin/experts" search={{ edit: expert.id }} className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20">
+                  <Link to="/admin/experts" search={{ edit: expert.id }} className="rounded bg-paper-ivory/10 px-5 py-2.5 text-sm font-medium text-paper-ivory ring-1 ring-paper-ivory/30 transition-colors hover:bg-paper-ivory/20">
                     <Pencil className="mr-2 inline h-4 w-4" /> Edit this Profile
                   </Link>
                 ) : null)}
                 {expert.cv_url && (
-                  <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
+                  <a href={expert.cv_url} target="_blank" rel="noopener noreferrer" className="rounded bg-paper-ivory px-5 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-white">
                     <Download className="mr-2 inline h-4 w-4" /> Download CV
                   </a>
                 )}
@@ -172,7 +172,7 @@ function ExpertWitnessProfile() {
               <h2 className="font-heading text-xl text-ink">Disciplines</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {disciplines.map((d) => (
-                  <span key={d.slug} className="rounded bg-ink/10 px-2.5 py-1 text-xs text-ink">{d.name}</span>
+                  <span key={d.slug} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs text-brand-primary">{d.name}</span>
                 ))}
               </div>
             </section>
@@ -183,7 +183,7 @@ function ExpertWitnessProfile() {
               <h2 className="font-heading text-xl text-ink">Services</h2>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {expert.services.map((s: string) => (
-                  <span key={s} className="rounded-full bg-gold/15 px-2.5 py-1 text-xs font-medium text-ink">{s}</span>
+                  <span key={s} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand-primary">{s}</span>
                 ))}
               </div>
             </section>
@@ -213,7 +213,7 @@ function ExpertWitnessProfile() {
           {samples && samples.length > 0 && (
             <section>
               <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
-                <Briefcase className="h-5 w-5 text-gold" /> Samples of Work
+                <Briefcase className="h-5 w-5 text-brand-primary" /> Samples of Work
               </h2>
               <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
                 {samples.map((s) => (
@@ -238,7 +238,7 @@ function ExpertWitnessProfile() {
               <h2 className="font-heading text-xl text-ink">Courts Accepted In</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {expert.courts_accepted_in.map((c: string) => (
-                  <span key={c} className="rounded bg-forest/10 px-2.5 py-1 text-xs text-forest">{c}</span>
+                  <span key={c} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs text-brand-primary">{c}</span>
                 ))}
               </div>
             </section>
@@ -247,12 +247,12 @@ function ExpertWitnessProfile() {
           {cases.length > 0 && (
             <section>
               <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
-                <BookOpen className="h-5 w-5 text-gold" /> Case Appearances ({cases.length})
+                <BookOpen className="h-5 w-5 text-brand-primary" /> Case Appearances ({cases.length})
               </h2>
               <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
                 {cases.map((cew: any, i: number) => (
                   <li key={i} className="p-4">
-                    <a href={cew.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
+                    <a href={cew.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink transition-colors hover:text-brand-hover">
                       {cew.cases.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
                     </a>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -269,7 +269,7 @@ function ExpertWitnessProfile() {
           {expert.geographic_availability && (
             <div className="rounded-md border border-border bg-card p-5">
               <h3 className="flex items-center gap-2 font-heading text-sm font-semibold uppercase tracking-wider text-ink">
-                <Globe className="h-4 w-4 text-gold" /> Availability
+                <Globe className="h-4 w-4 text-brand-primary" /> Availability
               </h3>
               <p className="mt-2 text-sm text-foreground/80">{expert.geographic_availability}</p>
             </div>
@@ -291,7 +291,7 @@ function ExpertWitnessProfile() {
             </div>
           )}
           <div className="rounded-md border border-border bg-card p-5">
-            <Link to="/expert-witnesses" className="text-sm text-forest hover:text-gold">← Back to expert witness search</Link>
+            <Link to="/expert-witnesses" className="text-sm text-brand-primary transition-colors hover:text-brand-hover">← Back to expert witness search</Link>
           </div>
         </aside>
       </div>

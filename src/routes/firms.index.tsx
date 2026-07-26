@@ -11,7 +11,6 @@ import { ViewToggle, type ViewMode } from "../components/ViewToggle";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { StickySearchBar } from "../components/StickySearchBar";
 import { useStickyTrigger } from "../hooks/use-sticky-trigger";
-import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 type SortField = "name" | "lawyers" | "listed";
 type Search = { q?: string; province?: string; town?: string; page?: number; sort?: SortField; dir?: SortDir; view?: ViewMode };
@@ -219,7 +218,7 @@ function FirmsIndex() {
   );
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       <StickySearchBar
         visible={isStuck}
         q={q}
@@ -228,29 +227,23 @@ function FirmsIndex() {
         placeholder="Search firms by name or city…"
         filters={compactFilters}
       />
-      <section className="relative overflow-hidden bg-ink py-12 text-cream">
-        <img
-          src={attorneysHero.url}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+      <section className="relative bg-brand-deep py-12 text-paper-ivory">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-          <h1 className="font-heading text-3xl md:text-4xl">Find a Law Firm</h1>
-          <p className="mt-2 max-w-2xl text-cream/70">
+          <p className="eyebrow text-paper-ivory/70">[Law Firms]</p>
+          <h1 className="mt-2 font-heading text-3xl md:text-4xl">Find a Law Firm</h1>
+          <p className="mt-2 max-w-2xl text-paper-ivory/75">
             Search verified South African law firms by name, city and province.
           </p>
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg [&_input]:text-ink [&_select]:text-ink [&_input]:placeholder:text-muted-foreground">
+          <div className="mt-6 panel-elevated rounded bg-paper-white p-3 text-ink">
             <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search firms by name or city…"
                 maxLength={120}
-                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                className="rounded border border-rule bg-paper-white px-4 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-primary"
               />
-              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
+              <button type="submit" className="rounded bg-brand-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">Search</button>
             </form>
             <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2">
               <Combobox
@@ -321,13 +314,13 @@ function FirmsIndex() {
                   {sortedRows.map((f) => {
                     const lawyerCount = counts?.[f.id] ?? 0;
                     return (
-                      <TableRow key={f.id} className={f.is_featured ? "bg-amber-50/40" : undefined}>
+                      <TableRow key={f.id} className={f.is_featured ? "bg-brass/5" : undefined}>
                         <TableCell>
                           <FirmLogo src={f.logo_url} alt={`${f.name} logo`} size="sm" accentColor={f.logo_accent_color} />
                         </TableCell>
                         <TableCell className="font-medium">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Link to="/firms/$slug" params={{ slug: f.slug }} className="text-ink hover:text-gold">
+                            <Link to="/firms/$slug" params={{ slug: f.slug }} className="text-ink transition-colors hover:text-brand-hover">
                               {f.name}
                             </Link>
                             {f.is_featured && <FeaturedBadge />}
@@ -344,7 +337,7 @@ function FirmsIndex() {
                           <Link
                             to="/firms/$slug"
                             params={{ slug: f.slug }}
-                            className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90"
+                            className="rounded bg-brand-primary px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-hover"
                           >
                             View
                           </Link>
@@ -362,7 +355,7 @@ function FirmsIndex() {
                 return (
                   <article
                     key={f.id}
-                    className={`flex items-stretch gap-3 overflow-hidden rounded-xl bg-card shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 ${f.is_featured ? "ring-2 ring-amber-400/70" : ""}`}
+                    className={`flex items-stretch gap-3 overflow-hidden rounded border border-rule bg-paper-white transition-colors hover:border-brand-primary/60 sm:h-28 sm:gap-0 ${f.is_featured ? "ring-1 ring-brass/60" : ""}`}
                   >
                     <Link
                       to="/firms/$slug"
@@ -384,7 +377,7 @@ function FirmsIndex() {
                           <Link
                             to="/firms/$slug"
                             params={{ slug: f.slug }}
-                            className="font-heading text-base font-semibold text-ink hover:text-gold sm:text-lg sm:truncate"
+                            className="font-heading text-base text-ink transition-colors hover:text-brand-hover sm:text-lg sm:truncate"
                           >
                             {f.name}
                           </Link>
@@ -409,14 +402,14 @@ function FirmsIndex() {
                         })()}
                       </div>
                       <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-0.5 text-xs font-medium text-ink">
+                        <span className="citation-chip">
                           <Users className="h-3 w-3" strokeWidth={1.5} />
                           {lawyerCount}
                         </span>
                         <Link
                           to="/firms/$slug"
                           params={{ slug: f.slug }}
-                          className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90"
+                          className="rounded bg-brand-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover"
                         >
                           View
                         </Link>
@@ -481,7 +474,7 @@ function FirmDiscoverLinks() {
             <Link
               to="/firms"
               search={{ town: t.slug }}
-              className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-sm text-ink hover:border-gold hover:bg-gold/10"
+              className="inline-flex items-center rounded border border-rule bg-paper-white px-3 py-1.5 text-sm text-ink transition-colors hover:border-brand-primary hover:bg-brand-tint/40"
             >
               Law firms in {t.name}
             </Link>

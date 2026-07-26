@@ -30,10 +30,10 @@ function PracticeAreasPage() {
   });
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       <div className="border-b border-border bg-card py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <span className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">Browse</span>
+          <span className="eyebrow text-ink-muted">[Browse]</span>
           <h1 className="mt-2 font-heading text-4xl text-ink md:text-5xl">Practice Areas</h1>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             Find attorneys and advocates across every major area of South African law.
@@ -49,9 +49,9 @@ function PracticeAreasPage() {
                 key={a.id}
                 to="/search"
                 search={{ area: a.slug } as never}
-                className="group flex items-start gap-4 rounded-xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-gold/50 hover:shadow-md"
+                className="group flex items-start gap-4 rounded border border-rule bg-paper-white p-6 transition-colors hover:border-brand-primary"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold transition-colors group-hover:bg-gold group-hover:text-white">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[3px] bg-brand-tint text-brand-primary transition-colors group-hover:bg-brand-primary group-hover:text-white">
                   <Icon className="h-6 w-6" strokeWidth={1.75} />
                 </div>
                 <div>

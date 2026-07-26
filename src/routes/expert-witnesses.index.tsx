@@ -115,14 +115,14 @@ function ExpertWitnessSearch() {
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
     <>
-      <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="w-44 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
-      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
-      <SimpleSelect value={search.independent ?? ""} onChange={(independent) => update({ independent: (independent || undefined) as Search["independent"] })} options={[{ value: "yes", label: "Independent" }, { value: "no", label: "Employed" }]} placeholder="All experts" className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="w-44 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.independent ?? ""} onChange={(independent) => update({ independent: (independent || undefined) as Search["independent"] })} options={[{ value: "yes", label: "Independent" }, { value: "no", label: "Employed" }]} placeholder="All experts" className="w-36 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
     </>
   );
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       <StickySearchBar
         visible={isStuck}
         q={q}
@@ -131,16 +131,16 @@ function ExpertWitnessSearch() {
         placeholder="Search experts — supports AND / OR / NOT…"
         filters={compactFilters}
       />
-      <section className="bg-ink py-12 text-cream">
+      <section className="bg-brand-deep py-12 text-paper-ivory">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <Microscope className="h-7 w-7 text-gold" />
+            <Microscope className="h-7 w-7 text-brass" />
             <h1 className="font-heading text-3xl md:text-4xl">Find an Expert Witness</h1>
           </div>
-          <p className="mt-2 max-w-2xl text-cream/70">
+          <p className="mt-2 max-w-2xl text-paper-ivory/75">
             Specialists across medicine, engineering, forensics, finance and more — with linked case appearances.
           </p>
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg [&_input]:text-ink [&_select]:text-ink [&_input]:placeholder:text-muted-foreground">
+          <div className="mt-6 panel-elevated rounded bg-paper-white p-3 text-ink">
             <form
               onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
               className="grid gap-2 sm:grid-cols-[1fr_240px_180px_auto]"
@@ -150,11 +150,11 @@ function ExpertWitnessSearch() {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search — supports AND / OR / NOT…"
                 maxLength={240}
-                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                className="rounded border border-rule bg-paper-white px-4 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-primary"
               />
-              <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
-              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
-              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">
+              <SimpleSelect value={search.discipline ?? ""} onChange={(discipline) => update({ discipline: discipline || undefined })} options={(disciplines ?? []).map((d) => ({ value: d.slug, label: `${d.parent_category ?? "Other"} — ${d.name}` }))} placeholder="All disciplines" className="rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink" />
+              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink" />
+              <button type="submit" className="rounded bg-brand-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">
                 Search
               </button>
             </form>
@@ -171,8 +171,8 @@ function ExpertWitnessSearch() {
                     key={o.label}
                     type="button"
                     onClick={() => update({ independent: o.v })}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                      active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"
+                    className={`rounded border px-3 py-1 text-xs font-medium transition-colors ${
+                      active ? "border-brand-primary bg-brand-primary text-white" : "border-rule bg-paper-white text-ink hover:border-brand-primary"
                     }`}
                   >
                     {o.label}
@@ -181,7 +181,7 @@ function ExpertWitnessSearch() {
               })}
             </div>
           </div>
-          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
+          <p className="mt-2 text-xs text-paper-ivory/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
       <div ref={sentinelRef} aria-hidden="true" />
@@ -238,7 +238,7 @@ function ExpertWitnessSearch() {
                     return (
                       <TableRow key={e.id}>
                         <TableCell className="font-medium">
-                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="text-ink hover:text-gold">
+                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="text-ink transition-colors hover:text-brand-hover">
                             {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
                           </Link>
                         </TableCell>
@@ -250,7 +250,7 @@ function ExpertWitnessSearch() {
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">{caseCount}</TableCell>
                         <TableCell className="text-right">
-                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90">
+                          <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded bg-brand-primary px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
                             View
                           </Link>
                         </TableCell>
@@ -266,8 +266,8 @@ function ExpertWitnessSearch() {
                 const disc: any[] = (e.provider_disciplines ?? []).map((x: any) => x.expert_disciplines).filter(Boolean);
                 const caseCount = e.case_service_providers?.length ?? 0;
                 return (
-                  <article key={e.id} className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-gold/30 sm:px-5">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-gold/30 sm:h-20 sm:w-20">
+                  <article key={e.id} className="flex items-center gap-4 rounded border border-rule bg-paper-white p-4 transition-colors hover:border-brand-primary/60 sm:px-5">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full ring-1 ring-rule sm:h-20 sm:w-20">
                       {e.avatar_url ? (
                         <img
                           src={e.avatar_url}
@@ -275,7 +275,7 @@ function ExpertWitnessSearch() {
                           className="h-full w-full scale-[1.18] object-cover object-top"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gold/10 font-heading text-xl text-gold sm:text-2xl">
+                        <div className="flex h-full w-full items-center justify-center bg-brand-tint font-heading text-xl text-brand-primary sm:text-2xl">
                           {e.first_name?.[0]}{e.last_name?.[0]}
                         </div>
                       )}
@@ -286,7 +286,7 @@ function ExpertWitnessSearch() {
                           <Link
                             to="/expert-witnesses/$slug"
                             params={{ slug: e.slug }}
-                            className="font-heading text-lg font-semibold text-ink hover:text-gold"
+                            className="font-heading text-lg text-ink transition-colors hover:text-brand-hover"
                           >
                             {[e.name_title, e.first_name, e.last_name].filter(Boolean).join(" ")}
                           </Link>
@@ -296,7 +296,7 @@ function ExpertWitnessSearch() {
                             </span>
                           )}
                           {disc[0] && (
-                            <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">
+                            <span className="rounded-[3px] bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-primary">
                               {disc[0].name}
                             </span>
                           )}
@@ -310,11 +310,11 @@ function ExpertWitnessSearch() {
                       </div>
                       <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
                         {caseCount > 0 && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
+                          <span className="citation-chip">
                             <BookOpen className="h-3 w-3" /> {caseCount} case{caseCount === 1 ? "" : "s"}
                           </span>
                         )}
-                        <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                        <Link to="/expert-witnesses/$slug" params={{ slug: e.slug }} className="rounded bg-brand-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
                           View Profile
                         </Link>
                       </div>

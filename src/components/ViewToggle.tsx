@@ -8,7 +8,7 @@ export function ViewToggle({
   onChange: (v: ViewMode) => void;
 }) {
   return (
-    <div className="inline-flex rounded-full border border-border bg-background p-1">
+    <div className="inline-flex rounded border border-rule bg-paper-white p-1">
       {([
         { key: "cards" as const, label: "Cards" },
         { key: "list" as const, label: "List" },
@@ -18,8 +18,8 @@ export function ViewToggle({
           <button
             key={v.key}
             onClick={() => onChange(v.key)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
+            className={`rounded-[3px] px-3 py-1 text-xs font-medium transition-colors ${
+              active ? "bg-brand-primary text-white" : "text-ink-muted hover:text-ink"
             }`}
           >
             {v.label}
