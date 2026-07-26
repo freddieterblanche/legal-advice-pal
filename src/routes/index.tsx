@@ -82,7 +82,7 @@ function HomePage() {
             className="animate-hero-rise mx-auto mt-5 max-w-3xl font-heading leading-[1.15] text-paper-ivory [animation-delay:80ms]"
             style={{ fontSize: "clamp(30px, 4.5vw, 46px)" }}
           >
-            Every legal professional in South Africa. Searchable by expertise.
+            A comprehensive database of South African legal professionals. Searchable by expertise.
           </h1>
           <p className="animate-hero-rise mx-auto mt-5 max-w-2xl text-base leading-relaxed text-paper-ivory/75 [animation-delay:160ms]">
             South Africa has a split legal profession. Choose who you need — then search a
@@ -302,7 +302,7 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
       </form>
 
       <div className="mt-5 flex items-center justify-between text-xs text-ink-muted">
-        <span className="font-mono">Every province · every practice area</span>
+        <span className="font-mono">Nationwide · searchable by expertise</span>
         <Link
           to="/search"
           search={{ type: kind } as never}
