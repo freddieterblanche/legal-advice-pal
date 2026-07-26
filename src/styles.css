@@ -5,10 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: 2px;
+  --radius-md: 3px;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: var(--radius);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -28,67 +28,95 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ink: var(--ink);
-  --color-cream: var(--cream);
-  --color-gold: var(--gold);
-  --color-forest: var(--forest);
-  --color-attorney: var(--gold);
-  --color-advocate: var(--forest);
 
-  --font-heading: "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  /* Brand tokens */
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-tint: var(--brand-tint);
+  --color-brass: var(--accent-brass);
+  --color-paper-ivory: var(--paper-ivory);
+  --color-paper-white: var(--paper-white);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+
+  /* Legacy aliases — older components reference these names */
+  --color-cream: var(--paper-ivory);
+  --color-gold: var(--brand-primary);
+  --color-forest: var(--brand-deep);
+  --color-attorney: var(--brand-primary);
+  --color-advocate: var(--brand-deep);
+
+  --font-heading: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 4px;
 
-  /* Lawexpert.co.za — Navy palette
-     Cool light surfaces, deep navy text, trustworthy blue for Attorneys,
-     deeper navy for Advocates. */
-  --ink: oklch(0.18 0.08 265);             /* dark navy — primary text / dark surfaces */
-  --cream: oklch(0.985 0.005 250);          /* airy background */
-  --gold: oklch(0.50 0.18 264);             /* blue-700 — Attorney accent */
-  --forest: oklch(0.32 0.09 265);           /* navy-700 — Advocate accent */
+  /* Lawexpert — "Chancery Blue" palette. The record speaks. */
+  --brand-deep:    #0B2138;  /* heroes, covers, footer */
+  --brand-primary: #123A5C;  /* primary brand colour, buttons, logo */
+  --brand-hover:   #1C4E7A;  /* hover states, links */
+  --brand-tint:    #DCE5EE;  /* citation chips, subtle fills */
+  --accent-brass:  #B48A2E;  /* accent ONLY — cap at ~5% of any view */
+  --paper-ivory:   #F7F4EC;  /* page background */
+  --paper-white:   #FFFFFF;  /* cards, panels */
+  --ink:           #171A18;  /* body text */
+  --ink-muted:     #5C635E;  /* secondary text */
+  --rule:          #D9D4C6;  /* hairline borders */
 
-  --background: var(--cream);
+  --background: var(--paper-ivory);
   --foreground: var(--ink);
-  --card: oklch(1 0 0);
+  --card: var(--paper-white);
   --card-foreground: var(--ink);
-  --popover: oklch(1 0 0);
+  --popover: var(--paper-white);
   --popover-foreground: var(--ink);
-  --primary: var(--gold);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.965 0.008 250);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.96 0.006 250);
-  --muted-foreground: oklch(0.50 0.02 255);
-  --accent: oklch(0.95 0.02 255);
-  --accent-foreground: var(--ink);
-  --destructive: oklch(0.58 0.20 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.91 0.01 255);
-  --input: oklch(0.92 0.01 255);
-  --ring: var(--gold);
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--brand-tint);
+  --secondary-foreground: var(--brand-primary);
+  --muted: #efece3;
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--brand-tint);
+  --accent-foreground: var(--brand-primary);
+  --destructive: #a3372c;
+  --destructive-foreground: #ffffff;
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--brand-primary);
+}
+
+/* Alternate palette: "Report Green" */
+[data-theme="green"] {
+  --brand-deep:    #0E2E24;
+  --brand-primary: #123B2E;
+  --brand-hover:   #1B4D3C;
+  --brand-tint:    #DCE8E1;
 }
 
 .dark {
-  --background: var(--ink);
-  --foreground: var(--cream);
-  --card: oklch(0.34 0.04 255);
-  --card-foreground: var(--cream);
-  --popover: oklch(0.34 0.04 255);
-  --popover-foreground: var(--cream);
-  --primary: var(--gold);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.36 0.04 255);
-  --secondary-foreground: var(--cream);
-  --muted: oklch(0.36 0.04 255);
-  --muted-foreground: oklch(0.78 0.01 255);
-  --accent: oklch(0.40 0.05 255);
-  --accent-foreground: var(--cream);
-  --border: oklch(0.40 0.04 255);
-  --input: oklch(0.40 0.04 255);
-  --ring: var(--gold);
+  --background: var(--brand-deep);
+  --foreground: var(--paper-ivory);
+  --card: #12293f;
+  --card-foreground: var(--paper-ivory);
+  --popover: #12293f;
+  --popover-foreground: var(--paper-ivory);
+  --primary: var(--brand-tint);
+  --primary-foreground: var(--brand-deep);
+  --secondary: #1a344c;
+  --secondary-foreground: var(--paper-ivory);
+  --muted: #1a344c;
+  --muted-foreground: #9fb2c4;
+  --accent: #1a344c;
+  --accent-foreground: var(--paper-ivory);
+  --destructive: #c4564a;
+  --destructive-foreground: #ffffff;
+  --border: #24415a;
+  --input: #24415a;
+  --ring: var(--brand-tint);
 }
 
 @layer base {
@@ -97,11 +125,69 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    font-size: 15px;
     -webkit-font-smoothing: antialiased;
   }
+  /* Authority comes from the serif itself — never bold-heavy. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 700;
-    letter-spacing: -0.035em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Mono uppercase eyebrow label — [ATTORNEYS], VERIFIED PROFILES · LINKED CASES */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Case citations are set in Plex Mono everywhere, without exception. */
+  .citation-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--brand-tint);
+    color: var(--brand-primary);
+    border-radius: 3px;
+    padding: 6px 12px;
+    line-height: 1.3;
+  }
+  a.citation-chip { transition: background-color 150ms ease, color 150ms ease; }
+  a.citation-chip:hover { background: var(--brand-primary); color: #fff; }
+
+  /* One soft ambient shadow reserved for major elevated panels. */
+  .panel-elevated {
+    box-shadow: 0 12px 32px -16px rgb(11 33 56 / 0.25);
+  }
+}
+
+@layer utilities {
+  @keyframes hero-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-hero-rise { animation: hero-rise 500ms ease-out both; }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-rise { animation: none; }
   }
 }

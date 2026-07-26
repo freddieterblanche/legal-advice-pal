@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 84" width="680" height="168" role="img" aria-label="Lawexpert reversed logo">
+  <rect width="340" height="84" fill="#0B2138"/>
+  <g stroke="#F7F4EC" stroke-width="6" fill="none" stroke-linecap="square">
+    <path d="M18 12 H6 V72 H18"/><path d="M322 12 H334 V72 H322"/>
+  </g>
+  <text x="36" y="55" font-family="'Libre Caslon Text',Georgia,serif" font-size="34" fill="#F7F4EC">Law<tspan font-style="italic" fill="#B48A2E">expert</tspan></text>
+  <text x="36" y="72" font-family="'IBM Plex Mono',monospace" font-size="10.5" letter-spacing="3.5" fill="#9FB2C4">SOUTH AFRICA'S LEGAL RECORD</text>
+</svg>
