@@ -87,6 +87,9 @@ export function Navbar() {
                           <DropdownMenuItem asChild>
                             <Link to="/admin">Overview</Link>
                           </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to="/admin/claims">Profile Claims</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
                             <Link to="/admin/firms">Firms</Link>
@@ -160,6 +163,7 @@ export function Navbar() {
                       <span className="eyebrow block px-3 py-2 text-ink-muted">Admin</span>
                       <Link to="/admin" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-brand-primary">Admin Hub</Link>
                       <div className="grid grid-cols-2 gap-1 px-3 pb-2">
+                        <Link to="/admin/claims" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-ink hover:bg-brand-tint/50">Claims</Link>
                         <Link to="/admin/firms" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-ink hover:bg-brand-tint/50">Firms</Link>
                         <Link to="/admin/attorneys" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-ink hover:bg-brand-tint/50">Attorneys</Link>
                         <Link to="/admin/advocates" onClick={() => setOpen(false)} className="rounded px-2 py-1.5 text-sm text-ink hover:bg-brand-tint/50">Advocates</Link>

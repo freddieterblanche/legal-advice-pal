@@ -248,6 +248,59 @@ export type Database = {
           },
         ]
       }
+      claim_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          email: string
+          id: string
+          message: string | null
+          phone: string | null
+          requested_tier: string
+          service_provider_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_tier?: string
+          service_provider_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          requested_tier?: string
+          service_provider_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_requests_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       config: {
         Row: {
           key: string
@@ -997,6 +1050,7 @@ export type Database = {
           id: string
           is_arbitrator: boolean
           is_claimed: boolean | null
+          listing_tier: string
           is_featured: boolean
           is_independent: boolean
           is_mediator: boolean
@@ -1070,6 +1124,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          listing_tier?: string
           is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean
@@ -1143,6 +1198,7 @@ export type Database = {
           id?: string
           is_arbitrator?: boolean
           is_claimed?: boolean | null
+          listing_tier?: string
           is_featured?: boolean
           is_independent?: boolean
           is_mediator?: boolean
@@ -1224,6 +1280,69 @@ export type Database = {
             columns: ["town_id"]
             isOneToOne: false
             referencedRelation: "towns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          activated_at: string | null
+          amount_rands: number
+          claim_request_id: string | null
+          created_at: string
+          current_period_end: string | null
+          frequency: string
+          id: string
+          payfast_token: string | null
+          pf_payment_id: string | null
+          service_provider_id: string
+          status: string
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          amount_rands: number
+          claim_request_id?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          frequency?: string
+          id?: string
+          payfast_token?: string | null
+          pf_payment_id?: string | null
+          service_provider_id: string
+          status?: string
+          tier: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          amount_rands?: number
+          claim_request_id?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          frequency?: string
+          id?: string
+          payfast_token?: string | null
+          pf_payment_id?: string | null
+          service_provider_id?: string
+          status?: string
+          tier?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_claim_request_id_fkey"
+            columns: ["claim_request_id"]
+            isOneToOne: false
+            referencedRelation: "claim_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
             referencedColumns: ["id"]
           },
         ]

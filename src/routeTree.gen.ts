@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
+import { Route as ClaimProfileRouteImport } from './routes/claim-profile'
 import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -24,6 +25,7 @@ import { Route as ArbitratorsIndexRouteImport } from './routes/arbitrators.index
 import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as ExpertWitnessesSlugRouteImport } from './routes/expert-witnesses.$slug'
+import { Route as ApiPayfastItnRouteImport } from './routes/api.payfast-itn'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
@@ -32,6 +34,7 @@ import { Route as AuthenticatedAdminMediatorsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminFirmsRouteImport } from './routes/_authenticated/admin.firms'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin.experts'
 import { Route as AuthenticatedAdminCountriesRouteImport } from './routes/_authenticated/admin.countries'
+import { Route as AuthenticatedAdminClaimsRouteImport } from './routes/_authenticated/admin.claims'
 import { Route as AuthenticatedAdminChambersRouteImport } from './routes/_authenticated/admin.chambers'
 import { Route as AuthenticatedAdminBarsRouteImport } from './routes/_authenticated/admin.bars'
 import { Route as AuthenticatedAdminAttorneysRouteImport } from './routes/_authenticated/admin.attorneys'
@@ -56,6 +59,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PracticeAreasRoute = PracticeAreasRouteImport.update({
   id: '/practice-areas',
   path: '/practice-areas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClaimProfileRoute = ClaimProfileRouteImport.update({
+  id: '/claim-profile',
+  path: '/claim-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClaimRoute = ClaimRouteImport.update({
@@ -112,6 +120,11 @@ const ExpertWitnessesSlugRoute = ExpertWitnessesSlugRouteImport.update({
   path: '/expert-witnesses/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPayfastItnRoute = ApiPayfastItnRouteImport.update({
+  id: '/api/payfast-itn',
+  path: '/api/payfast-itn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -156,6 +169,12 @@ const AuthenticatedAdminCountriesRoute =
     path: '/admin/countries',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminClaimsRoute =
+  AuthenticatedAdminClaimsRouteImport.update({
+    id: '/admin/claims',
+    path: '/admin/claims',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminChambersRoute =
   AuthenticatedAdminChambersRouteImport.update({
     id: '/admin/chambers',
@@ -190,11 +209,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -207,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
+  '/admin/claims': typeof AuthenticatedAdminClaimsRoute
   '/admin/countries': typeof AuthenticatedAdminCountriesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
@@ -219,11 +241,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -236,6 +260,7 @@ export interface FileRoutesByTo {
   '/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/admin/chambers': typeof AuthenticatedAdminChambersRoute
+  '/admin/claims': typeof AuthenticatedAdminClaimsRoute
   '/admin/countries': typeof AuthenticatedAdminCountriesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/firms': typeof AuthenticatedAdminFirmsRoute
@@ -250,11 +275,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -267,6 +294,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/attorneys': typeof AuthenticatedAdminAttorneysRoute
   '/_authenticated/admin/bars': typeof AuthenticatedAdminBarsRoute
   '/_authenticated/admin/chambers': typeof AuthenticatedAdminChambersRoute
+  '/_authenticated/admin/claims': typeof AuthenticatedAdminClaimsRoute
   '/_authenticated/admin/countries': typeof AuthenticatedAdminCountriesRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/_authenticated/admin/firms': typeof AuthenticatedAdminFirmsRoute
@@ -281,11 +309,13 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/claim'
+    | '/claim-profile'
     | '/practice-areas'
     | '/register'
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -298,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/attorneys'
     | '/admin/bars'
     | '/admin/chambers'
+    | '/admin/claims'
     | '/admin/countries'
     | '/admin/experts'
     | '/admin/firms'
@@ -310,11 +341,13 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/claim'
+    | '/claim-profile'
     | '/practice-areas'
     | '/register'
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -327,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin/attorneys'
     | '/admin/bars'
     | '/admin/chambers'
+    | '/admin/claims'
     | '/admin/countries'
     | '/admin/experts'
     | '/admin/firms'
@@ -340,11 +374,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/claim'
+    | '/claim-profile'
     | '/practice-areas'
     | '/register'
     | '/search'
     | '/sitemap.xml'
     | '/_authenticated/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -357,6 +393,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/attorneys'
     | '/_authenticated/admin/bars'
     | '/_authenticated/admin/chambers'
+    | '/_authenticated/admin/claims'
     | '/_authenticated/admin/countries'
     | '/_authenticated/admin/experts'
     | '/_authenticated/admin/firms'
@@ -371,10 +408,12 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ClaimRoute: typeof ClaimRoute
+  ClaimProfileRoute: typeof ClaimProfileRoute
   PracticeAreasRoute: typeof PracticeAreasRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPayfastItnRoute: typeof ApiPayfastItnRoute
   ExpertWitnessesSlugRoute: typeof ExpertWitnessesSlugRoute
   FirmsSlugRoute: typeof FirmsSlugRoute
   LawyersSlugRoute: typeof LawyersSlugRoute
@@ -412,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: '/practice-areas'
       fullPath: '/practice-areas'
       preLoaderRoute: typeof PracticeAreasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/claim-profile': {
+      id: '/claim-profile'
+      path: '/claim-profile'
+      fullPath: '/claim-profile'
+      preLoaderRoute: typeof ClaimProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/claim': {
@@ -491,6 +537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpertWitnessesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/payfast-itn': {
+      id: '/api/payfast-itn'
+      path: '/api/payfast-itn'
+      fullPath: '/api/payfast-itn'
+      preLoaderRoute: typeof ApiPayfastItnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -547,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCountriesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/claims': {
+      id: '/_authenticated/admin/claims'
+      path: '/admin/claims'
+      fullPath: '/admin/claims'
+      preLoaderRoute: typeof AuthenticatedAdminClaimsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/chambers': {
       id: '/_authenticated/admin/chambers'
       path: '/admin/chambers'
@@ -592,6 +652,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAttorneysRoute: typeof AuthenticatedAdminAttorneysRoute
   AuthenticatedAdminBarsRoute: typeof AuthenticatedAdminBarsRoute
   AuthenticatedAdminChambersRoute: typeof AuthenticatedAdminChambersRoute
+  AuthenticatedAdminClaimsRoute: typeof AuthenticatedAdminClaimsRoute
   AuthenticatedAdminCountriesRoute: typeof AuthenticatedAdminCountriesRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
   AuthenticatedAdminFirmsRoute: typeof AuthenticatedAdminFirmsRoute
@@ -608,6 +669,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAttorneysRoute: AuthenticatedAdminAttorneysRoute,
   AuthenticatedAdminBarsRoute: AuthenticatedAdminBarsRoute,
   AuthenticatedAdminChambersRoute: AuthenticatedAdminChambersRoute,
+  AuthenticatedAdminClaimsRoute: AuthenticatedAdminClaimsRoute,
   AuthenticatedAdminCountriesRoute: AuthenticatedAdminCountriesRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
   AuthenticatedAdminFirmsRoute: AuthenticatedAdminFirmsRoute,
@@ -625,10 +687,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ClaimRoute: ClaimRoute,
+  ClaimProfileRoute: ClaimProfileRoute,
   PracticeAreasRoute: PracticeAreasRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPayfastItnRoute: ApiPayfastItnRoute,
   ExpertWitnessesSlugRoute: ExpertWitnessesSlugRoute,
   FirmsSlugRoute: FirmsSlugRoute,
   LawyersSlugRoute: LawyersSlugRoute,
