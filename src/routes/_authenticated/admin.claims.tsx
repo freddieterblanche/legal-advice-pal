@@ -23,6 +23,8 @@ type ClaimRow = {
   decision_note: string | null;
   created_at: string;
   decided_at: string | null;
+  selfie_url: string | null;
+  id_doc_url: string | null;
   service_providers: {
     id: string;
     slug: string;
@@ -151,6 +153,24 @@ function AdminClaimsPage() {
                     <div><span className="text-ink-muted">Listing email: </span><span className="text-ink">{p.email}</span></div>
                   )}
                   {r.message && <div className="sm:col-span-2"><span className="text-ink-muted">Note: </span><span className="text-ink">{r.message}</span></div>}
+                  <div className="sm:col-span-2 flex flex-wrap items-center gap-4 border-t border-rule pt-3">
+                    {r.selfie_url ? (
+                      <a href={r.selfie_url} target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-2">
+                        <img src={r.selfie_url} alt="Claimant selfie" className="h-14 w-14 rounded-[3px] border border-rule object-cover" />
+                        <span className="text-xs text-brand-primary group-hover:text-brand-hover">Selfie →</span>
+                      </a>
+                    ) : (
+                      <span className="text-xs text-destructive">No selfie attached</span>
+                    )}
+                    {r.id_doc_url ? (
+                      <a href={r.id_doc_url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-brand-primary hover:text-brand-hover">
+                        View ID document →
+                      </a>
+                    ) : (
+                      <span className="text-xs text-destructive">No ID document attached</span>
+                    )}
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">Links expire in 1h · docs deleted after decision</span>
+                  </div>
                 </div>
 
                 {noteFor === r.id ? (

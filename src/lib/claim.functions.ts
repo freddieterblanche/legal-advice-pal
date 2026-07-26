@@ -12,9 +12,11 @@ export const submitClaimRequest = createServerFn({ method: "POST" })
     z
       .object({
         service_provider_id: z.string().uuid(),
-        phone: z.string().trim().max(40).optional(),
+        phone: z.string().trim().min(7, "Phone number required").max(40),
         message: z.string().trim().max(1000).optional(),
         requested_tier: z.enum(TIER_SLUGS).default("basic"),
+        selfie_path: z.string().min(1, "Selfie required").max(500),
+        id_doc_path: z.string().min(1, "ID document required").max(500),
       })
       .parse(input),
   )
@@ -37,13 +39,23 @@ export const submitClaimRequest = createServerFn({ method: "POST" })
     const email = userData.user.email?.toLowerCase();
     if (!email) throw new Error("Your account has no email address.");
 
+    // Verification docs must live in the claimant's own folder of the
+    // private bucket — never accept a path pointing at someone else's files.
+    for (const path of [data.selfie_path, data.id_doc_path]) {
+      if (!path.startsWith(`${context.userId}/`) || path.includes("..")) {
+        throw new Error("Invalid verification document reference.");
+      }
+    }
+
     const { error: insErr } = await supabaseAdmin.from("claim_requests").insert({
       service_provider_id: data.service_provider_id,
       user_id: context.userId,
       email,
-      phone: data.phone || null,
+      phone: data.phone,
       message: data.message || null,
       requested_tier: data.requested_tier,
+      selfie_path: data.selfie_path,
+      id_doc_path: data.id_doc_path,
     });
     if (insErr) {
       if (insErr.code === "23505") {
@@ -91,12 +103,30 @@ export const adminListClaimRequests = createServerFn({ method: "POST" })
     const { data, error } = await supabaseAdmin
       .from("claim_requests")
       .select(
-        "id, email, phone, message, requested_tier, status, decision_note, created_at, decided_at, service_providers(id, slug, first_name, last_name, provider_type, designation, city, province, email, firms(name))",
+        "id, email, phone, message, requested_tier, status, decision_note, created_at, decided_at, selfie_path, id_doc_path, service_providers(id, slug, first_name, last_name, provider_type, designation, city, province, email, firms(name))",
       )
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw error;
-    return { requests: data ?? [] };
+
+    // Short-lived signed URLs so admins can review the private KYC documents.
+    const requests = await Promise.all(
+      (data ?? []).map(async (r) => {
+        const sign = async (path: string | null) => {
+          if (!path) return null;
+          const { data: signed } = await supabaseAdmin.storage
+            .from("verification-docs")
+            .createSignedUrl(path, 3600);
+          return signed?.signedUrl ?? null;
+        };
+        return {
+          ...r,
+          selfie_url: await sign(r.selfie_path),
+          id_doc_url: await sign(r.id_doc_path),
+        };
+      }),
+    );
+    return { requests };
   });
 
 // Admin: verify or reject. Verification confirms identity only — the
@@ -149,6 +179,21 @@ export const adminDecideClaimRequest = createServerFn({ method: "POST" })
       })
       .eq("id", req.id);
     if (decErr) throw decErr;
+
+    // KYC documents have served their purpose — delete them (POPIA hygiene).
+    const { data: fullReq } = await supabaseAdmin
+      .from("claim_requests")
+      .select("selfie_path, id_doc_path")
+      .eq("id", req.id)
+      .maybeSingle();
+    const paths = [fullReq?.selfie_path, fullReq?.id_doc_path].filter((p): p is string => !!p);
+    if (paths.length) {
+      await supabaseAdmin.storage.from("verification-docs").remove(paths);
+      await supabaseAdmin
+        .from("claim_requests")
+        .update({ selfie_path: null, id_doc_path: null })
+        .eq("id", req.id);
+    }
 
     return { ok: true as const };
   });

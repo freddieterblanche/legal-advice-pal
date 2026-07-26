@@ -256,9 +256,11 @@ export type Database = {
           decision_note: string | null
           email: string
           id: string
+          id_doc_path: string | null
           message: string | null
           phone: string | null
           requested_tier: string
+          selfie_path: string | null
           service_provider_id: string
           status: string
           user_id: string
@@ -270,9 +272,11 @@ export type Database = {
           decision_note?: string | null
           email: string
           id?: string
+          id_doc_path?: string | null
           message?: string | null
           phone?: string | null
           requested_tier?: string
+          selfie_path?: string | null
           service_provider_id: string
           status?: string
           user_id: string
@@ -284,9 +288,11 @@ export type Database = {
           decision_note?: string | null
           email?: string
           id?: string
+          id_doc_path?: string | null
           message?: string | null
           phone?: string | null
           requested_tier?: string
+          selfie_path?: string | null
           service_provider_id?: string
           status?: string
           user_id?: string
