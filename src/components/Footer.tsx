@@ -11,9 +11,9 @@ export function Footer() {
               <LogoLockup variant="dark" tagline className="text-[15px]" />
             </Link>
             <p className="mt-4 font-mono text-xs leading-relaxed text-paper-ivory/60">
-              South Africa's legal directory.
+              South Africa's directory of
               <br />
-              Verified profiles. Linked cases.
+              legal professionals.
             </p>
           </div>
           <div>

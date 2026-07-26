@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/designation";
-import { VerifiedMark } from "../components/BrandMark";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
@@ -308,7 +307,7 @@ function SearchPage() {
             })}
           </div>
           <p className="eyebrow text-paper-ivory/70">
-            {search.type === "advocate" ? "[Advocates] Members of the Bar" : "[Attorneys] Verified attorneys"}
+            {search.type === "advocate" ? "[Advocates] Members of the Bar" : "[Attorneys] Searchable by expertise"}
           </p>
           <h1 className="mt-2 font-heading text-3xl md:text-4xl">
             {search.type === "advocate" ? "Find an Advocate" : "Find an Attorney"}
@@ -534,7 +533,6 @@ function SearchPage() {
                     <div className="flex flex-row flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
                       {caseCount > 0 && (
                         <span className="citation-chip">
-                          <VerifiedMark size={13} />
                           {caseCount} reported case{caseCount === 1 ? "" : "s"}
                         </span>
                       )}
