@@ -25,6 +25,7 @@ import { Route as ArbitratorsIndexRouteImport } from './routes/arbitrators.index
 import { Route as LawyersSlugRouteImport } from './routes/lawyers.$slug'
 import { Route as FirmsSlugRouteImport } from './routes/firms.$slug'
 import { Route as ExpertWitnessesSlugRouteImport } from './routes/expert-witnesses.$slug'
+import { Route as ApiPayfastItnRouteImport } from './routes/api.payfast-itn'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTownsRouteImport } from './routes/_authenticated/admin.towns'
@@ -119,6 +120,11 @@ const ExpertWitnessesSlugRoute = ExpertWitnessesSlugRouteImport.update({
   path: '/expert-witnesses/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPayfastItnRoute = ApiPayfastItnRouteImport.update({
+  id: '/api/payfast-itn',
+  path: '/api/payfast-itn',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/api/payfast-itn': typeof ApiPayfastItnRoute
   '/expert-witnesses/$slug': typeof ExpertWitnessesSlugRoute
   '/firms/$slug': typeof FirmsSlugRoute
   '/lawyers/$slug': typeof LawyersSlugRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sitemap.xml'
     | '/_authenticated/dashboard'
+    | '/api/payfast-itn'
     | '/expert-witnesses/$slug'
     | '/firms/$slug'
     | '/lawyers/$slug'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPayfastItnRoute: typeof ApiPayfastItnRoute
   ExpertWitnessesSlugRoute: typeof ExpertWitnessesSlugRoute
   FirmsSlugRoute: typeof FirmsSlugRoute
   LawyersSlugRoute: typeof LawyersSlugRoute
@@ -522,6 +535,13 @@ declare module '@tanstack/react-router' {
       path: '/expert-witnesses/$slug'
       fullPath: '/expert-witnesses/$slug'
       preLoaderRoute: typeof ExpertWitnessesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/payfast-itn': {
+      id: '/api/payfast-itn'
+      path: '/api/payfast-itn'
+      fullPath: '/api/payfast-itn'
+      preLoaderRoute: typeof ApiPayfastItnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -672,6 +692,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPayfastItnRoute: ApiPayfastItnRoute,
   ExpertWitnessesSlugRoute: ExpertWitnessesSlugRoute,
   FirmsSlugRoute: FirmsSlugRoute,
   LawyersSlugRoute: LawyersSlugRoute,

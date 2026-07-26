@@ -99,18 +99,17 @@ export const adminListClaimRequests = createServerFn({ method: "POST" })
     return { requests: data ?? [] };
   });
 
-// Admin: approve or reject. Operational rule for Phase 1: send the payment
-// link when the request arrives and approve once payment clears — approval
-// hands over ownership and edit rights in one step. (Phase 2 automates this
-// via the PayFast ITN webhook.) Public listing status is left untouched so
-// the profile never disappears from the directory mid-claim.
+// Admin: verify or reject. Verification confirms identity only — the
+// claimant then pays via PayFast, and the ITN webhook performs the actual
+// handover (ownership + tier) on the first COMPLETE payment. Ownership never
+// transfers unpaid, and the public listing never disappears mid-claim.
 export const adminDecideClaimRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
       .object({
         id: z.string().uuid(),
-        decision: z.enum(["approved", "rejected"]),
+        decision: z.enum(["verified", "rejected"]),
         note: z.string().trim().max(500).optional(),
       })
       .parse(input),
@@ -127,7 +126,7 @@ export const adminDecideClaimRequest = createServerFn({ method: "POST" })
     if (!req) throw new Error("Request not found.");
     if (req.status !== "pending") throw new Error("This request has already been decided.");
 
-    if (data.decision === "approved") {
+    if (data.decision === "verified") {
       const { data: provider, error: pErr } = await supabaseAdmin
         .from("service_providers")
         .select("id, profile_id, is_claimed")
@@ -138,20 +137,6 @@ export const adminDecideClaimRequest = createServerFn({ method: "POST" })
       if (provider.profile_id || provider.is_claimed) {
         throw new Error("Profile was claimed by someone else in the meantime.");
       }
-
-      const { error: updErr } = await supabaseAdmin
-        .from("service_providers")
-        .update({
-          profile_id: req.user_id,
-          is_claimed: true,
-          listing_tier: req.requested_tier,
-        })
-        .eq("id", req.service_provider_id);
-      if (updErr) throw updErr;
-
-      await supabaseAdmin
-        .from("profiles")
-        .upsert({ id: req.user_id, email: req.email, role: "lawyer" }, { onConflict: "id" });
     }
 
     const { error: decErr } = await supabaseAdmin

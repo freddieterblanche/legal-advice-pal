@@ -61,10 +61,10 @@ function AdminClaimsPage() {
   });
 
   const decide = useMutation({
-    mutationFn: async (vars: { id: string; decision: "approved" | "rejected"; note?: string }) =>
+    mutationFn: async (vars: { id: string; decision: "verified" | "rejected"; note?: string }) =>
       decideFn({ data: vars }),
     onSuccess: (_r, vars) => {
-      toast.success(vars.decision === "approved" ? "Claim approved — profile handed over." : "Claim rejected.");
+      toast.success(vars.decision === "verified" ? "Claim verified — claimant can now pay to activate." : "Claim rejected.");
       setNoteFor(null);
       setNote("");
       qc.invalidateQueries({ queryKey: ["admin-claims"] });
@@ -82,7 +82,8 @@ function AdminClaimsPage() {
   }
 
   const pending = (data ?? []).filter((r) => r.status === "pending");
-  const decided = (data ?? []).filter((r) => r.status !== "pending");
+  const awaitingPayment = (data ?? []).filter((r) => r.status === "verified");
+  const decided = (data ?? []).filter((r) => r.status === "approved" || r.status === "rejected");
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -91,8 +92,8 @@ function AdminClaimsPage() {
       </Link>
       <h1 className="mt-3 font-heading text-3xl text-ink">Profile Claims</h1>
       <p className="mt-1 text-sm text-ink-muted">
-        Verify identity before approving — approval hands over ownership and edit rights. Send the
-        payment link for the requested tier first; approve once payment clears.
+        Verify identity only — once verified, the claimant pays via PayFast and the webhook hands
+        over ownership automatically on the first successful payment.
       </p>
 
       <h2 className="eyebrow mt-8 text-ink-muted">Pending [{pending.length}]</h2>
@@ -175,11 +176,11 @@ function AdminClaimsPage() {
                 ) : (
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
-                      onClick={() => decide.mutate({ id: r.id, decision: "approved" })}
+                      onClick={() => decide.mutate({ id: r.id, decision: "verified" })}
                       disabled={decide.isPending}
                       className="inline-flex items-center gap-1.5 rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover disabled:opacity-50"
                     >
-                      <Check className="h-4 w-4" /> Approve & hand over
+                      <Check className="h-4 w-4" /> Verify claim
                     </button>
                     <button
                       onClick={() => setNoteFor(r.id)}
@@ -194,6 +195,27 @@ function AdminClaimsPage() {
             );
           })}
         </ul>
+      )}
+
+      {awaitingPayment.length > 0 && (
+        <>
+          <h2 className="eyebrow mt-10 text-ink-muted">Verified · awaiting payment [{awaitingPayment.length}]</h2>
+          <ul className="mt-4 divide-y divide-rule rounded border border-rule bg-paper-white">
+            {awaitingPayment.map((r) => {
+              const p = r.service_providers;
+              const tier = TIER_BY_SLUG[r.requested_tier as TierSlug];
+              return (
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
+                  <div>
+                    <span className="font-medium text-ink">{p ? `${p.first_name} ${p.last_name}` : "(deleted profile)"}</span>
+                    <span className="ml-2 text-ink-muted">{r.email}</span>
+                  </div>
+                  <span className="citation-chip">{tier ? `${tier.name} · ${formatRands(tier.monthlyRands)}/m` : r.requested_tier}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       {decided.length > 0 && (

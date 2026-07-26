@@ -5,13 +5,15 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { submitClaimRequest, getMyClaimRequest } from "../lib/claim.functions";
-import { TIERS, annualRands, formatRands, type TierSlug } from "../lib/tiers";
+import { createClaimCheckout } from "../lib/billing.functions";
+import { TIERS, TIER_BY_SLUG, annualRands, formatRands, type TierSlug } from "../lib/tiers";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/claim-profile")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
     provider: typeof s.provider === "string" ? s.provider : "",
+    payment: s.payment === "success" || s.payment === "cancelled" ? s.payment : undefined,
   }),
   head: () => ({
     meta: [
@@ -23,9 +25,10 @@ export const Route = createFileRoute("/claim-profile")({
 });
 
 function ClaimProfilePage() {
-  const { provider: slug } = Route.useSearch();
+  const { provider: slug, payment } = Route.useSearch();
   const submit = useServerFn(submitClaimRequest);
   const myRequest = useServerFn(getMyClaimRequest);
+  const checkout = useServerFn(createClaimCheckout);
 
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [mode, setMode] = useState<"signup" | "signin">("signup");
@@ -36,7 +39,8 @@ function ClaimProfilePage() {
   const [tier, setTier] = useState<TierSlug>("standard");
   const [busy, setBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [existing, setExisting] = useState<{ status: string; requested_tier: string } | null>(null);
+  const [existing, setExisting] = useState<{ id: string; status: string; requested_tier: string; decision_note: string | null } | null>(null);
+  const [frequency, setFrequency] = useState<"monthly" | "annual">("monthly");
 
   const { data: provider, isLoading } = useQuery({
     queryKey: ["claim-provider", slug],
@@ -62,10 +66,46 @@ function ClaimProfilePage() {
     if (!authed || !provider?.id) return;
     myRequest({ data: { service_provider_id: provider.id } })
       .then((res) => {
-        if (res.request) setExisting({ status: res.request.status, requested_tier: res.request.requested_tier });
+        if (res.request) setExisting(res.request as typeof existing);
       })
       .catch(() => {});
   }, [authed, provider?.id, myRequest]);
+
+  // After returning from PayFast, poll briefly while the webhook lands.
+  useEffect(() => {
+    if (payment !== "success" || !provider?.id || !authed) return;
+    if (existing?.status === "approved") return;
+    const t = setInterval(() => {
+      myRequest({ data: { service_provider_id: provider.id } })
+        .then((res) => { if (res.request) setExisting(res.request as typeof existing); })
+        .catch(() => {});
+    }, 4000);
+    const stop = setTimeout(() => clearInterval(t), 60000);
+    return () => { clearInterval(t); clearTimeout(stop); };
+  }, [payment, provider?.id, authed, existing?.status, myRequest]);
+
+  const payNow = async () => {
+    if (!existing) return;
+    setBusy(true);
+    try {
+      const { action, fields } = await checkout({ data: { claim_request_id: existing.id, frequency } });
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = action;
+      for (const [k, v] of Object.entries(fields)) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = k;
+        input.value = v;
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+      setBusy(false);
+    }
+  };
 
   const doAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +184,85 @@ function ClaimProfilePage() {
           Your claim for <strong className="text-ink">{name}</strong> is being reviewed. We verify every
           claim to protect professionals from impersonation. We'll email you the next steps, including
           payment for your chosen tier, usually within one business day.
+        </p>
+      </Shell>
+    );
+  }
+
+  if (existing?.status === "verified") {
+    const verifiedTier = TIER_BY_SLUG[existing.requested_tier as TierSlug];
+    if (payment === "success") {
+      return (
+        <Shell>
+          <p className="eyebrow text-brand-primary">[Payment received]</p>
+          <h1 className="mt-2 font-heading text-2xl text-ink">Activating your listing…</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+            Thanks — PayFast has confirmed your payment and we're handing the profile over to you now.
+            This page will update automatically; it usually takes under a minute.
+          </p>
+        </Shell>
+      );
+    }
+    return (
+      <Shell>
+        <p className="eyebrow text-brand-primary">[Claim verified]</p>
+        <h1 className="mt-2 font-heading text-2xl text-ink">You're verified — activate your listing.</h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+          Your claim for <strong className="text-ink">{name}</strong> has been verified. Pay for your{" "}
+          <strong className="text-ink">{verifiedTier?.name ?? existing.requested_tier}</strong> listing to
+          unlock full edit access.
+        </p>
+        {payment === "cancelled" && (
+          <p className="mt-3 rounded border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            Payment was cancelled — no charge was made. You can try again below.
+          </p>
+        )}
+        {verifiedTier && (
+          <div className="mt-5 space-y-3">
+            <div className="flex gap-2">
+              {([
+                { key: "monthly" as const, label: `${formatRands(verifiedTier.monthlyRands)} / month` },
+                { key: "annual" as const, label: `${formatRands(annualRands(verifiedTier))} / year · 2 months free` },
+              ]).map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setFrequency(f.key)}
+                  aria-pressed={frequency === f.key}
+                  className={`flex-1 rounded border px-3 py-2.5 text-sm transition-colors ${
+                    frequency === f.key
+                      ? "border-brand-primary bg-brand-tint text-brand-primary"
+                      : "border-rule bg-paper-white text-ink-muted hover:border-brand-primary/60"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={payNow}
+              disabled={busy}
+              className="w-full rounded bg-brass px-4 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50"
+            >
+              {busy ? "Redirecting to PayFast…" : `Pay ${formatRands(frequency === "annual" ? annualRands(verifiedTier) : verifiedTier.monthlyRands)} with PayFast`}
+            </button>
+            <p className="text-xs text-ink-muted">
+              Secure recurring billing via PayFast. Cancel any time — your listing stays in the directory.
+            </p>
+          </div>
+        )}
+      </Shell>
+    );
+  }
+
+  if (existing?.status === "rejected") {
+    return (
+      <Shell>
+        <p className="eyebrow text-destructive">[Claim declined]</p>
+        <h1 className="mt-2 font-heading text-2xl text-ink">We couldn't verify this claim.</h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+          {existing.decision_note || "We couldn't confirm that this profile belongs to you."} If you think
+          this is a mistake, reply to our email or submit a new claim with more detail.
         </p>
       </Shell>
     );
