@@ -439,7 +439,7 @@ function EnquiryModal({ lawyerId, onClose }: { lawyerId: string; onClose: () => 
           <textarea required maxLength={1000} rows={5} placeholder="Your message…" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm text-ink-muted hover:text-ink">Cancel</button>
-            <button type="submit" disabled={submit.isPending} className="rounded bg-brass px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
+            <button type="submit" disabled={submit.isPending} className="rounded bg-brass px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
               {submit.isPending ? "Sending…" : "Send"}
             </button>
           </div>

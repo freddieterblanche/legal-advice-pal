@@ -93,7 +93,7 @@ function AuthPage() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <button type="submit" disabled={loading} className="w-full rounded bg-brass px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
+          <button type="submit" disabled={loading} className="w-full rounded bg-brass px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
             {loading ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
         </form>

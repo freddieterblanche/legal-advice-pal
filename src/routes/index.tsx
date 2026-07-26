@@ -110,7 +110,7 @@ function HomePage() {
             />
             <button
               type="submit"
-              className="inline-flex shrink-0 items-center gap-2 rounded-[3px] bg-brass px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] sm:px-7"
+              className="inline-flex shrink-0 items-center gap-2 rounded-[3px] bg-brass px-5 py-3 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] sm:px-7"
             >
               <Search className="h-4 w-4" strokeWidth={2} />
               <span className="hidden sm:inline">Search</span>
@@ -227,7 +227,7 @@ function HomePage() {
           </p>
           <Link
             to="/register"
-            className="mt-8 inline-flex items-center gap-2 rounded bg-brass px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526]"
+            className="mt-8 inline-flex items-center gap-2 rounded bg-brass px-8 py-3.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f]"
           >
             Register Your Firm <ArrowRight className="h-4 w-4" strokeWidth={STROKE} />
           </Link>

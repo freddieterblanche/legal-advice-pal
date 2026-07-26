@@ -119,7 +119,7 @@ function ClaimPage() {
         )}
 
         {emailMatches ? (
-          <button onClick={doAccept} disabled={busy} className="mt-4 w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
+          <button onClick={doAccept} disabled={busy} className="mt-4 w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
             {busy ? "Claiming…" : "Claim my profile"}
           </button>
         ) : currentEmail ? null : (
@@ -135,7 +135,7 @@ function ClaimPage() {
               </div>
             )}
             <input type="password" required minLength={8} maxLength={72} placeholder={mode === "signup" ? "Choose a password (min 8 chars)" : "Your password"} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
-            <button type="submit" disabled={busy} className="w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
+            <button type="submit" disabled={busy} className="w-full rounded bg-brass px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
               {busy ? "Working…" : mode === "signup" ? "Create account & claim" : "Sign in & claim"}
             </button>
           </form>

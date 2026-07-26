@@ -256,7 +256,7 @@ function ConfirmStep({ loading, onBack, onSubmit }: { loading: boolean; onBack: 
       <p className="text-xs text-muted-foreground">By registering, your listing enters review. Once approved, your profile goes live.</p>
       <div className="flex justify-between pt-2">
         <button onClick={onBack} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
-        <button onClick={onSubmit} disabled={loading} className="rounded bg-brass px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9a7526] disabled:opacity-50">
+        <button onClick={onSubmit} disabled={loading} className="rounded bg-brass px-5 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
           {loading ? "Registering…" : "Complete Registration"}
         </button>
       </div>
