@@ -1,24 +1,17 @@
 /**
- * Colour-coded pill for listing types.
- * Each listing type (attorney, advocate, expert, mediator, arbitrator, firm)
- * gets its own distinct colour so users can tell them apart at a glance.
+ * Pill for listing types (attorney, advocate, expert, mediator, arbitrator,
+ * firm). Editorial token styling — one tint family, differentiated by label.
  */
 type Variant = "attorney" | "advocate" | "expert" | "mediator" | "arbitrator" | "firm" | "neutral";
 
 const STYLES: Record<Variant, string> = {
-  // Attorney — cool blue
-  attorney:   "bg-sky-500/25 text-ink ring-sky-500/50",
-  // Advocate — emerald
-  advocate:   "bg-emerald-500/25 text-ink ring-emerald-500/50",
-  // Expert witness — gold (matches site accent)
-  expert:     "bg-amber-400/30 text-ink ring-amber-500/50",
-  // Mediator — violet
-  mediator:   "bg-violet-500/25 text-ink ring-violet-500/50",
-  // Arbitrator — rose
-  arbitrator: "bg-rose-500/25 text-ink ring-rose-500/50",
-  // Law firm — slate
-  firm:       "bg-slate-400/25 text-ink ring-slate-500/50",
-  neutral:    "bg-ink/10 text-ink ring-ink/30",
+  attorney:   "bg-brand-tint text-brand-primary",
+  advocate:   "bg-brand-tint text-brand-primary",
+  expert:     "bg-brand-tint text-brand-primary",
+  mediator:   "bg-brand-tint text-brand-primary",
+  arbitrator: "bg-brand-tint text-brand-primary",
+  firm:       "bg-brand-tint text-brand-primary",
+  neutral:    "bg-muted text-ink-muted",
 };
 
 export function TypePill({
@@ -32,7 +25,7 @@ export function TypePill({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${STYLES[variant]} ${className}`}
+      className={`inline-flex items-center rounded-[3px] px-2.5 py-1 font-mono text-xs font-medium ${STYLES[variant]} ${className}`}
     >
       {children}
     </span>

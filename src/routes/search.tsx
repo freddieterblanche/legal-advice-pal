@@ -1,19 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Briefcase, Scale } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { DESIGNATIONS } from "../lib/constants";
 import { designationKind, designationBadgeClass, yearsInPractice } from "../lib/designation";
-import { BrandStrandDivider } from "../components/BrandMark";
+import { VerifiedMark } from "../components/BrandMark";
 import { Combobox } from "../components/Combobox";
 import { SortBar, type SortDir } from "../components/SortBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { FeaturedBadge } from "../components/FeaturedBadge";
 import { StickySearchBar } from "../components/StickySearchBar";
 import { useStickyTrigger } from "../hooks/use-sticky-trigger";
-import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
-import advocateHero from "../assets/advocate-hero.jpg.asset.json";
 
 type LawyerType = "attorney" | "advocate";
 type SortField = "surname" | "experience" | "listed";
@@ -277,7 +274,7 @@ function SearchPage() {
   );
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       <StickySearchBar
         visible={isStuck}
         q={q}
@@ -286,33 +283,10 @@ function SearchPage() {
         placeholder="Search by name, firm, practice area, city, town or province…"
         filters={compactFilters}
       />
-      <section className="relative overflow-hidden bg-ink py-12 text-cream">
-        {search.type === "attorney" && (
-          <>
-            <img
-              src={attorneysHero.url}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
-          </>
-        )}
-        {search.type === "advocate" && (
-          <>
-            <img
-              src={advocateHero.url}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60 [filter:grayscale(100%)_contrast(1.05)]"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-forest/55 mix-blend-multiply" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/40 to-ink/80" />
-          </>
-        )}
+      <section className="relative bg-brand-deep py-12 text-paper-ivory">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           {/* Type tabs */}
-          <div className="mb-6 inline-flex rounded-full border border-cream/20 bg-ink/40 p-1">
+          <div className="mb-6 inline-flex rounded border border-paper-ivory/25 p-1">
             {([
               { key: "attorney" as const, label: "Attorneys" },
               { key: "advocate" as const, label: "Advocates" },
@@ -322,12 +296,10 @@ function SearchPage() {
                 <button
                   key={t.label}
                   onClick={() => update({ type: t.key })}
-                  className={`rounded-full px-4 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-[3px] px-4 py-1 font-mono text-xs font-medium uppercase tracking-wider transition-colors ${
                     active
-                      ? t.key === "advocate"
-                        ? "bg-forest text-white"
-                        : "bg-gold text-white"
-                      : "text-cream/70 hover:text-cream"
+                      ? "bg-paper-ivory text-brand-deep"
+                      : "text-paper-ivory/70 hover:text-paper-ivory"
                   }`}
                 >
                   {t.label}
@@ -335,34 +307,34 @@ function SearchPage() {
               );
             })}
           </div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-gold">
-            {search.type === "advocate" ? "Members of the Bar" : "Verified attorneys"}
+          <p className="eyebrow text-paper-ivory/70">
+            {search.type === "advocate" ? "[Advocates] Members of the Bar" : "[Attorneys] Verified attorneys"}
           </p>
           <h1 className="mt-2 font-heading text-3xl md:text-4xl">
             {search.type === "advocate" ? "Find an Advocate" : "Find an Attorney"}
           </h1>
-          <p className="mt-2 max-w-2xl text-cream/70">
+          <p className="mt-2 max-w-2xl text-paper-ivory/75">
             {search.type === "advocate"
               ? "Members of the Bar across South Africa — filter by chambers, province and seniority."
               : "Search South African attorneys by name, firm, practice area and province."}
           </p>
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg [&_input]:text-ink [&_select]:text-ink [&_input]:placeholder:text-muted-foreground">
+          <div className="panel-elevated mt-6 rounded bg-paper-white p-3 text-ink">
             <form onSubmit={onSearchSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto]">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by name, firm, practice area, city, town or province…"
                 maxLength={120}
-                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                className="rounded border border-rule bg-paper-white px-4 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-primary"
               />
               <button
                 type="submit"
-                className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90"
+                className="rounded bg-brand-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover"
               >
                 Search
               </button>
             </form>
-            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-3 grid gap-2 border-t border-rule pt-3 sm:grid-cols-2 lg:grid-cols-4">
               <Combobox
                 value={search.area ?? ""}
                 onChange={(v) => update({ area: v || undefined })}
@@ -389,12 +361,13 @@ function SearchPage() {
               />
             </div>
           </div>
-          <p className="mt-2 text-xs text-cream/60">
-            Tip: combine terms with <span className="font-semibold text-cream/80">OR</span> and{" "}
-            <span className="font-semibold text-cream/80">NOT</span> — e.g. <em>insolvency OR tax NOT labour</em>.
+          <p className="mt-2 text-xs text-paper-ivory/60">
+            Tip: combine terms with <span className="font-mono font-medium text-paper-ivory/85">OR</span> and{" "}
+            <span className="font-mono font-medium text-paper-ivory/85">NOT</span> — e.g.{" "}
+            <span className="font-mono text-paper-ivory/85">insolvency OR tax NOT labour</span>.
           </p>
         </div>
-        <BrandStrandDivider />
+        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-paper-ivory/15" />
       </section>
       <div ref={sentinelRef} aria-hidden="true" />
 
@@ -420,7 +393,7 @@ function SearchPage() {
                   navigate({ search: (prev: Search) => ({ ...prev, sort, dir, page: 1 }) })
                 }
               />
-              <div className="inline-flex rounded-full border border-border bg-background p-1">
+              <div className="inline-flex rounded border border-rule bg-paper-white p-1">
                 {([
                   { key: "cards" as const, label: "Cards" },
                   { key: "list" as const, label: "List" },
@@ -430,8 +403,8 @@ function SearchPage() {
                     <button
                       key={v.key}
                       onClick={() => navigate({ search: (prev: Search) => ({ ...prev, view: v.key, page: 1 }) })}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                        active ? "bg-ink text-white" : "text-muted-foreground hover:text-ink"
+                      className={`rounded-[3px] px-3 py-1 text-xs font-medium transition-colors ${
+                        active ? "bg-brand-primary text-white" : "text-ink-muted hover:text-ink"
                       }`}
                     >
                       {v.label}
@@ -445,14 +418,14 @@ function SearchPage() {
 
           {isLoading ? (
             <div className="space-y-3">
-              {[...Array(4)].map((_, i) => <div key={i} className="h-32 animate-pulse rounded-md bg-muted" />)}
+              {[...Array(4)].map((_, i) => <div key={i} className="h-32 animate-pulse rounded bg-muted" />)}
             </div>
           ) : results?.rows.length === 0 ? (
-            <div className="rounded-md border border-border bg-card p-12 text-center text-muted-foreground">
+            <div className="rounded border border-rule bg-paper-white p-12 text-center text-ink-muted">
               No lawyers match your search. Try fewer filters.
             </div>
           ) : (search.view ?? "cards") === "list" ? (
-            <div className="overflow-hidden rounded-md border border-border bg-card">
+            <div className="overflow-hidden rounded border border-rule bg-paper-white">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -472,26 +445,26 @@ function SearchPage() {
                     const badgeLabel = l.designation
                       ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                     return (
-                      <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
+                      <TableRow key={l.id} className={l.is_featured ? "bg-brass/5" : undefined}>
                         <TableCell className="font-medium">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink hover:text-gold">
+                            <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="text-ink transition-colors hover:text-brand-hover">
                               {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                             </Link>
                             {l.is_featured && <FeaturedBadge />}
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{badgeLabel}</TableCell>
-                        <TableCell className="text-muted-foreground">{l.firm_name ?? l.chambers_name ?? "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-ink-muted">{badgeLabel}</TableCell>
+                        <TableCell className="text-ink-muted">{l.firm_name ?? l.chambers_name ?? "—"}</TableCell>
+                        <TableCell className="text-ink-muted">
                           {l.city ?? "—"}
-                          {l.province ? <span className="text-muted-foreground/70">, {l.province}</span> : null}
+                          {l.province ? <span className="text-ink-muted/70">, {l.province}</span> : null}
                         </TableCell>
                         <TableCell className="text-right">
                           <Link
                             to="/lawyers/$slug"
                             params={{ slug: l.slug ?? "" }}
-                            className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90"
+                            className="rounded bg-brand-primary px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-hover"
                           >
                             View
                           </Link>
@@ -512,19 +485,17 @@ function SearchPage() {
                   l.provider_type === "advocate" || l.provider_type === "attorney"
                     ? l.provider_type
                     : designationKind(l.designation);
-                const KindIcon = kind === "advocate" ? Scale : Briefcase;
-                const accentBg = kind === "advocate" ? "bg-forest/10 text-forest" : "bg-gold/10 text-gold";
                 const badgeLabel = l.designation
                   ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
                 return (
-                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md hover:ring-1 hover:ring-gold/30 sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-gold/60" : ""}`}>
+                <article key={l.id} className={`flex gap-4 rounded border bg-paper-white p-4 transition-colors sm:p-5 ${l.is_featured ? "border-brass/50" : "border-rule hover:border-brand-primary/60"}`}>
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top"
+                      className="h-14 w-14 shrink-0 rounded-full object-cover object-top"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";
@@ -534,25 +505,23 @@ function SearchPage() {
                     />
                   ) : null}
                   <div
-                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-lg ${accentBg} font-heading text-xl sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl`}
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-tint font-heading text-lg text-brand-primary"
                     style={l.avatar_url ? { display: "none" } : undefined}
                   >
                     {first[0]}{last[0]}
                   </div>
-                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
-
+                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex-1">
-                      <div className="flex flex-wrap items-baseline gap-3">
-                        <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-lg text-ink transition-colors hover:text-brand-hover">
                           {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                         </Link>
                         <span className={designationBadgeClass(kind === "advocate" ? "advocate" : (l.designation ?? "attorney"))}>
-                          <KindIcon className="h-3 w-3" strokeWidth={2} />
                           {badgeLabel}
                         </span>
                         {l.is_featured && <FeaturedBadge />}
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="mt-1 text-sm text-ink-muted">
                         {[
                           l.firm_name ?? l.chambers_name,
                           kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : null) : null,
@@ -562,13 +531,14 @@ function SearchPage() {
                           .join(" · ")}
                       </p>
                     </div>
-                    <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
+                    <div className="flex flex-row flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
                       {caseCount > 0 && (
-                        <span className="rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink">
-                          {caseCount} case{caseCount === 1 ? "" : "s"}
+                        <span className="citation-chip">
+                          <VerifiedMark size={13} />
+                          {caseCount} reported case{caseCount === 1 ? "" : "s"}
                         </span>
                       )}
-                      <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded bg-brand-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
                         View Profile
                       </Link>
                     </div>
@@ -584,15 +554,15 @@ function SearchPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => navigate({ search: (prev: Search) => ({ ...prev, page: page - 1 }) })}
-                className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
+                className="rounded border border-rule bg-paper-white px-3 py-1.5 text-sm transition-colors hover:border-brand-primary disabled:opacity-40"
               >
                 ← Prev
               </button>
-              <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+              <span className="font-mono text-sm text-ink-muted">Page {page} of {totalPages}</span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => navigate({ search: (prev: Search) => ({ ...prev, page: page + 1 }) })}
-                className="rounded border border-border bg-card px-3 py-1.5 text-sm disabled:opacity-40"
+                className="rounded border border-rule bg-paper-white px-3 py-1.5 text-sm transition-colors hover:border-brand-primary disabled:opacity-40"
               >
                 Next →
               </button>
@@ -647,7 +617,7 @@ function DiscoverLinks({ type }: { type: LawyerType }) {
               <Link
                 to="/search"
                 search={{ type: "attorney", town: t.slug }}
-                className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1.5 text-sm text-ink hover:border-gold hover:bg-gold/10"
+                className="inline-flex items-center rounded border border-rule bg-paper-white px-3 py-1.5 text-sm text-ink transition-colors hover:border-brand-primary hover:bg-brand-tint/40"
               >
                 Attorneys in {t.name}
               </Link>
@@ -674,14 +644,14 @@ function DiscoverLinks({ type }: { type: LawyerType }) {
       <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Object.entries(byCity).map(([city, list]) => (
           <div key={city}>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-ink/70">{city}</h3>
+            <h3 className="eyebrow text-ink-muted">{city}</h3>
             <ul className="mt-2 flex flex-wrap gap-1.5">
               {list.map((c) => (
                 <li key={c.id}>
                   <Link
                     to="/search"
                     search={{ type: "advocate", chambers: c.slug }}
-                    className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-1 text-xs text-ink hover:border-forest hover:bg-forest/10"
+                    className="inline-flex items-center rounded border border-rule bg-paper-white px-2.5 py-1 text-xs text-ink transition-colors hover:border-brand-primary hover:bg-brand-tint/40"
                   >
                     {c.name}
                   </Link>

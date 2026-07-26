@@ -4,7 +4,6 @@ import { MapPin, Globe, Phone, Mail, Building2, Star, Pencil, Linkedin, Facebook
 import { supabase } from "../integrations/supabase/client";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { FirmLogo } from "../components/FirmLogo";
-import attorneysHero from "../assets/attorneys-hero.jpg.asset.json";
 
 export const Route = createFileRoute("/firms/$slug")({
   head: ({ params }) => ({
@@ -99,38 +98,31 @@ function FirmProfile() {
   const canEdit = isPlatformAdmin || (!!viewer?.firm_id && viewer.firm_id === firm.id);
 
   return (
-    <div className="bg-cream">
-      <section className="relative overflow-hidden bg-ink py-16 text-cream">
-        <img
-          src={attorneysHero.url}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/90" />
+    <div className="bg-paper-ivory">
+      <section className="relative bg-brand-deep py-16 text-paper-ivory">
         <div className="relative mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-6 px-4 sm:px-6">
           <div>
             <h1 className="font-heading text-4xl md:text-5xl">{firm.name}</h1>
-            <div className="mt-4 flex flex-wrap gap-5 text-sm text-cream/70">
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[13px] text-paper-ivory/75">
               {firm.city && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {firm.city}, {firm.province}</span>}
-              {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold"><Globe className="h-4 w-4" /> Website</a>}
+              {firm.website && <a href={firm.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory"><Globe className="h-4 w-4" /> Website</a>}
               {firm.phone && <span className="flex items-center gap-1.5"><Phone className="h-4 w-4" /> {firm.phone}</span>}
-              {firm.email && <a href={`mailto:${firm.email}`} className="flex items-center gap-1.5 hover:text-gold"><Mail className="h-4 w-4" /> {firm.email}</a>}
+              {firm.email && <a href={`mailto:${firm.email}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory"><Mail className="h-4 w-4" /> {firm.email}</a>}
             </div>
             {(firm.linkedin_url || firm.facebook_url || firm.twitter_url || firm.instagram_url || firm.youtube_url) && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                {firm.linkedin_url && <a href={firm.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Linkedin className="h-4 w-4" /></a>}
-                {firm.facebook_url && <a href={firm.facebook_url} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Facebook className="h-4 w-4" /></a>}
-                {firm.twitter_url && <a href={firm.twitter_url} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Twitter className="h-4 w-4" /></a>}
-                {firm.instagram_url && <a href={firm.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Instagram className="h-4 w-4" /></a>}
-                {firm.youtube_url && <a href={firm.youtube_url} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/20 transition hover:bg-gold hover:text-ink"><Youtube className="h-4 w-4" /></a>}
+                {firm.linkedin_url && <a href={firm.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] bg-paper-ivory/10 text-paper-ivory ring-1 ring-paper-ivory/25 transition-colors hover:bg-paper-ivory hover:text-brand-deep"><Linkedin className="h-4 w-4" /></a>}
+                {firm.facebook_url && <a href={firm.facebook_url} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] bg-paper-ivory/10 text-paper-ivory ring-1 ring-paper-ivory/25 transition-colors hover:bg-paper-ivory hover:text-brand-deep"><Facebook className="h-4 w-4" /></a>}
+                {firm.twitter_url && <a href={firm.twitter_url} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] bg-paper-ivory/10 text-paper-ivory ring-1 ring-paper-ivory/25 transition-colors hover:bg-paper-ivory hover:text-brand-deep"><Twitter className="h-4 w-4" /></a>}
+                {firm.instagram_url && <a href={firm.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] bg-paper-ivory/10 text-paper-ivory ring-1 ring-paper-ivory/25 transition-colors hover:bg-paper-ivory hover:text-brand-deep"><Instagram className="h-4 w-4" /></a>}
+                {firm.youtube_url && <a href={firm.youtube_url} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] bg-paper-ivory/10 text-paper-ivory ring-1 ring-paper-ivory/25 transition-colors hover:bg-paper-ivory hover:text-brand-deep"><Youtube className="h-4 w-4" /></a>}
               </div>
             )}
             {canEdit && (
               <Link
                 to="/dashboard"
                 search={{ tab: "settings", ...(isPlatformAdmin ? { firmId: firm.id } : {}) }}
-                className="mt-5 inline-flex items-center rounded-md bg-cream/10 px-4 py-2 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+                className="mt-5 inline-flex items-center rounded bg-paper-ivory/10 px-4 py-2 text-sm font-medium text-paper-ivory ring-1 ring-paper-ivory/30 transition-colors hover:bg-paper-ivory/20"
               >
                 <Pencil className="mr-2 h-4 w-4" /> Edit this Profile
               </Link>
@@ -156,7 +148,7 @@ function FirmProfile() {
             <h2 className="font-heading text-xl text-ink">Services</h2>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {firm.services.map((s: string) => (
-                <span key={s} className="rounded-full bg-gold/15 px-2.5 py-1 text-xs font-medium text-ink">{s}</span>
+                <span key={s} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand-primary">{s}</span>
               ))}
             </div>
           </section>
@@ -166,13 +158,13 @@ function FirmProfile() {
         {branches && branches.length > 0 && (
           <section className="mt-10">
             <h2 className="flex items-center gap-2 font-heading text-2xl text-ink">
-              <Building2 className="h-5 w-5 text-gold" /> {branches.length === 1 ? "Office" : "Offices"}
+              <Building2 className="h-5 w-5 text-brand-primary" /> {branches.length === 1 ? "Office" : "Offices"}
             </h2>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {branches.map((b: any) => (
-                <div key={b.id} className="rounded-md border border-border bg-card p-4">
+                <div key={b.id} className="rounded border border-rule bg-paper-white p-4">
                   <p className="flex items-center gap-2 font-heading text-sm font-semibold text-ink">
-                    {b.is_head_office && <Star className="h-3.5 w-3.5 text-gold" />}
+                    {b.is_head_office && <Star className="h-3.5 w-3.5 fill-brass text-brass" />}
                     {b.name}
                   </p>
                   {(b.address || b.city) && (
@@ -182,12 +174,12 @@ function FirmProfile() {
                     </p>
                   )}
                   {b.phone && (
-                    <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                    <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-1 flex items-center gap-1.5 text-xs text-brand-primary transition-colors hover:text-brand-hover">
                       <Phone className="h-3 w-3" /> {b.phone}
                     </a>
                   )}
                   {b.email && (
-                    <a href={`mailto:${b.email}`} className="mt-1 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                    <a href={`mailto:${b.email}`} className="mt-1 flex items-center gap-1.5 text-xs text-brand-primary transition-colors hover:text-brand-hover">
                       <Mail className="h-3 w-3" /> {b.email}
                     </a>
                   )}
@@ -209,9 +201,9 @@ function FirmProfile() {
                 key={l.id}
                 to="/lawyers/$slug"
                 params={{ slug: l.slug }}
-                className="group overflow-hidden rounded-lg border border-border bg-card transition hover:border-gold hover:shadow-lg"
+                className="group overflow-hidden rounded border border-rule bg-paper-white transition-colors hover:border-brand-primary"
               >
-                <div className="aspect-[4/5] w-full overflow-hidden bg-ink">
+                <div className="aspect-[4/5] w-full overflow-hidden bg-brand-tint">
                   {l.avatar_url ? (
                     <img
                       src={l.avatar_url}
@@ -220,13 +212,13 @@ function FirmProfile() {
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-ink font-heading text-5xl text-gold">
+                    <div className="flex h-full w-full items-center justify-center bg-brand-tint font-heading text-5xl text-brand-primary">
                       {l.first_name[0]}{l.last_name[0]}
                     </div>
                   )}
                 </div>
                 <div className="p-4">
-                  <p className="font-heading text-base font-semibold text-ink group-hover:text-gold">
+                  <p className="font-heading text-base text-ink transition-colors group-hover:text-brand-hover">
                     {l.first_name} {l.last_name}{l.is_senior_counsel ? " SC" : ""}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
@@ -235,7 +227,7 @@ function FirmProfile() {
                   {areas.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {areas.map((a: string) => (
-                        <span key={a} className="rounded bg-ink/5 px-2 py-0.5 text-[11px] text-ink/70">
+                        <span key={a} className="rounded-[3px] bg-brand-tint px-2 py-0.5 text-[11px] text-brand-primary">
                           {a}
                         </span>
                       ))}

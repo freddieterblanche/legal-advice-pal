@@ -17,9 +17,7 @@ type SortBarProps<K extends string> = {
 export function SortBar<K extends string>({ options, sort, dir, onChange }: SortBarProps<K>) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Sort by
-      </span>
+      <span className="eyebrow mr-1 text-ink-muted">Sort by</span>
       {options.map((opt) => {
         const active = sort === opt.key;
         const asc = active && dir === "asc";
@@ -36,8 +34,8 @@ export function SortBar<K extends string>({ options, sort, dir, onChange }: Sort
             }}
             className={`inline-flex items-center gap-1 rounded border px-2.5 py-1.5 text-xs font-medium transition ${
               active
-                ? "border-ink bg-ink text-cream"
-                : "border-border bg-card text-ink hover:border-ink"
+                ? "border-brand-primary bg-brand-primary text-white"
+                : "border-rule bg-paper-white text-ink hover:border-brand-primary"
             }`}
           >
             {opt.label}

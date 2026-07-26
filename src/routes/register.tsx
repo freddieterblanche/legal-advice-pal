@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Scale, Handshake, Gavel, Microscope, Check, Eye, EyeOff } from "lucide-react";
+import { Building2, BookOpen, Handshake, FileCheck2, Microscope, Check, Eye, EyeOff } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,9 +40,9 @@ type Kind = "firm" | "advocate" | "mediator" | "arbitrator" | "expert";
 
 const TYPES: { kind: Kind; label: string; icon: typeof Building2; pill: "firm" | "advocate" | "mediator" | "arbitrator" | "expert"; blurb: string }[] = [
   { kind: "firm", label: "Law Firm", icon: Building2, pill: "firm", blurb: "Register your firm and add your attorneys." },
-  { kind: "advocate", label: "Advocate", icon: Scale, pill: "advocate", blurb: "Individual advocate at the Bar, with chambers." },
+  { kind: "advocate", label: "Advocate", icon: BookOpen, pill: "advocate", blurb: "Individual advocate at the Bar, with chambers." },
   { kind: "mediator", label: "Mediator", icon: Handshake, pill: "mediator", blurb: "Accredited mediator — lawyer or non-lawyer." },
-  { kind: "arbitrator", label: "Arbitrator", icon: Gavel, pill: "arbitrator", blurb: "Arbitrator — lawyer or non-lawyer." },
+  { kind: "arbitrator", label: "Arbitrator", icon: FileCheck2, pill: "arbitrator", blurb: "Arbitrator — lawyer or non-lawyer." },
   { kind: "expert", label: "Expert Witness", icon: Microscope, pill: "expert", blurb: "Specialist expert across any discipline." },
 ];
 
@@ -50,7 +50,7 @@ function RegisterPage() {
   const [kind, setKind] = useState<Kind | null>(null);
 
   return (
-    <div className="bg-cream py-12">
+    <div className="bg-paper-ivory py-12">
       <div className="mx-auto max-w-2xl px-4 sm:px-6">
         <h1 className="font-heading text-3xl text-ink md:text-4xl">Register your listing</h1>
         <p className="mt-2 text-muted-foreground">Choose what you'd like to list on Lawexpert.co.za.</p>
@@ -63,7 +63,7 @@ function RegisterPage() {
                 <button
                   key={t.kind}
                   onClick={() => setKind(t.kind)}
-                  className="group flex flex-col items-start gap-3 rounded-lg border border-border bg-card p-5 text-left transition-all hover:border-gold hover:shadow-md"
+                  className="group flex flex-col items-start gap-3 rounded border border-rule bg-paper-white p-5 text-left transition-colors hover:border-brand-primary"
                 >
                   <div className="flex w-full items-center justify-between">
                     <Icon className="h-6 w-6 text-ink" />
@@ -100,10 +100,10 @@ function StepDots({ step, total }: { step: number; total: number }) {
         const s = i + 1;
         return (
           <div key={s} className="flex flex-1 items-center gap-2">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${step >= s ? "bg-gold text-white" : "bg-muted text-muted-foreground"}`}>
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${step >= s ? "bg-brand-primary text-white" : "bg-muted text-muted-foreground"}`}>
               {step > s ? <Check className="h-4 w-4" /> : s}
             </div>
-            {s < total && <div className={`h-0.5 flex-1 ${step > s ? "bg-gold" : "bg-muted"}`} />}
+            {s < total && <div className={`h-0.5 flex-1 ${step > s ? "bg-brand-primary" : "bg-muted"}`} />}
           </div>
         );
       })}
@@ -120,7 +120,7 @@ function Input({ value, onChange, type = "text", placeholder, required }: { valu
       placeholder={placeholder}
       required={required}
       maxLength={255}
-      className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+      className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
     />
   );
 }
@@ -175,7 +175,7 @@ function AccountStep({
     <div className="space-y-3">
       <h2 className="font-heading text-xl text-ink">Your Account</h2>
       {existingUserId ? (
-        <div className="rounded border border-forest/30 bg-forest/5 p-4 text-sm text-ink">
+        <div className="rounded border border-brand-primary/25 bg-brand-tint/50 p-4 text-sm text-ink">
           You're signed in as <strong>{existingEmail}</strong>. This account will own the listing.
         </div>
       ) : (
@@ -195,7 +195,7 @@ function AccountStep({
               required
               minLength={8}
               maxLength={72}
-              className="w-full rounded border border-border bg-background px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             />
             <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-ink">
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -208,7 +208,7 @@ function AccountStep({
         <button
           onClick={onNext}
           disabled={!existingUserId && (!admin.email || admin.password.length < 8 || !admin.first_name || !admin.last_name)}
-          className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50"
+          className="rounded bg-brand-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:opacity-50"
         >
           Continue →
         </button>
@@ -248,15 +248,15 @@ function ConfirmStep({ loading, onBack, onSubmit }: { loading: boolean; onBack: 
   return (
     <div className="space-y-4">
       <h2 className="font-heading text-xl text-ink">Confirm</h2>
-      <div className="space-y-2 rounded bg-cream p-5 text-sm">
-        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-forest" /> <strong>Free for the first 3 months</strong> — no card required to start.</p>
-        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-forest" /> Subscription details will be confirmed per listing type before billing begins.</p>
-        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-forest" /> You can edit your listing any time from your profile page or dashboard.</p>
+      <div className="space-y-2 rounded border border-rule bg-paper-ivory p-5 text-sm">
+        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" /> <strong>Free for the first 3 months</strong> — no card required to start.</p>
+        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" /> Subscription details will be confirmed per listing type before billing begins.</p>
+        <p className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" /> You can edit your listing any time from your profile page or dashboard.</p>
       </div>
       <p className="text-xs text-muted-foreground">By registering, your listing enters review. Once approved, your profile goes live.</p>
       <div className="flex justify-between pt-2">
         <button onClick={onBack} className="text-sm text-muted-foreground hover:text-ink">← Back</button>
-        <button onClick={onSubmit} disabled={loading} className="rounded bg-gold px-5 py-2 text-sm font-semibold text-white hover:bg-gold/90 disabled:opacity-50">
+        <button onClick={onSubmit} disabled={loading} className="rounded bg-brass px-5 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
           {loading ? "Registering…" : "Complete Registration"}
         </button>
       </div>
@@ -289,7 +289,7 @@ function FirmWizard() {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div className="rounded border border-rule bg-paper-white p-6">
       <StepDots step={step} total={3} />
       {step === 1 && (
         <div className="space-y-3">
@@ -301,7 +301,7 @@ function FirmWizard() {
           <Input placeholder="Website (https://…)" value={firm.website} onChange={(v) => setFirm({ ...firm, website: v })} />
           <Input placeholder="Phone (optional)" value={firm.phone} onChange={(v) => setFirm({ ...firm, phone: v })} />
           <div className="flex justify-end pt-2">
-            <button onClick={() => setStep(2)} disabled={!firm.name || !firm.province || !firm.city} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue →</button>
+            <button onClick={() => setStep(2)} disabled={!firm.name || !firm.province || !firm.city} className="rounded bg-brand-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:opacity-50">Continue →</button>
           </div>
         </div>
       )}
@@ -398,7 +398,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
   const kindLabel = kind === "advocate" ? "Advocate" : kind === "mediator" ? "Mediator" : "Arbitrator";
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div className="rounded border border-rule bg-paper-white p-6">
       <StepDots step={step} total={3} />
       {step === 1 && (
         <div className="space-y-3">
@@ -462,7 +462,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
                 <p className="text-sm text-muted-foreground">Sectors</p>
                 <div className="flex flex-wrap gap-1.5">
                   {MEDIATION_SECTORS.map((s) => (
-                    <button type="button" key={s} onClick={() => toggleArr("mediator_sectors", s)} className={`rounded-full border px-2.5 py-1 text-xs ${form.mediator_sectors.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                    <button type="button" key={s} onClick={() => toggleArr("mediator_sectors", s)} className={`rounded-full border px-2.5 py-1 text-xs ${form.mediator_sectors.includes(s) ? "border-brand-primary bg-brand-tint text-brand-primary" : "border-rule bg-paper-white text-ink-muted"}`}>
                       {s}
                     </button>
                   ))}
@@ -479,7 +479,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
                 <p className="text-sm text-muted-foreground">Arbitration types</p>
                 <div className="flex flex-wrap gap-1.5">
                   {ARBITRATION_TYPES.map((s) => (
-                    <button type="button" key={s} onClick={() => toggleArr("arbitrator_types", s)} className={`rounded-full border px-2.5 py-1 text-xs ${form.arbitrator_types.includes(s) ? "border-gold bg-gold/15 text-ink" : "border-border bg-background text-muted-foreground"}`}>
+                    <button type="button" key={s} onClick={() => toggleArr("arbitrator_types", s)} className={`rounded-full border px-2.5 py-1 text-xs ${form.arbitrator_types.includes(s) ? "border-brand-primary bg-brand-tint text-brand-primary" : "border-rule bg-paper-white text-ink-muted"}`}>
                       {s}
                     </button>
                   ))}
@@ -495,7 +495,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
               placeholder="Briefly describe your professional background (e.g. Chartered Accountant, Engineer, Psychologist)…"
               maxLength={500}
               rows={3}
-              className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             />
           )}
 
@@ -506,7 +506,7 @@ function LawyerWizard({ kind }: { kind: LawyerKind }) {
           </div>
 
           <div className="flex justify-end pt-2">
-            <button onClick={() => setStep(2)} disabled={!canSubmitStep1} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue →</button>
+            <button onClick={() => setStep(2)} disabled={!canSubmitStep1} className="rounded bg-brand-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:opacity-50">Continue →</button>
           </div>
         </div>
       )}
@@ -565,7 +565,7 @@ function ExpertWizard() {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div className="rounded border border-rule bg-paper-white p-6">
       <StepDots step={step} total={3} />
       {step === 1 && (
         <div className="space-y-3">
@@ -600,7 +600,7 @@ function ExpertWizard() {
             <Input placeholder="Mobile phone (optional)" value={form.mobile_phone} onChange={(v) => setForm({ ...form, mobile_phone: v })} />
           </div>
           <div className="flex justify-end pt-2">
-            <button onClick={() => setStep(2)} disabled={!form.first_name || !form.last_name} className="rounded bg-ink px-5 py-2 text-sm font-semibold text-cream disabled:opacity-50">Continue →</button>
+            <button onClick={() => setStep(2)} disabled={!form.first_name || !form.last_name} className="rounded bg-brand-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:opacity-50">Continue →</button>
           </div>
         </div>
       )}

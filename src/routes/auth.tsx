@@ -56,8 +56,8 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-cream px-4 py-12">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+    <div className="flex min-h-[80vh] items-center justify-center bg-paper-ivory px-4 py-12">
+      <div className="w-full max-w-md rounded border border-rule bg-paper-white p-8">
         <h1 className="font-heading text-3xl text-ink">{mode === "signin" ? "Sign in to Lawexpert.co.za" : "Create an account"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {mode === "signin" ? "Access your firm dashboard." : "Sign up to manage your firm and lawyers."}
@@ -71,7 +71,7 @@ function AuthPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+            className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
           />
           <div className="relative">
             <input
@@ -82,7 +82,7 @@ function AuthPage() {
               placeholder="Password (min 8 chars)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-border bg-background px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full rounded border border-rule bg-paper-white px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             />
             <button
               type="button"
@@ -93,20 +93,20 @@ function AuthPage() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <button type="submit" disabled={loading} className="w-full rounded-md bg-ink px-4 py-2.5 text-sm font-semibold text-cream hover:bg-ink/90 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="w-full rounded bg-brass px-4 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
             {loading ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "signin" ? (
-            <>Don't have an account? <button onClick={() => setMode("signup")} className="font-medium text-forest hover:text-gold">Sign up</button></>
+            <>Don't have an account? <button onClick={() => setMode("signup")} className="font-medium text-brand-primary transition-colors hover:text-brand-hover">Sign up</button></>
           ) : (
-            <>Already have an account? <button onClick={() => setMode("signin")} className="font-medium text-forest hover:text-gold">Sign in</button></>
+            <>Already have an account? <button onClick={() => setMode("signin")} className="font-medium text-brand-primary transition-colors hover:text-brand-hover">Sign in</button></>
           )}
         </p>
         <p className="mt-2 text-center text-xs text-muted-foreground">
-          Registering a new firm? <Link to="/register" className="font-medium text-forest hover:text-gold">Start firm registration →</Link>
+          Registering a new firm? <Link to="/register" className="font-medium text-brand-primary transition-colors hover:text-brand-hover">Start firm registration →</Link>
         </p>
       </div>
     </div>

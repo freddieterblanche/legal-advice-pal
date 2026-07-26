@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Users, Scale, Landmark, Briefcase, MapPin, Stethoscope, Handshake, Gavel, BookOpen, Globe } from "lucide-react";
+import { Building2, Users, BookMarked, Library, Briefcase, MapPin, Stethoscope, Handshake, FileCheck2, BookOpen, Globe } from "lucide-react";
 import { supabase } from "../../integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -79,7 +79,7 @@ function AdminHub() {
     },
     {
       to: "/admin/advocates",
-      icon: Scale,
+      icon: BookMarked,
       title: "Advocates",
       desc: "Add advocates by Bar and Chambers.",
       count: counts?.advocates,
@@ -100,14 +100,14 @@ function AdminHub() {
     },
     {
       to: "/admin/arbitrators",
-      icon: Gavel,
+      icon: FileCheck2,
       title: "Arbitrators",
       desc: "Lawyers flagged as arbitrators.",
       count: counts?.arbitrators,
     },
     {
       to: "/admin/bars",
-      icon: Landmark,
+      icon: Library,
       title: "Bars",
       desc: "South African Bar Councils — reference data.",
       count: counts?.bars,

@@ -34,10 +34,10 @@ export function designationKind(designation?: string | null): LawyerKind {
 }
 
 export const ADVOCATE_BADGE =
-  "inline-flex items-center gap-1 rounded-full bg-forest/12 px-2.5 py-0.5 text-xs font-semibold text-forest ring-1 ring-inset ring-forest/25";
+  "inline-flex items-center gap-1 rounded-[3px] bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-primary";
 
 export const ATTORNEY_BADGE =
-  "inline-flex items-center gap-1 rounded-full bg-gold/12 px-2.5 py-0.5 text-xs font-semibold text-gold ring-1 ring-inset ring-gold/30";
+  "inline-flex items-center gap-1 rounded-[3px] bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-primary";
 
 export function designationBadgeClass(designation?: string | null): string {
   return designationKind(designation) === "advocate" ? ADVOCATE_BADGE : ATTORNEY_BADGE;

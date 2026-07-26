@@ -98,15 +98,15 @@ function MediatorSearch() {
   const onSubmit = (e: React.FormEvent) => { e.preventDefault(); update({ q: q || undefined }); };
   const compactFilters = (
     <>
-      <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
-      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
-      <SimpleSelect value={search.accreditation ?? ""} onChange={(accreditation) => update({ accreditation: accreditation || undefined })} options={MEDIATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Any accreditation" className="w-40 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
-      <SimpleSelect value={search.style ?? ""} onChange={(style) => update({ style: style || undefined })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="Any style" className="w-36 rounded-lg border border-border bg-card px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="w-40 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="w-40 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.accreditation ?? ""} onChange={(accreditation) => update({ accreditation: accreditation || undefined })} options={MEDIATION_ACCREDITATIONS.map((a) => ({ value: a, label: a }))} placeholder="Any accreditation" className="w-40 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
+      <SimpleSelect value={search.style ?? ""} onChange={(style) => update({ style: style || undefined })} options={MEDIATION_STYLES.map((s) => ({ value: s, label: s }))} placeholder="Any style" className="w-36 rounded border border-rule bg-paper-white px-2 py-2 text-sm text-ink" />
     </>
   );
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       <StickySearchBar
         visible={isStuck}
         q={q}
@@ -115,16 +115,16 @@ function MediatorSearch() {
         placeholder="Search mediators — supports AND / OR / NOT…"
         filters={compactFilters}
       />
-      <section className="bg-ink py-12 text-cream">
+      <section className="bg-brand-deep py-12 text-paper-ivory">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <Handshake className="h-7 w-7 text-gold" />
+            <Handshake className="h-7 w-7 text-brass" />
             <h1 className="font-heading text-3xl md:text-4xl">Find a Mediator</h1>
           </div>
-          <p className="mt-2 max-w-2xl text-cream/70">
+          <p className="mt-2 max-w-2xl text-paper-ivory/75">
             Accredited mediators across commercial, family, labour and construction disputes.
           </p>
-          <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-3 text-cream backdrop-blur-md shadow-lg [&_input]:text-ink [&_select]:text-ink [&_input]:placeholder:text-muted-foreground">
+          <div className="mt-6 panel-elevated rounded bg-paper-white p-3 text-ink">
             <form
               onSubmit={(e) => { e.preventDefault(); update({ q: q || undefined }); }}
               className="grid gap-2 sm:grid-cols-[1fr_220px_180px_auto]"
@@ -134,11 +134,11 @@ function MediatorSearch() {
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search — supports AND / OR / NOT…"
                 maxLength={240}
-                className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                className="rounded border border-rule bg-paper-white px-4 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-primary"
               />
-              <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
-              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-ink" />
-              <button type="submit" className="rounded-lg bg-gold px-6 py-2 text-sm font-semibold text-white hover:bg-gold/90">Search</button>
+              <SimpleSelect value={search.sector ?? ""} onChange={(sector) => update({ sector: sector || undefined })} options={MEDIATION_SECTORS.map((s) => ({ value: s, label: s }))} placeholder="All sectors" className="rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink" />
+              <SimpleSelect value={search.province ?? ""} onChange={(province) => update({ province: province || undefined })} options={PROVINCES.map((p) => ({ value: p, label: p }))} placeholder="All provinces" className="rounded border border-rule bg-paper-white px-3 py-2 text-sm text-ink" />
+              <button type="submit" className="rounded bg-brand-primary px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover">Search</button>
             </form>
             <div className="mt-3 space-y-2 border-t border-border pt-3">
               <div className="flex flex-wrap items-center gap-2">
@@ -147,7 +147,7 @@ function MediatorSearch() {
                   const active = search.accreditation === a;
                   return (
                     <button key={a} type="button" onClick={() => update({ accreditation: active ? undefined : a })}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      className={`rounded border px-3 py-1 text-xs font-medium transition-colors ${active ? "border-brand-primary bg-brand-primary text-white" : "border-rule bg-paper-white text-ink hover:border-brand-primary"}`}>
                       {a}
                     </button>
                   );
@@ -159,7 +159,7 @@ function MediatorSearch() {
                   const active = search.style === s;
                   return (
                     <button key={s} type="button" onClick={() => update({ style: active ? undefined : s })}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium transition ${active ? "border-ink bg-ink text-cream" : "border-border bg-background text-ink hover:border-ink"}`}>
+                      className={`rounded border px-3 py-1 text-xs font-medium transition-colors ${active ? "border-brand-primary bg-brand-primary text-white" : "border-rule bg-paper-white text-ink hover:border-brand-primary"}`}>
                       {s}
                     </button>
                   );
@@ -167,7 +167,7 @@ function MediatorSearch() {
               </div>
             </div>
           </div>
-          <p className="mt-2 text-xs text-cream/60">{BOOLEAN_SEARCH_HINT}</p>
+          <p className="mt-2 text-xs text-paper-ivory/60">{BOOLEAN_SEARCH_HINT}</p>
         </div>
       </section>
       <div ref={sentinelRef} aria-hidden="true" />
@@ -214,10 +214,10 @@ function MediatorSearch() {
                 </TableHeader>
                 <TableBody>
                   {results?.rows.map((l: any) => (
-                    <TableRow key={l.id} className={l.is_featured ? "bg-amber-50/40" : undefined}>
+                    <TableRow key={l.id} className={l.is_featured ? "bg-brass/5" : undefined}>
                       <TableCell className="font-medium">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink hover:text-gold">
+                          <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="text-ink transition-colors hover:text-brand-hover">
                             {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                           </Link>
                           {l.is_featured && <FeaturedBadge />}
@@ -230,7 +230,7 @@ function MediatorSearch() {
                         {l.province ? <span className="text-muted-foreground/70">, {l.province}</span> : null}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-white hover:bg-ink/90">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded bg-brand-primary px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
                           View
                         </Link>
                       </TableCell>
@@ -242,22 +242,22 @@ function MediatorSearch() {
           ) : (
             <div className="space-y-3">
               {results?.rows.map((l: any) => (
-                <article key={l.id} className={`flex gap-4 overflow-hidden rounded-xl bg-card p-4 shadow-sm transition-shadow hover:shadow-md sm:h-28 sm:gap-0 sm:p-0 ${l.is_featured ? "ring-2 ring-amber-400/70" : ""}`}>
+                <article key={l.id} className={`flex gap-4 rounded border border-rule bg-paper-white p-4 transition-colors hover:border-brand-primary/60 sm:p-5 ${l.is_featured ? "ring-1 ring-brass/60" : ""}`}>
                   {l.avatar_url ? (
-                    <img src={l.avatar_url} alt={l.full_name} className="h-16 w-16 shrink-0 rounded-lg object-cover sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:object-top" />
+                    <img src={l.avatar_url} alt={l.full_name} className="h-14 w-14 shrink-0 rounded-full object-cover object-top" />
                   ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gold/10 font-heading text-xl text-gold sm:h-auto sm:w-28 sm:self-stretch sm:rounded-none sm:text-2xl">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-tint font-heading text-lg text-brand-primary">
                       {l.first_name?.[0]}{l.last_name?.[0]}
                     </div>
                   )}
-                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
+                  <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-baseline gap-3">
-                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg font-semibold text-ink hover:text-gold">
+                        <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="font-heading text-lg text-ink transition-colors hover:text-brand-hover">
                           {l.full_name}{l.is_senior_counsel ? " SC" : ""}
                         </Link>
                         {l.mediator_accreditation && (
-                          <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold">{l.mediator_accreditation}</span>
+                          <span className="rounded-[3px] bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-primary">{l.mediator_accreditation}</span>
                         )}
                         {l.is_featured && <FeaturedBadge />}
                       </div>
@@ -266,7 +266,7 @@ function MediatorSearch() {
                       </p>
                     </div>
                     <div className="flex flex-row items-center gap-2 sm:w-32 sm:flex-col sm:items-end">
-                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/90">
+                      <Link to="/lawyers/$slug" params={{ slug: l.slug }} className="rounded bg-brand-primary px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
                         View Profile
                       </Link>
                     </div>

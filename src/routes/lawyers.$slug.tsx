@@ -1,13 +1,13 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { ExternalLink, MapPin, Building2, BookOpen, Mail, Pencil, Phone, Linkedin, Globe } from "lucide-react";
+import { ExternalLink, MapPin, Building2, Mail, Pencil, Phone, Linkedin, Globe } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { sanitizeBioHtml } from "../lib/sanitize";
 import { formatDesignation, headBadges, designationKind } from "../lib/designation";
-import { BrandStrandDivider } from "../components/BrandMark";
+import { BrandStrandDivider, VerifiedMark } from "../components/BrandMark";
 
 export const Route = createFileRoute("/lawyers/$slug")({
   head: ({ params }) => ({
@@ -77,26 +77,27 @@ function LawyerProfile() {
     .filter(Boolean);
 
   return (
-    <div className="bg-cream">
+    <div className="bg-paper-ivory">
       {/* Header */}
-      <section className="relative bg-ink py-16 text-cream">
+      <section className="relative bg-brand-deep py-16 text-paper-ivory">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
             {lawyer.avatar_url ? (
               <img
                 src={lawyer.avatar_url}
                 alt={`${lawyer.first_name} ${lawyer.last_name}`}
-                className="h-64 w-52 shrink-0 rounded-2xl object-cover object-top shadow-lg ring-1 ring-gold/40 sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
+                className="h-64 w-52 shrink-0 rounded object-cover object-top ring-1 ring-paper-ivory/25 sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div className="flex h-64 w-52 shrink-0 items-center justify-center rounded-2xl bg-gold/20 font-heading text-5xl text-gold ring-1 ring-gold/40 sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
+              <div className="flex h-64 w-52 shrink-0 items-center justify-center rounded bg-paper-ivory/10 font-heading text-5xl text-paper-ivory ring-1 ring-paper-ivory/25 sm:h-80 sm:w-60 md:h-[22rem] md:w-64">
                 {lawyer.first_name[0]}{lawyer.last_name[0]}
               </div>
             )}
 
             <div className="flex-1">
-              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.35em] text-gold">
+              <p className="eyebrow mb-2 flex items-center gap-2 text-paper-ivory/75">
+                <VerifiedMark size={15} color="var(--paper-ivory)" />
                 {designationKind(lawyer.provider_type === "advocate" ? "advocate" : lawyer.designation) === "advocate"
                   ? "Verified advocate"
                   : lawyer.is_mediator || lawyer.is_arbitrator
@@ -119,55 +120,53 @@ function LawyerProfile() {
                   if (!label) return null;
                   const isAdv = designationKind(lawyer.provider_type === "advocate" ? "advocate" : lawyer.designation) === "advocate";
                   return (
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${
-                      isAdv ? "bg-white/10 text-white ring-white/30" : "bg-gold/20 text-white ring-gold/40"
-                    }`}>
+                    <span className="inline-flex items-center gap-1.5 rounded-[3px] bg-paper-ivory/10 px-3 py-1 font-mono text-xs text-paper-ivory ring-1 ring-inset ring-paper-ivory/25">
                       {isAdv ? "Advocate" : "Attorney"} · {label}
                     </span>
                   );
                 })()}
                 {lawyer.is_mediator && (
-                  <span className="inline-flex items-center rounded-full bg-violet-500/25 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-violet-500/50">Mediator</span>
+                  <span className="inline-flex items-center rounded-[3px] bg-paper-ivory/10 px-3 py-1 font-mono text-xs text-paper-ivory ring-1 ring-inset ring-paper-ivory/25">Mediator</span>
                 )}
                 {lawyer.is_arbitrator && (
-                  <span className="inline-flex items-center rounded-full bg-rose-500/25 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-rose-500/50">Arbitrator</span>
+                  <span className="inline-flex items-center rounded-[3px] bg-paper-ivory/10 px-3 py-1 font-mono text-xs text-paper-ivory ring-1 ring-inset ring-paper-ivory/25">Arbitrator</span>
                 )}
                 {headBadges(lawyer).map((b) => (
-                  <span key={b} className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-white ring-1 ring-inset ring-gold/40">
+                  <span key={b} className="inline-flex items-center gap-1.5 rounded-[3px] bg-paper-ivory/10 px-3 py-1 font-mono text-xs text-paper-ivory ring-1 ring-inset ring-paper-ivory/25">
                     {b}
                   </span>
                 ))}
               </div>
-              <div className="mt-3 flex flex-wrap gap-4 text-sm text-cream/70">
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[13px] text-paper-ivory/75">
                 {lawyer.firms && (
-                  <Link to="/firms/$slug" params={{ slug: lawyer.firms.slug }} className="flex items-center gap-1.5 hover:text-gold">
+                  <Link to="/firms/$slug" params={{ slug: lawyer.firms.slug }} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                     <Building2 className="h-4 w-4" /> {lawyer.firms.name}
                   </Link>
                 )}
                 <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {lawyer.city}, {lawyer.province}</span>
                 {contact?.email && (
-                  <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-gold">
+                  <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                     <Mail className="h-4 w-4" /> {contact.email}
                   </a>
                 )}
                 {contact?.office_phone && (
-                  <a href={`tel:${contact.office_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
-                    <Phone className="h-4 w-4" /> <span className="text-cream/50">Office</span> {contact.office_phone}
+                  <a href={`tel:${contact.office_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
+                    <Phone className="h-4 w-4" /> <span className="text-paper-ivory/50">Office</span> {contact.office_phone}
                   </a>
                 )}
                 {contact?.mobile_phone && (
-                  <a href={`tel:${contact.mobile_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 hover:text-gold">
-                    <Phone className="h-4 w-4" /> <span className="text-cream/50">Mobile</span> {contact.mobile_phone}
+                  <a href={`tel:${contact.mobile_phone.replace(/[^\d+]/g, "")}`} className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
+                    <Phone className="h-4 w-4" /> <span className="text-paper-ivory/50">Mobile</span> {contact.mobile_phone}
                   </a>
                 )}
 
                 {lawyer.linkedin_url && (
-                  <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                  <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                     <Linkedin className="h-4 w-4" /> LinkedIn
                   </a>
                 )}
                 {lawyer.website_url && (
-                  <a href={lawyer.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-gold">
+                  <a href={lawyer.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-colors hover:text-paper-ivory">
                     <Globe className="h-4 w-4" /> Visit website
                   </a>
                 )}
@@ -179,7 +178,7 @@ function LawyerProfile() {
                   <Link
                     to="/admin/advocates"
                     search={{ edit: lawyer.id }}
-                    className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+                    className="rounded bg-paper-ivory/10 px-5 py-2.5 text-sm font-medium text-paper-ivory ring-1 ring-paper-ivory/30 transition-colors hover:bg-paper-ivory/20"
                   >
                     <Pencil className="mr-2 inline h-4 w-4" /> Edit Profile
                   </Link>
@@ -187,13 +186,13 @@ function LawyerProfile() {
                   <Link
                     to="/dashboard"
                     search={{ tab: "lawyers", edit: lawyer.id, ...(isPlatformAdmin && lawyer.firm_id ? { firmId: lawyer.firm_id } : {}) }}
-                    className="rounded-md bg-cream/10 px-5 py-2.5 text-sm font-semibold text-cream ring-1 ring-cream/30 hover:bg-cream/20"
+                    className="rounded bg-paper-ivory/10 px-5 py-2.5 text-sm font-medium text-paper-ivory ring-1 ring-paper-ivory/30 transition-colors hover:bg-paper-ivory/20"
                   >
                     <Pencil className="mr-2 inline h-4 w-4" /> Edit Profile
                   </Link>
                 )
               )}
-              <button onClick={() => setShowEnquiry(true)} className="rounded-md bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-gold/90">
+              <button onClick={() => setShowEnquiry(true)} className="rounded bg-paper-ivory px-5 py-2.5 text-sm font-semibold text-brand-deep transition-colors hover:bg-white">
                 <Mail className="mr-2 inline h-4 w-4" /> Send Enquiry
               </button>
             </div>
@@ -209,7 +208,7 @@ function LawyerProfile() {
               <h2 className="font-heading text-xl text-ink">Practice Areas</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {areas.map((a: any) => (
-                  <span key={a.slug} className="rounded-full border border-gold/30 bg-gold/[0.06] px-3 py-1 text-xs font-medium text-ink">{a.name}</span>
+                  <span key={a.slug} className="rounded-[3px] bg-brand-tint px-3 py-1 text-xs font-medium text-brand-primary">{a.name}</span>
                 ))}
               </div>
             </section>
@@ -236,7 +235,7 @@ function LawyerProfile() {
               <h2 className="font-heading text-xl text-ink">Services</h2>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {lawyer.services.map((s: string) => (
-                  <span key={s} className="rounded-full bg-gold/15 px-2.5 py-1 text-xs font-medium text-ink">{s}</span>
+                  <span key={s} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand-primary">{s}</span>
                 ))}
               </div>
             </section>
@@ -255,7 +254,7 @@ function LawyerProfile() {
           {lawyer.is_mediator && (lawyer.mediator_accreditation || lawyer.mediator_style || (lawyer.mediator_sectors?.length ?? 0) > 0 || lawyer.availability_notes) && (
             <section>
               <h2 className="font-heading text-xl text-ink">Mediation</h2>
-              <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 rounded border border-rule bg-paper-white p-4 text-sm sm:grid-cols-2">
                 {lawyer.mediator_accreditation && (
                   <div><span className="text-muted-foreground">Accreditation: </span><span className="text-ink">{lawyer.mediator_accreditation}</span></div>
                 )}
@@ -267,7 +266,7 @@ function LawyerProfile() {
                     <span className="text-muted-foreground">Sectors: </span>
                     <span className="inline-flex flex-wrap gap-1.5">
                       {lawyer.mediator_sectors.map((s: string) => (
-                        <span key={s} className="rounded bg-gold/10 px-2 py-0.5 text-xs text-ink">{s}</span>
+                        <span key={s} className="rounded-[3px] bg-brand-tint px-2 py-0.5 text-xs text-brand-primary">{s}</span>
                       ))}
                     </span>
                   </div>
@@ -282,7 +281,7 @@ function LawyerProfile() {
           {lawyer.is_arbitrator && (lawyer.arbitrator_accreditation || typeof lawyer.arbitrator_experience_years === "number" || (lawyer.arbitrator_types?.length ?? 0) > 0 || lawyer.daily_rate_range || (lawyer.languages?.length ?? 0) > 0) && (
             <section>
               <h2 className="font-heading text-xl text-ink">Arbitration</h2>
-              <div className="mt-3 grid gap-3 rounded-md border border-border bg-card p-4 text-sm sm:grid-cols-2">
+              <div className="mt-3 grid gap-3 rounded border border-rule bg-paper-white p-4 text-sm sm:grid-cols-2">
                 {lawyer.arbitrator_accreditation && (
                   <div><span className="text-muted-foreground">Accreditation: </span><span className="text-ink">{lawyer.arbitrator_accreditation}</span></div>
                 )}
@@ -294,7 +293,7 @@ function LawyerProfile() {
                     <span className="text-muted-foreground">Types handled: </span>
                     <span className="inline-flex flex-wrap gap-1.5">
                       {lawyer.arbitrator_types.map((s: string) => (
-                        <span key={s} className="rounded bg-forest/10 px-2 py-0.5 text-xs text-forest">{s}</span>
+                        <span key={s} className="rounded-[3px] bg-brand-tint px-2 py-0.5 text-xs text-brand-primary">{s}</span>
                       ))}
                     </span>
                   </div>
@@ -310,45 +309,54 @@ function LawyerProfile() {
           )}
 
           <section>
-            <h2 className="flex items-center gap-2 font-heading text-xl text-ink">
-              <BookOpen className="h-5 w-5 text-gold" /> Reported Cases ({totalCases})
-            </h2>
+            <h2 className="font-heading text-xl text-ink">Reported Cases <span className="font-mono text-base text-ink-muted">[{totalCases}]</span></h2>
             {totalCases === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">No reported cases yet.</p>
             ) : (
-              <ul className="mt-4 divide-y divide-border rounded-md border border-border bg-card">
+              <ul className="mt-4 divide-y divide-rule rounded border border-rule bg-paper-white">
                 {cases.map((lc: any, i: number) => lc.cases && (
-                  <li key={`linked-${i}`} className="p-4">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
+                  <li key={`linked-${i}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+                    <div className="min-w-0 flex-1">
+                      <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink transition-colors hover:text-brand-hover">
                         {lc.cases.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
                       </a>
-                      {lc.outcome && (
-                        <span className={`rounded-full px-2 py-0.5 text-xs ${
-                          lc.outcome === "won" ? "bg-forest/15 text-forest" :
-                          lc.outcome === "lost" ? "bg-destructive/15 text-destructive" :
-                          "bg-muted text-muted-foreground"
-                        }`}>{lc.outcome}</span>
-                      )}
+                      <p className="mt-1 font-mono text-xs text-ink-muted">
+                        {[lc.cases.court, lc.role?.replace(/_/g, " "), lc.outcome].filter(Boolean).join(" · ")}
+                      </p>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {[lc.cases.citation, lc.cases.court, lc.cases.year, lc.role?.replace(/_/g, " ")].filter(Boolean).join(" · ")}
-                    </p>
+                    {(lc.cases.citation || lc.cases.year) && (
+                      lc.cases.saflii_url ? (
+                        <a href={lc.cases.saflii_url} target="_blank" rel="noopener noreferrer" className="citation-chip">
+                          {lc.cases.citation ?? lc.cases.year}
+                        </a>
+                      ) : (
+                        <span className="citation-chip">{lc.cases.citation ?? lc.cases.year}</span>
+                      )
+                    )}
                   </li>
                 ))}
                 {reportedCases.map((rc: any) => (
-                  <li key={`rep-${rc.id}`} className="p-4">
-                    {rc.url ? (
-                      <a href={rc.url} target="_blank" rel="noopener noreferrer" className="font-heading text-sm font-semibold text-ink hover:text-gold">
-                        {rc.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="font-heading text-sm font-semibold text-ink">{rc.case_name}</span>
-                    )}
-                    {(rc.citation || rc.court || rc.year) && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {[rc.citation, rc.court, rc.year].filter(Boolean).join(" · ")}
-                      </p>
+                  <li key={`rep-${rc.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+                    <div className="min-w-0 flex-1">
+                      {rc.url ? (
+                        <a href={rc.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-ink transition-colors hover:text-brand-hover">
+                          {rc.case_name} <ExternalLink className="ml-1 inline h-3 w-3" />
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium text-ink">{rc.case_name}</span>
+                      )}
+                      {(rc.court || rc.year) && (
+                        <p className="mt-1 font-mono text-xs text-ink-muted">
+                          {[rc.court, rc.year].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                    {rc.citation && (
+                      rc.url ? (
+                        <a href={rc.url} target="_blank" rel="noopener noreferrer" className="citation-chip">{rc.citation}</a>
+                      ) : (
+                        <span className="citation-chip">{rc.citation}</span>
+                      )
                     )}
                   </li>
                 ))}
@@ -359,13 +367,13 @@ function LawyerProfile() {
 
         <aside className="space-y-4">
           {canEdit && (
-            <div className="rounded-md border border-border bg-card p-5">
-              <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-ink">Status</h3>
+            <div className="rounded border border-rule bg-paper-white p-5">
+              <h3 className="eyebrow text-ink">Status</h3>
               <p className="mt-2 text-sm capitalize text-foreground/80">
                 {lawyer.status === "trial" ? "Listed (Trial)" : "Verified Listing"}
               </p>
               {lawyer.linkedin_url && (
-                <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-forest hover:text-gold">
+                <a href={lawyer.linkedin_url} target="_blank" rel="noopener noreferrer" className="mt-3 block text-sm text-brand-primary transition-colors hover:text-brand-hover">
                   LinkedIn →
                 </a>
               )}
@@ -373,16 +381,16 @@ function LawyerProfile() {
           )}
 
           {branches.length > 0 && (
-            <div className="rounded-md border border-border bg-card p-5">
-              <h3 className="flex items-center gap-2 font-heading text-sm font-semibold uppercase tracking-wider text-ink">
-                <Building2 className="h-4 w-4 text-gold" /> {branches.length === 1 ? "Office" : "Offices"}
+            <div className="rounded border border-rule bg-paper-white p-5">
+              <h3 className="eyebrow flex items-center gap-2 text-ink">
+                <Building2 className="h-4 w-4 text-brand-primary" /> {branches.length === 1 ? "Office" : "Offices"}
               </h3>
               <ul className="mt-3 space-y-3">
                 {branches.map((b: any) => (
                   <li key={b.id} className="text-sm">
                     <p className="font-semibold text-ink">
                       {b.name}
-                      {b.is_head_office && <span className="ml-2 rounded bg-gold/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-gold">Head Office</span>}
+                      {b.is_head_office && <span className="ml-2 rounded-[3px] bg-brand-tint px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-brand-primary">Head Office</span>}
                     </p>
                     {(b.address || b.city || b.province) && (
                       <p className="mt-0.5 flex items-start gap-1.5 text-xs text-muted-foreground">
@@ -391,7 +399,7 @@ function LawyerProfile() {
                       </p>
                     )}
                     {b.phone && (
-                      <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-0.5 flex items-center gap-1.5 text-xs text-forest hover:text-gold">
+                      <a href={`tel:${b.phone.replace(/[^\d+]/g, "")}`} className="mt-0.5 flex items-center gap-1.5 text-xs text-brand-primary transition-colors hover:text-brand-hover">
                         <Phone className="h-3 w-3" /> {b.phone}
                       </a>
                     )}
@@ -423,15 +431,15 @@ function EnquiryModal({ lawyerId, onClose }: { lawyerId: string; onClose: () => 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
+      <div onClick={(e) => e.stopPropagation()} className="panel-elevated w-full max-w-md rounded bg-paper-white p-6">
         <h3 className="font-heading text-xl text-ink">Send an Enquiry</h3>
         <form onSubmit={(e) => { e.preventDefault(); submit.mutate(); }} className="mt-4 space-y-3">
-          <input required maxLength={100} placeholder="Your name" value={form.sender_name} onChange={(e) => setForm({ ...form, sender_name: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <input required type="email" maxLength={255} placeholder="Your email" value={form.sender_email} onChange={(e) => setForm({ ...form, sender_email: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
-          <textarea required maxLength={1000} rows={5} placeholder="Your message…" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full rounded border border-border bg-background px-3 py-2 text-sm" />
+          <input required maxLength={100} placeholder="Your name" value={form.sender_name} onChange={(e) => setForm({ ...form, sender_name: e.target.value })} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
+          <input required type="email" maxLength={255} placeholder="Your email" value={form.sender_email} onChange={(e) => setForm({ ...form, sender_email: e.target.value })} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
+          <textarea required maxLength={1000} rows={5} placeholder="Your message…" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full rounded border border-rule bg-paper-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm text-muted-foreground hover:text-ink">Cancel</button>
-            <button type="submit" disabled={submit.isPending} className="rounded bg-ink px-4 py-2 text-sm font-semibold text-cream disabled:opacity-50">
+            <button type="button" onClick={onClose} className="rounded px-4 py-2 text-sm text-ink-muted hover:text-ink">Cancel</button>
+            <button type="submit" disabled={submit.isPending} className="rounded bg-brass px-4 py-2 text-sm font-semibold text-brand-deep transition-colors hover:bg-[#c39a3f] disabled:opacity-50">
               {submit.isPending ? "Sending…" : "Send"}
             </button>
           </div>
