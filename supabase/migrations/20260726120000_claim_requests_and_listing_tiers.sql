@@ -18,10 +18,6 @@ create table if not exists public.claim_requests (
   email text not null,
   phone text,
   message text,
-  -- KYC evidence: paths in the private 'verification-docs' bucket, removed
-  -- (and nulled) once the claim is decided.
-  selfie_path text,
-  id_doc_path text,
   requested_tier text not null default 'basic'
     check (requested_tier in ('basic','standard','silver','gold','elite')),
   -- pending -> verified (identity confirmed, awaiting payment) -> approved (paid,
@@ -54,24 +50,6 @@ create policy "Users can view their own claim requests"
 create policy "Platform admin full access to claim requests"
   on public.claim_requests for all
   using (public.get_my_role() = 'platform_admin');
-
--- Private bucket for claim verification documents (selfie + ID). Never public:
--- claimants write/read only their own folder; platform admin reads for review.
-insert into storage.buckets (id, name, public)
-values ('verification-docs', 'verification-docs', false)
-on conflict (id) do nothing;
-
-create policy "Users upload own verification docs"
-  on storage.objects for insert to authenticated
-  with check (bucket_id = 'verification-docs' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "Users view own verification docs"
-  on storage.objects for select to authenticated
-  using (bucket_id = 'verification-docs' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "Platform admin views verification docs"
-  on storage.objects for select to authenticated
-  using (bucket_id = 'verification-docs' and public.get_my_role() = 'platform_admin');
 
 -- PayFast recurring subscriptions (one live subscription per provider).
 create table if not exists public.subscriptions (
