@@ -1,8 +1,8 @@
 import {
-  Landmark,
+  PiggyBank,
   Building2,
   Radio,
-  Scale,
+  BookMarked,
   ShieldAlert,
   Handshake,
   Leaf,
@@ -20,10 +20,10 @@ import {
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
-  "banking-finance": Landmark,
+  "banking-finance": PiggyBank,
   "commercial-law": Building2,
   "competition-law": Radio,
-  "constitutional-law": Scale,
+  "constitutional-law": BookMarked,
   "criminal-law": ShieldAlert,
   "dispute-resolution": Handshake,
   "environmental-law": Leaf,
