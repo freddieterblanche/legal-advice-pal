@@ -482,6 +482,50 @@ export type Database = {
           },
         ]
       }
+      firm_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          firm_id: string
+          id: string
+          invited_by: string | null
+          sent_at: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          firm_id: string
+          id?: string
+          invited_by?: string | null
+          sent_at?: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          firm_id?: string
+          id?: string
+          invited_by?: string | null
+          sent_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "firm_invites_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firms: {
         Row: {
           address: string | null

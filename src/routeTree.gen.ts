@@ -14,6 +14,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
 import { Route as ClaimProfileRouteImport } from './routes/claim-profile'
+import { Route as ClaimFirmRouteImport } from './routes/claim-firm'
 import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -64,6 +65,11 @@ const PracticeAreasRoute = PracticeAreasRouteImport.update({
 const ClaimProfileRoute = ClaimProfileRouteImport.update({
   id: '/claim-profile',
   path: '/claim-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClaimFirmRoute = ClaimFirmRouteImport.update({
+  id: '/claim-firm',
+  path: '/claim-firm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClaimRoute = ClaimRouteImport.update({
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/claim': typeof ClaimRoute
+  '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
   '/register': typeof RegisterRoute
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/claim'
+    | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
     | '/register'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/claim'
+    | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
     | '/register'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/claim'
+    | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
     | '/register'
@@ -408,6 +420,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ClaimRoute: typeof ClaimRoute
+  ClaimFirmRoute: typeof ClaimFirmRoute
   ClaimProfileRoute: typeof ClaimProfileRoute
   PracticeAreasRoute: typeof PracticeAreasRoute
   RegisterRoute: typeof RegisterRoute
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/claim-profile'
       fullPath: '/claim-profile'
       preLoaderRoute: typeof ClaimProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/claim-firm': {
+      id: '/claim-firm'
+      path: '/claim-firm'
+      fullPath: '/claim-firm'
+      preLoaderRoute: typeof ClaimFirmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/claim': {
@@ -687,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ClaimRoute: ClaimRoute,
+  ClaimFirmRoute: ClaimFirmRoute,
   ClaimProfileRoute: ClaimProfileRoute,
   PracticeAreasRoute: PracticeAreasRoute,
   RegisterRoute: RegisterRoute,
