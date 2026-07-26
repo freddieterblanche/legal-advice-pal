@@ -191,8 +191,10 @@ function SearchPage() {
       }
       const sort = search.sort ?? "surname";
       const ascending = (search.dir ?? "asc") === "asc";
-      // Always prioritise featured listings first, then apply the chosen sort.
+      // Always prioritise featured listings first, then paid tiers
+      // (elite > gold > silver > standard/basic), then the chosen sort.
       query = query.order("is_featured", { ascending: false });
+      query = query.order("tier_rank", { ascending: false, nullsFirst: false });
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {
@@ -487,6 +489,78 @@ function SearchPage() {
                 const badgeLabel = l.designation
                   ?? (kind === "advocate" ? (l.is_senior_counsel ? "Senior Counsel" : "Advocate") : "Attorney");
                 const yrs = yearsInPractice(l.year_of_admission ?? null);
+                const tierSlug = (l as { listing_tier?: string | null }).listing_tier ?? "basic";
+                const excerpt = ((l as { overview_excerpt?: string | null }).overview_excerpt ?? "").trim();
+                const enhanced = tierSlug === "gold" || tierSlug === "elite";
+                if (enhanced) {
+                  const isElite = tierSlug === "elite";
+                  const areaNames = ((l.practice_areas ?? []) as (string | null)[]).filter(Boolean).slice(0, 3) as string[];
+                  return (
+                    <article
+                      key={l.id}
+                      className={`rounded border-2 bg-paper-white p-5 sm:p-6 ${isElite ? "border-brass" : "border-brand-primary"}`}
+                    >
+                      <div className="flex gap-4 sm:gap-5">
+                        {l.avatar_url ? (
+                          <img
+                            src={l.avatar_url}
+                            alt={l.full_name ?? `${first} ${last}`}
+                            loading="lazy"
+                            className={`h-16 w-16 shrink-0 rounded-full object-cover object-top ring-2 ring-offset-2 sm:h-20 sm:w-20 ${isElite ? "ring-brass" : "ring-brand-primary"}`}
+                          />
+                        ) : (
+                          <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-tint font-heading text-xl text-brand-primary ring-2 ring-offset-2 sm:h-20 sm:w-20 sm:text-2xl ${isElite ? "ring-brass" : "ring-brand-primary"}`}>
+                            {first[0]}{last[0]}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                            <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="font-heading text-xl text-ink transition-colors hover:text-brand-hover sm:text-2xl">
+                              {l.full_name}{l.is_senior_counsel ? " SC" : ""}
+                            </Link>
+                            {isElite || l.is_featured ? <FeaturedBadge /> : <span className="eyebrow text-brand-primary">[Gold]</span>}
+                          </div>
+                          <p className="mt-0.5 text-sm text-ink-muted">
+                            {[
+                              badgeLabel,
+                              l.firm_name ?? l.chambers_name,
+                              kind === "attorney" ? (yrs !== null ? `${yrs} years in practice` : null) : null,
+                              [l.city, l.province].filter(Boolean).join(", "),
+                            ].filter(Boolean).join(" · ")}
+                          </p>
+                          {excerpt && (
+                            <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-ink">{excerpt}</p>
+                          )}
+                          {areaNames.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {areaNames.map((a) => (
+                                <span key={a} className="rounded-[3px] bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand-primary">{a}</span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
+                            {caseCount > 0 ? (
+                              <span className="citation-chip">{caseCount} reported case{caseCount === 1 ? "" : "s"}</span>
+                            ) : <span />}
+                            <div className="flex gap-2">
+                              <Link
+                                to="/lawyers/$slug"
+                                params={{ slug: l.slug ?? "" }}
+                                search={{ enquire: 1 } as never}
+                                className="rounded border border-rule bg-paper-white px-4 py-2 text-xs font-medium text-ink transition-colors hover:border-brand-primary"
+                              >
+                                Send Enquiry
+                              </Link>
+                              <Link to="/lawyers/$slug" params={{ slug: l.slug ?? "" }} className="rounded bg-brand-primary px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-brand-hover">
+                                View Profile
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
                 return (
                 <article key={l.id} className={`flex gap-4 rounded border bg-paper-white p-4 transition-colors sm:p-5 ${l.is_featured ? "border-brass/50" : "border-rule hover:border-brand-primary/60"}`}>
                   {l.avatar_url ? (

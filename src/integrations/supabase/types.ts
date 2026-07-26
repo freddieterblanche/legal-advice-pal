@@ -1427,6 +1427,9 @@ export type Database = {
           designation: string | null
           exclude_from_lawyer_listing: boolean | null
           featured_since: string | null
+          listing_tier: string | null
+          tier_rank: number | null
+          overview_excerpt: string | null
           firm_name: string | null
           firm_slug: string | null
           first_name: string | null

@@ -211,7 +211,7 @@ function ExpertWitnessProfile() {
             <section>
               <h2 className="font-heading text-xl text-ink">Qualifications</h2>
               <div
-                className="prose prose-sm mt-3 max-w-none text-foreground/80 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2"
+                className="prose-editorial prose prose-sm mt-3 max-w-none text-foreground/80 [&_p]:my-2"
                 dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(expert.qualifications) }}
               />
             </section>
@@ -221,7 +221,7 @@ function ExpertWitnessProfile() {
             <section>
               <h2 className="font-heading text-xl text-ink">About</h2>
               <div
-                className="prose prose-sm mt-3 max-w-none leading-relaxed text-foreground/80 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2"
+                className="prose-editorial prose prose-sm mt-3 max-w-none leading-relaxed text-foreground/80 [&_p]:my-2"
                 dangerouslySetInnerHTML={{ __html: sanitizeBioHtml(expert.bio) }}
               />
             </section>
