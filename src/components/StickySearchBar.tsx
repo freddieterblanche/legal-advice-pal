@@ -22,7 +22,7 @@ export function StickySearchBar({
 
   return (
     <div
-      className={`fixed inset-x-0 top-0 z-40 border-b border-ink/20 bg-ink text-cream shadow-lg transition-transform duration-200 ${
+      className={`fixed inset-x-0 top-0 z-40 border-b border-rule bg-paper-white shadow-[0_8px_24px_-16px_rgb(11_33_56/0.25)] transition-transform duration-200 ${
         visible ? "translate-y-0" : "-translate-y-full"
       }`}
       aria-hidden={!visible}
@@ -30,13 +30,13 @@ export function StickySearchBar({
       <div className="mx-auto max-w-7xl px-3 py-2 sm:px-6">
         <form onSubmit={onSubmit} className="flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={placeholder}
               maxLength={240}
-              className="w-full rounded-lg border border-border bg-card pl-9 pr-3 py-2 text-sm text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold"
+              className="w-full rounded border border-rule bg-paper-white py-2 pl-9 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-primary"
             />
           </div>
           {filters ? (
@@ -45,7 +45,7 @@ export function StickySearchBar({
               <button
                 type="button"
                 onClick={() => setFiltersOpen((o) => !o)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-cream/30 bg-ink/40 px-3 py-2 text-xs font-semibold text-cream hover:bg-ink/60 lg:hidden"
+                className="inline-flex items-center gap-1.5 rounded border border-rule bg-paper-white px-3 py-2 text-xs font-medium text-ink hover:border-brand-primary lg:hidden"
                 aria-expanded={filtersOpen}
               >
                 {filtersOpen ? <X className="h-3.5 w-3.5" /> : <SlidersHorizontal className="h-3.5 w-3.5" />}
@@ -55,13 +55,13 @@ export function StickySearchBar({
           ) : null}
           <button
             type="submit"
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white hover:bg-gold/90"
+            className="rounded bg-brand-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-hover"
           >
             Search
           </button>
         </form>
         {filters && filtersOpen ? (
-          <div className="mt-2 grid gap-2 border-t border-cream/15 pt-2 lg:hidden">
+          <div className="mt-2 grid gap-2 border-t border-rule pt-2 lg:hidden">
             {filters}
           </div>
         ) : null}
