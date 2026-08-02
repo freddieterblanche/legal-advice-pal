@@ -94,7 +94,7 @@ function LawyerProfile() {
               <img
                 src={lawyer.avatar_url}
                 alt={`${lawyer.first_name} ${lawyer.last_name}`}
-                className="h-64 w-52 shrink-0 rounded object-cover object-top ring-1 ring-paper-ivory/25 sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
+                className="h-64 w-52 shrink-0 rounded object-cover object-top grayscale ring-1 ring-paper-ivory/25 sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (

@@ -93,7 +93,7 @@ function ExpertWitnessProfile() {
               <img
                 src={expert.avatar_url}
                 alt={`${expert.first_name} ${expert.last_name}`}
-                className="h-64 w-52 shrink-0 object-cover object-top sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
+                className="h-64 w-52 shrink-0 object-cover object-top grayscale sm:h-80 sm:w-60 md:h-[22rem] md:w-64"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               />
             ) : (

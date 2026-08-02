@@ -272,7 +272,7 @@ function ExpertWitnessSearch() {
                         <img
                           src={e.avatar_url}
                           alt={`${e.first_name} ${e.last_name}`}
-                          className="h-full w-full scale-[1.18] object-cover object-top"
+                          className="h-full w-full scale-[1.18] object-cover object-top grayscale"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-brand-tint font-heading text-xl text-brand-primary sm:text-2xl">

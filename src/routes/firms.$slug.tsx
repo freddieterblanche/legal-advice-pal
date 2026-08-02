@@ -208,7 +208,7 @@ function FirmProfile() {
                     <img
                       src={l.avatar_url}
                       alt={`${l.first_name} ${l.last_name}`}
-                      className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.03]"
+                      className="h-full w-full object-cover object-top grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                     />
                   ) : (
