@@ -237,6 +237,22 @@ function SearchPage() {
     navigate({ search: (prev: Search) => ({ ...prev, ...patch, page: 1 }) });
   };
 
+  const hasFilters = !!(
+    search.q || search.area || search.province || search.town || search.chambers || search.designation
+  );
+  const clearFilters = () => {
+    setQ("");
+    navigate({
+      search: (prev: Search) => ({
+        type: prev.type,
+        sort: prev.sort,
+        dir: prev.dir,
+        view: prev.view,
+        page: 1,
+      }),
+    });
+  };
+
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     update({ q: q || undefined });
@@ -283,6 +299,15 @@ function SearchPage() {
           placeholder="Designation"
         />
       </div>
+      {hasFilters && (
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="shrink-0 text-xs font-medium text-brand-primary transition-colors hover:text-brand-hover"
+        >
+          × Clear
+        </button>
+      )}
     </>
   );
 
@@ -373,6 +398,17 @@ function SearchPage() {
                 placeholder="Designation"
               />
             </div>
+            {hasFilters && (
+              <div className="mt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-medium text-brand-primary transition-colors hover:text-brand-hover"
+                >
+                  × Clear search &amp; filters
+                </button>
+              </div>
+            )}
           </div>
           <p className="mt-2 text-xs text-paper-ivory/60">
             Tip: combine terms with <span className="font-mono font-medium text-paper-ivory/85">OR</span> and{" "}
@@ -388,11 +424,22 @@ function SearchPage() {
         {/* Results */}
         <div>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
-            <h1 className="font-heading text-2xl text-ink">
-              {isLoading
-                ? "Searching…"
-                : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
-            </h1>
+            <div className="flex flex-wrap items-baseline gap-3">
+              <h1 className="font-heading text-2xl text-ink">
+                {isLoading
+                  ? "Searching…"
+                  : `${total} ${search.type === "advocate" ? "advocate" : "attorney"}${total === 1 ? "" : "s"} found`}
+              </h1>
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-medium text-brand-primary transition-colors hover:text-brand-hover"
+                >
+                  × Clear search &amp; filters
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-3">
               <SortBar
                 options={[
