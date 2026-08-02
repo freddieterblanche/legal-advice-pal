@@ -1457,6 +1457,13 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_area_counts: {
+        Row: {
+          practice_area_id: string | null
+          provider_count: number | null
+        }
+        Relationships: []
+      }
       lawyer_search_view: {
         Row: {
           arbitrator_accreditation: string | null
