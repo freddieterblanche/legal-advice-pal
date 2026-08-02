@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PracticeAreasRouteImport } from './routes/practice-areas'
 import { Route as ClaimProfileRouteImport } from './routes/claim-profile'
 import { Route as ClaimFirmRouteImport } from './routes/claim-firm'
@@ -55,6 +56,11 @@ const SearchRoute = SearchRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PracticeAreasRoute = PracticeAreasRouteImport.update({
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -286,6 +294,7 @@ export interface FileRoutesById {
   '/claim-firm': typeof ClaimFirmRoute
   '/claim-profile': typeof ClaimProfileRoute
   '/practice-areas': typeof PracticeAreasRoute
+  '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
   '/search': typeof SearchRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -321,6 +330,7 @@ export interface FileRouteTypes {
     | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
+    | '/pricing'
     | '/register'
     | '/search'
     | '/sitemap.xml'
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
+    | '/pricing'
     | '/register'
     | '/search'
     | '/sitemap.xml'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/claim-firm'
     | '/claim-profile'
     | '/practice-areas'
+    | '/pricing'
     | '/register'
     | '/search'
     | '/sitemap.xml'
@@ -423,6 +435,7 @@ export interface RootRouteChildren {
   ClaimFirmRoute: typeof ClaimFirmRoute
   ClaimProfileRoute: typeof ClaimProfileRoute
   PracticeAreasRoute: typeof PracticeAreasRoute
+  PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -457,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/practice-areas': {
@@ -710,6 +730,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClaimFirmRoute: ClaimFirmRoute,
   ClaimProfileRoute: ClaimProfileRoute,
   PracticeAreasRoute: PracticeAreasRoute,
+  PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

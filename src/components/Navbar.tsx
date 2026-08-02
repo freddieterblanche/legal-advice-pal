@@ -67,6 +67,9 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
+          <Link to="/pricing" className="text-sm font-medium text-ink-muted transition-colors hover:text-brand-hover">
+            Pricing
+          </Link>
           {session ? (
             <>
               <DropdownMenu>
@@ -180,6 +183,7 @@ export function Navbar() {
                 </>
               ) : (
                 <>
+                  <Link to="/pricing" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm text-ink">Pricing</Link>
                   <Link to="/auth" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm text-ink">Sign In</Link>
                   <Link to="/register" onClick={() => setOpen(false)} className="mt-2 block rounded bg-brand-primary px-3 py-2 text-center text-sm font-medium text-white">Register Your Firm</Link>
                 </>
