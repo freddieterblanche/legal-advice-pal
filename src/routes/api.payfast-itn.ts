@@ -70,6 +70,28 @@ export const Route = createFileRoute("/api/payfast-itn")({
           if (sub.frequency === "annual") periodEnd.setFullYear(periodEnd.getFullYear() + 1);
           else periodEnd.setMonth(periodEnd.getMonth() + 1);
 
+          // Retire any other live subscription for this provider first (tier
+          // changes replace the old plan; also required by the one-active-per-
+          // provider unique index). Remote cancel is best-effort — the local
+          // record always reflects intent.
+          const { data: oldSubs } = await supabaseAdmin
+            .from("subscriptions")
+            .select("id, payfast_token")
+            .eq("service_provider_id", sub.service_provider_id)
+            .eq("status", "active")
+            .neq("id", sub.id);
+          for (const old of oldSubs ?? []) {
+            if (old.payfast_token && old.payfast_token !== params.token) {
+              try {
+                const { cancelPayfastSubscription } = await import("../lib/payfast.server");
+                await cancelPayfastSubscription(old.payfast_token);
+              } catch (err) {
+                console.error("[payfast-itn] failed to cancel superseded sub at PayFast", old.id, err);
+              }
+            }
+            await supabaseAdmin.from("subscriptions").update({ status: "cancelled" }).eq("id", old.id);
+          }
+
           const { error: bErr } = await supabaseAdmin.from("billing_records").insert({
             service_provider_id: sub.service_provider_id,
             amount_rands: gross,
@@ -91,6 +113,15 @@ export const Route = createFileRoute("/api/payfast-itn")({
             })
             .eq("id", sub.id);
           if (subErr) throw subErr;
+
+          // Tier change (no claim attached): apply the new tier to the listing.
+          if (!sub.claim_request_id) {
+            const { error: tErr } = await supabaseAdmin
+              .from("service_providers")
+              .update({ listing_tier: sub.tier })
+              .eq("id", sub.service_provider_id);
+            if (tErr) throw tErr;
+          }
 
           // First payment on a verified claim: hand the profile over now.
           if (sub.claim_request_id) {
