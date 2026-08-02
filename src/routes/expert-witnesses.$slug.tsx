@@ -19,16 +19,17 @@ export const Route = createFileRoute("/expert-witnesses/$slug")({
 function ExpertWitnessProfile() {
   const { slug } = Route.useParams();
 
-  const { data: expert, isLoading } = useQuery({
+  const { data: expert, isLoading, isError } = useQuery({
     queryKey: ["expert-witness", slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_providers")
         .select(`*,
-          provider_disciplines(expert_disciplines(name, slug, parent_category).eq("provider_type", "expert")),
+          provider_disciplines(expert_disciplines(name, slug, parent_category)),
           case_service_providers(role, notes, cases(case_name, citation, court, year, saflii_url))
         `)
         .eq("slug", slug)
+        .eq("provider_type", "expert")
         .in("status", ["trial", "active"])
         .maybeSingle();
       if (error) throw error;
@@ -62,6 +63,15 @@ function ExpertWitnessProfile() {
   });
 
   if (isLoading) return <div className="mx-auto max-w-5xl px-6 py-20 text-center text-muted-foreground">Loading…</div>;
+  if (isError) {
+    return (
+      <div className="mx-auto max-w-md px-6 py-20 text-center">
+        <h1 className="font-heading text-2xl text-ink">This profile didn't load</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Something went wrong fetching this expert witness. Please try again.</p>
+        <Link to="/expert-witnesses" className="mt-6 inline-block text-sm text-brand-primary hover:text-brand-hover">← Back to expert witnesses</Link>
+      </div>
+    );
+  }
   if (!expert) return null;
 
   const isPlatformAdmin = viewer?.role === "platform_admin";
