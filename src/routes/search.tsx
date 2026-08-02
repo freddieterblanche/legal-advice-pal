@@ -518,7 +518,7 @@ function SearchPage() {
                             src={l.avatar_url}
                             alt={l.full_name ?? `${first} ${last}`}
                             loading="lazy"
-                            className={`h-16 w-16 shrink-0 rounded-full object-cover object-top ring-2 ring-offset-2 sm:h-20 sm:w-20 ${isElite ? "ring-brass" : "ring-brand-primary"}`}
+                            className={`h-16 w-16 shrink-0 rounded-full object-cover object-top grayscale ring-2 ring-offset-2 sm:h-20 sm:w-20 ${isElite ? "ring-brass" : "ring-brand-primary"}`}
                           />
                         ) : (
                           <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-tint font-heading text-xl text-brand-primary ring-2 ring-offset-2 sm:h-20 sm:w-20 sm:text-2xl ${isElite ? "ring-brass" : "ring-brand-primary"}`}>
@@ -580,7 +580,7 @@ function SearchPage() {
                       src={l.avatar_url}
                       alt={l.full_name ?? `${first} ${last}`}
                       loading="lazy"
-                      className="h-14 w-14 shrink-0 rounded-full object-cover object-top"
+                      className="h-14 w-14 shrink-0 rounded-full object-cover object-top grayscale"
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
                         img.style.display = "none";

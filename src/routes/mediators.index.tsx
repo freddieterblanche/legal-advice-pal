@@ -244,7 +244,7 @@ function MediatorSearch() {
               {results?.rows.map((l: any) => (
                 <article key={l.id} className={`flex gap-4 rounded border border-rule bg-paper-white p-4 transition-colors hover:border-brand-primary/60 sm:p-5 ${l.is_featured ? "ring-1 ring-brass/60" : ""}`}>
                   {l.avatar_url ? (
-                    <img src={l.avatar_url} alt={l.full_name} className="h-14 w-14 shrink-0 rounded-full object-cover object-top" />
+                    <img src={l.avatar_url} alt={l.full_name} className="h-14 w-14 shrink-0 rounded-full object-cover object-top grayscale" />
                   ) : (
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-tint font-heading text-lg text-brand-primary">
                       {l.first_name?.[0]}{l.last_name?.[0]}
