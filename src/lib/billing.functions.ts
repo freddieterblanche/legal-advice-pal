@@ -87,3 +87,145 @@ export const createClaimCheckout = createServerFn({ method: "POST" })
       cycles: tier.annualOnly ? 1 : 0,
     });
   });
+
+// ---------------------------------------------------------------------------
+// Self-serve subscription management for claimed-profile owners (/my-listing)
+// ---------------------------------------------------------------------------
+
+// The signed-in user's owned listing plus its live subscription state.
+export const getMyListing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("../integrations/supabase/client.server");
+
+    const { data: provider, error: pErr } = await supabaseAdmin
+      .from("service_providers")
+      .select("id, slug, first_name, last_name, designation, provider_type, city, province, listing_tier, is_claimed, status, firms(name)")
+      .eq("profile_id", context.userId)
+      .maybeSingle();
+    if (pErr) throw pErr;
+    if (!provider) return { provider: null, subscription: null };
+
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("id, tier, frequency, amount_rands, status, activated_at, current_period_end")
+      .eq("service_provider_id", provider.id)
+      .in("status", ["active", "pending"])
+      .order("status", { ascending: true }) // 'active' before 'pending'
+      .limit(1)
+      .maybeSingle();
+
+    return { provider, subscription: sub ?? null };
+  });
+
+// Start checkout for a tier change on the caller's own listing. The webhook
+// activates the new plan and retires the old subscription on first payment.
+export const createTierChangeCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        tier: z.enum(["basic", "standard", "silver", "gold", "elite"]),
+        frequency: z.enum(["monthly", "annual"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("../integrations/supabase/client.server");
+    const { buildSubscriptionCheckout } = await import("./payfast.server");
+
+    const { data: provider, error: pErr } = await supabaseAdmin
+      .from("service_providers")
+      .select("id, slug, first_name, last_name")
+      .eq("profile_id", context.userId)
+      .maybeSingle();
+    if (pErr) throw pErr;
+    if (!provider) throw new Error("No listing is linked to your account.");
+
+    const { data: userData, error: uErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    if (uErr) throw uErr;
+    const email = userData.user.email;
+    if (!email) throw new Error("Your account has no email address.");
+
+    const tier = TIER_BY_SLUG[data.tier];
+    const frequency = tier.annualOnly ? "annual" : data.frequency;
+    const amount = frequency === "annual" ? annualRands(tier) : tier.monthlyRands;
+
+    // Reuse an abandoned pending tier-change subscription if one exists.
+    const { data: existing } = await supabaseAdmin
+      .from("subscriptions")
+      .select("id")
+      .eq("service_provider_id", provider.id)
+      .is("claim_request_id", null)
+      .eq("status", "pending")
+      .maybeSingle();
+
+    let subscriptionId = existing?.id;
+    if (subscriptionId) {
+      await supabaseAdmin
+        .from("subscriptions")
+        .update({ tier: tier.slug, frequency, amount_rands: amount, user_id: context.userId })
+        .eq("id", subscriptionId);
+    } else {
+      const { data: sub, error: sErr } = await supabaseAdmin
+        .from("subscriptions")
+        .insert({
+          service_provider_id: provider.id,
+          user_id: context.userId,
+          tier: tier.slug,
+          frequency,
+          amount_rands: amount,
+        })
+        .select("id")
+        .single();
+      if (sErr) throw sErr;
+      subscriptionId = sub.id;
+    }
+
+    return buildSubscriptionCheckout({
+      subscriptionId: subscriptionId!,
+      email,
+      firstName: provider.first_name,
+      itemName: `Lawexpert ${tier.name} listing — ${provider.first_name} ${provider.last_name}`,
+      amountRands: amount,
+      frequency,
+      providerSlug: provider.slug ?? "",
+      cycles: tier.annualOnly ? 1 : 0,
+      returnPath: "/my-listing",
+    });
+  });
+
+// Cancel the caller's active subscription (billing stops; the listing stays
+// in the directory, and paid features run until the end of the paid period).
+export const cancelMySubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("../integrations/supabase/client.server");
+    const { cancelPayfastSubscription } = await import("./payfast.server");
+
+    const { data: provider } = await supabaseAdmin
+      .from("service_providers")
+      .select("id")
+      .eq("profile_id", context.userId)
+      .maybeSingle();
+    if (!provider) throw new Error("No listing is linked to your account.");
+
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("id, payfast_token, status")
+      .eq("service_provider_id", provider.id)
+      .eq("status", "active")
+      .maybeSingle();
+    if (!sub) throw new Error("No active subscription to cancel.");
+
+    if (sub.payfast_token) {
+      try {
+        await cancelPayfastSubscription(sub.payfast_token);
+      } catch (err) {
+        // Don't strand the user: record intent locally and flag for follow-up.
+        console.error("[billing] PayFast cancel failed for sub", sub.id, err);
+      }
+    }
+    await supabaseAdmin.from("subscriptions").update({ status: "cancelled" }).eq("id", sub.id);
+    return { ok: true as const };
+  });

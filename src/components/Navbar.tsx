@@ -81,6 +81,9 @@ export function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard">My Dashboard</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-listing">My Listing & Billing</Link>
+                  </DropdownMenuItem>
                   {isPlatformAdmin && (
                     <>
                       <DropdownMenuSeparator />
@@ -161,6 +164,7 @@ export function Navbar() {
               {session ? (
                 <>
                   <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-brand-primary">Dashboard</Link>
+                  <Link to="/my-listing" onClick={() => setOpen(false)} className="block rounded px-3 py-2 text-sm font-medium text-brand-primary">My Listing &amp; Billing</Link>
                   {isPlatformAdmin && (
                     <>
                       <span className="eyebrow block px-3 py-2 text-ink-muted">Admin</span>

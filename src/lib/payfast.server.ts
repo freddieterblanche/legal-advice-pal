@@ -55,6 +55,8 @@ export type CheckoutInput = {
   providerSlug: string;
   /** PayFast billing cycles: 0 = until cancelled, 1 = single-term seat. */
   cycles?: number;
+  /** Return/cancel page (default: the claim page). Query params are appended. */
+  returnPath?: string;
 };
 
 /**
@@ -71,8 +73,12 @@ export function buildSubscriptionCheckout(input: CheckoutInput): {
   const pairs: Array<[string, string]> = [
     ["merchant_id", cfg.merchantId],
     ["merchant_key", cfg.merchantKey],
-    ["return_url", `${cfg.siteUrl}/claim-profile?provider=${encodeURIComponent(input.providerSlug)}&payment=success`],
-    ["cancel_url", `${cfg.siteUrl}/claim-profile?provider=${encodeURIComponent(input.providerSlug)}&payment=cancelled`],
+    ["return_url", input.returnPath
+      ? `${cfg.siteUrl}${input.returnPath}?payment=success`
+      : `${cfg.siteUrl}/claim-profile?provider=${encodeURIComponent(input.providerSlug)}&payment=success`],
+    ["cancel_url", input.returnPath
+      ? `${cfg.siteUrl}${input.returnPath}?payment=cancelled`
+      : `${cfg.siteUrl}/claim-profile?provider=${encodeURIComponent(input.providerSlug)}&payment=cancelled`],
     ["notify_url", `${cfg.siteUrl}/api/payfast-itn`],
     ["name_first", input.firstName ?? ""],
     ["email_address", input.email],
@@ -130,4 +136,38 @@ export async function validateItn(rawBody: string): Promise<Record<string, strin
   if (text !== "VALID") throw new Error(`ITN postback validation failed: ${text || res.status}`);
 
   return params;
+}
+
+/**
+ * Cancel a recurring subscription at PayFast via the merchant API.
+ * Signature: md5 over all header/body params (plus passphrase), sorted
+ * alphabetically and URL-encoded, per PayFast API docs.
+ */
+export async function cancelPayfastSubscription(token: string): Promise<void> {
+  const cfg = getPayfastConfig();
+  const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, "");
+  const params: Array<[string, string]> = [
+    ["merchant-id", cfg.merchantId],
+    ["passphrase", cfg.passphrase],
+    ["timestamp", timestamp],
+    ["version", "v1"],
+  ].filter(([, v]) => v !== "") as Array<[string, string]>;
+  const signature = createHash("md5")
+    .update(params.map(([k, v]) => `${k}=${pfEncode(v)}`).join("&"))
+    .digest("hex");
+
+  const url = `https://api.payfast.co.za/subscriptions/${encodeURIComponent(token)}/cancel${cfg.sandbox ? "?testing=true" : ""}`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "merchant-id": cfg.merchantId,
+      version: "v1",
+      timestamp,
+      signature,
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`PayFast cancel failed (${res.status}): ${body.slice(0, 200)}`);
+  }
 }
