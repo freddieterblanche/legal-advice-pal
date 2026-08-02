@@ -26,6 +26,7 @@ export function Footer() {
           <div>
             <h4 className="eyebrow text-paper-ivory">For Firms</h4>
             <ul className="mt-4 space-y-2 text-sm">
+              <li><Link to="/pricing" className="transition-colors hover:text-paper-ivory">Pricing</Link></li>
               <li><Link to="/register" className="transition-colors hover:text-paper-ivory">Register Your Firm</Link></li>
               <li><Link to="/auth" className="transition-colors hover:text-paper-ivory">Firm Sign In</Link></li>
             </ul>
