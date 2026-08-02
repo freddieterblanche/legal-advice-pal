@@ -190,6 +190,7 @@ export function MediatorArbitratorFormModal({
       office_phone: form.office_phone.trim() || null,
       mobile_phone: form.mobile_phone.trim() || null,
       bio: sanitizeBioHtml(form.bio) || null,
+      overview: sanitizeBioHtml(form.bio) || null,
       languages: form.languages.length ? form.languages : null,
       services: form.services.length ? form.services : null,
       daily_rate_range: form.daily_rate_range.trim() || null,

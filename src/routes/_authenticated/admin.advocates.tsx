@@ -499,6 +499,7 @@ function AdvocateFormModal({ advocate, bars, chambers, onClose, onSaved }: {
         provider_type: "advocate" as const,
         designation: form.is_senior_counsel ? "Senior Counsel" : "Advocate",
         bio: sanitizeBioHtml(form.bio) || null,
+        overview: sanitizeBioHtml(form.bio) || null,
         website_url: form.website_url.trim() || null,
         firm_id: null,
       };
