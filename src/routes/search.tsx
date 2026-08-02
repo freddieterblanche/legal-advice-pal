@@ -58,6 +58,16 @@ export const Route = createFileRoute("/search")({
 const CARDS_PAGE_SIZE = 20;
 const LIST_PAGE_SIZE = 100;
 
+// tier_rank arrives with the search-view-tiers migration; degrade gracefully
+// on databases that haven't applied it yet. Checked once per session.
+let tierRankKnown: boolean | null = null;
+async function tierRankAvailable(): Promise<boolean> {
+  if (tierRankKnown !== null) return tierRankKnown;
+  const { error } = await supabase.from("lawyer_search_view").select("tier_rank").limit(1);
+  tierRankKnown = !error;
+  return tierRankKnown;
+}
+
 function SearchPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/search" });
@@ -194,7 +204,9 @@ function SearchPage() {
       // Always prioritise featured listings first, then paid tiers
       // (elite > gold > silver > standard/basic), then the chosen sort.
       query = query.order("is_featured", { ascending: false });
-      query = query.order("tier_rank", { ascending: false, nullsFirst: false });
+      if (await tierRankAvailable()) {
+        query = query.order("tier_rank", { ascending: false, nullsFirst: false });
+      }
       if (sort === "surname") {
         query = query.order("last_name", { ascending }).order("first_name", { ascending });
       } else if (sort === "experience") {

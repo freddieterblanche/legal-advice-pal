@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Plus, X, Building2, Trash2, Users, Settings as SettingsIcon } from "lucide-react";
+import { Plus, X, Building2, Trash2, Users, Settings as SettingsIcon, UserPlus } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { createFirmAdminInvite } from "../../lib/firm-invite.functions";
 import { supabase } from "../../integrations/supabase/client";
 import { toast } from "sonner";
 import { PROVINCES, slugify } from "../../lib/constants";
@@ -43,6 +45,24 @@ export const Route = createFileRoute("/_authenticated/admin/firms")({
 });
 
 function AdminFirmsPage() {
+  const inviteFirmAdminFn = useServerFn(createFirmAdminInvite);
+  const inviteAdmin = async (firmId: string, firmName: string) => {
+    const email = window.prompt(`Invite a firm administrator for ${firmName}.\nTheir email address:`);
+    if (!email?.trim()) return;
+    try {
+      const res = await inviteFirmAdminFn({ data: { firm_id: firmId, email: email.trim() } });
+      const url = `${window.location.origin}${res.url}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success(`Invite created for ${res.email} — link copied to clipboard (valid 7 days).`);
+      } catch {
+        window.prompt("Invite link (copy it):", url);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not create invite");
+    }
+  };
+
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [editing, setEditing] = useState<FirmRow | null>(null);
@@ -160,6 +180,13 @@ function AdminFirmsPage() {
                     />
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <button
+                      onClick={() => inviteAdmin(f.id, f.name)}
+                      className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold"
+                      title="Invite a firm administrator"
+                    >
+                      <UserPlus className="h-3 w-3" /> Invite admin
+                    </button>
                     <button
                       onClick={() => navigate({ to: "/dashboard", search: { firmId: f.id, tab: "lawyers" } as never })}
                       className="mr-3 inline-flex items-center gap-1 text-xs font-medium text-forest hover:text-gold"

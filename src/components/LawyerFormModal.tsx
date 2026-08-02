@@ -189,6 +189,8 @@ export function LawyerFormModal({
     availability_notes: lawyer?.availability_notes ?? "",
     services: (lawyer?.services ?? []) as string[],
     status: lawyer?.status ?? "active",
+    listing_tier: ((lawyer as { listing_tier?: string | null } | null)?.listing_tier ?? "basic") as
+      | "basic" | "standard" | "silver" | "gold" | "elite",
   });
 
   const toggleArr = (key: "mediator_sectors" | "arbitrator_types", v: string) =>
@@ -487,7 +489,7 @@ export function LawyerFormModal({
         const parsed = buildParsed();
         const { error } = await supabase
           .from("service_providers")
-          .update({ ...parsed, status: form.status })
+          .update({ ...parsed, status: form.status, listing_tier: form.listing_tier })
           .eq("id", currentLawyerId);
         if (!error) setLastSavedAt(new Date());
         else console.warn("autosave failed:", error.message);
@@ -541,7 +543,7 @@ export function LawyerFormModal({
 
       const parsed = buildParsed();
       if (currentLawyerId) {
-        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status }).eq("id", currentLawyerId);
+        const { error } = await supabase.from("service_providers").update({ ...parsed, status: form.status, listing_tier: form.listing_tier }).eq("id", currentLawyerId);
         if (error) throw error;
         await syncPracticeAreas(currentLawyerId);
         await syncBranches(currentLawyerId);
@@ -681,6 +683,32 @@ export function LawyerFormModal({
                   ))}
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground">Suspended profiles are hidden from public listings and search.</p>
+              </div>
+            )}
+
+            {isEdit && (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Listing tier</label>
+                <div className="flex flex-wrap gap-2">
+                  {(["basic", "standard", "silver", "gold", "elite"] as const).map((t) => (
+                    <button
+                      type="button"
+                      key={t}
+                      onClick={() => setForm({ ...form, listing_tier: t })}
+                      className={`rounded border px-3 py-1.5 text-xs capitalize transition-colors ${
+                        form.listing_tier === t
+                          ? "border-brand-primary bg-brand-tint text-brand-primary"
+                          : "border-border bg-card text-muted-foreground hover:text-ink"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Controls placement and the enhanced result card (Gold/Elite). Normally set automatically
+                  when a claim's subscription activates — override here for testing or manual arrangements.
+                </p>
               </div>
             )}
 

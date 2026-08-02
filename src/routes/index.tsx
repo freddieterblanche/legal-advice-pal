@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Search, Briefcase, BookOpen, ArrowRight } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { PROVINCES } from "../lib/constants";
-import { getPracticeAreaIcon } from "../lib/practice-area-icons";
 import { SimpleSelect } from "../components/SimpleSelect";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +26,7 @@ function HomePage() {
 
   const { data: practiceAreas } = useQuery({
     queryKey: ["practice-areas-home"],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase.from("practice_areas").select("*").order("name");
       if (error) throw error;
@@ -36,6 +36,7 @@ function HomePage() {
 
   const { data: stats } = useQuery({
     queryKey: ["home-stats"],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const [lawyersRes, expertsRes, mediatorsRes, arbitratorsRes] = await Promise.all([
         supabase.from("service_providers").select("*", { count: "exact", head: true }).in("status", ["trial", "active"]),
@@ -54,10 +55,18 @@ function HomePage() {
 
   const { data: areaCounts } = useQuery({
     queryKey: ["area-counts"],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data } = await supabase.from("provider_practice_areas").select("practice_area_id");
       const counts: Record<string, number> = {};
-      data?.forEach((r) => { counts[r.practice_area_id] = (counts[r.practice_area_id] ?? 0) + 1; });
+      // Aggregated server-side; fall back to the legacy full scan only if the
+      // view isn't deployed yet.
+      const { data, error } = await supabase.from("practice_area_counts").select("*");
+      if (!error && data) {
+        data.forEach((r) => { if (r.practice_area_id) counts[r.practice_area_id] = r.provider_count ?? 0; });
+        return counts;
+      }
+      const { data: rows } = await supabase.from("provider_practice_areas").select("practice_area_id");
+      rows?.forEach((r) => { counts[r.practice_area_id] = (counts[r.practice_area_id] ?? 0) + 1; });
       return counts;
     },
   });
@@ -82,7 +91,7 @@ function HomePage() {
             className="animate-hero-rise mx-auto mt-5 max-w-3xl font-heading leading-[1.15] text-paper-ivory [animation-delay:80ms]"
             style={{ fontSize: "clamp(30px, 4.5vw, 46px)" }}
           >
-            Every legal professional in South Africa. Searchable by expertise.
+            A comprehensive database of South African legal professionals. Searchable by expertise.
           </h1>
           <p className="animate-hero-rise mx-auto mt-5 max-w-2xl text-base leading-relaxed text-paper-ivory/75 [animation-delay:160ms]">
             South Africa has a split legal profession. Choose who you need — then search a
@@ -191,24 +200,18 @@ function HomePage() {
               View all →
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+          <div className="columns-2 gap-x-10 sm:columns-3 lg:columns-4">
             {practiceAreas?.map((p) => {
-              const Icon = getPracticeAreaIcon(p.slug);
+              const n = areaCounts?.[p.id] ?? 0;
               return (
                 <Link
                   key={p.id}
                   to="/search"
                   search={{ area: p.slug } as never}
-                  className="group flex flex-col border border-rule bg-paper-white p-5 transition-colors hover:border-brand-primary"
-                  style={{ borderRadius: 4 }}
+                  className="group flex items-baseline justify-between gap-3 break-inside-avoid border-b border-rule/70 py-2"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[3px] bg-brand-tint text-brand-primary transition-colors group-hover:bg-brand-primary group-hover:text-white">
-                    <Icon className="h-5 w-5" strokeWidth={STROKE} />
-                  </div>
-                  <span className="mt-4 font-body text-sm font-semibold text-ink">{p.name}</span>
-                  <span className="mt-1 font-mono text-xs text-ink-muted">
-                    {areaCounts?.[p.id] ?? 0} lawyer{(areaCounts?.[p.id] ?? 0) === 1 ? "" : "s"}
-                  </span>
+                  <span className="text-sm text-ink transition-colors group-hover:text-brand-hover">{p.name}</span>
+                  {n > 0 && <span className="font-mono text-xs text-ink-muted">{n}</span>}
                 </Link>
               );
             })}
@@ -302,7 +305,7 @@ function ProfessionPanel({ kind, title, tagline, description, Icon, practiceArea
       </form>
 
       <div className="mt-5 flex items-center justify-between text-xs text-ink-muted">
-        <span className="font-mono">Every province · every practice area</span>
+        <span className="font-mono">Nationwide · searchable by expertise</span>
         <Link
           to="/search"
           search={{ type: kind } as never}
